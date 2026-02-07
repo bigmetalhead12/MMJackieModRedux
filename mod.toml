@@ -5,45 +5,37 @@
 
 # Unique ID of this mod. Pick something long enough that it'll never be the same as any other mod.
 # The name displayed in the mod management menu is separate from this so this doesn't need to be human readable.
-id = "mm_recomp_mod_template"
+id = "jackie_redux_mod"
 
 # Version of this mod.
 version = "1.0.0"
 
 # The name that will show up for this mod in the mod menu. This should be human readable.
-display_name = "Always Spin Attack"
+display_name = "Jackie Quilt Redux Mod"
 
 # The description that will show up when this mod is displayed in the mod menu. This should be human readable.
 description =  """
-This is an example mod for Majora's Mask: Recompiled that can be used as a template for creating mods. \
-When this mod is enabled, you will always perform a quickspin when swinging your sword.
-
-For more details, see https://github.com/Zelda64Recomp/MMRecompModTemplate."""
+A mod that replaces Link with Jackie from Eternal Return.
+"""
 
 # A short description that will show up in this mod's entry in the mod list. This should be human readable and kept short
 # to prevent it from being cut off due to the limited space.
-short_description = "Always perform a quickspin when swinging your sword."
+short_description = "Replaces Link with Jackie'"
 
 # Authors of this mod.
-authors = [ "Your name here" ]
+authors = [ "Bigmetalhead12" ]
 
 # ID of the target recomp game.
 game_id = "mm"
 
 # Minimum version of the target recomp (e.g. Zelda 64: Recompiled) that this mod can run on.
-minimum_recomp_version = "1.2.2"
+minimum_recomp_version = "1.2.0"
 
 # Dependency mods. Each entry is the mod's ID and then an optional minimum version of the dependency mod.
 dependencies = [
-# Example dependency:
-#    "modname:1.0.0"
-]
-
-# Optional dependency mods. This has the same format as `dependencies`, but the game will still start if dependencies in this
-# list aren't present. You can query the presence of a given dependency by using `recomp_is_dependency_met` in recomputils.h.
-# Calling a function imported from an optional dependency that isn't present will trigger an error.
-optional_dependencies = [
-
+	"magemods_audio_api",
+	"MM_EZ_Text_Replacer_API",
+	"ProxyMM_CustomActor"
 ]
 
 # Native libraries (e.g. DLLs) and the functions they export.
@@ -59,38 +51,106 @@ native_libraries = [
 elf_path = "build/mod.elf"
 
 # Output mod filename.
-mod_filename = "mm_recomp_mod_template"
+mod_filename = "jackie_redux_mod"
 
 # Reference symbol files.
 func_reference_syms_file = "Zelda64RecompSyms/mm.us.rev1.syms.toml"
 data_reference_syms_files = [ "Zelda64RecompSyms/mm.us.rev1.datasyms.toml", "Zelda64RecompSyms/mm.us.rev1.datasyms_static.toml" ]
 
 # Additional files to include in the mod.
-additional_files = [ ]
-
+additional_files = [ "thumb.png", 
+						"hdtextures/eyes_open.dds",
+						"hdtextures/eyes_half.dds",
+						"hdtextures/eyes_closed.dds",
+						"hdtextures/eyes_roll_right.dds",
+						"hdtextures/eyes_roll_left.dds",
+						"hdtextures/eyes_roll_down.dds",
+						"hdtextures/eyes_shocked.dds",
+						"hdtextures/mouth_default.dds",
+						"hdtextures/mouth_half.dds",
+						"hdtextures/mouth_open.dds",
+						"hdtextures/mouth_smile.dds",
+						"hdtextures/hair3.dds",
+						"hdtextures/hair.dds",
+						"hdtextures/hair2.dds",
+						"hdtextures/face_scar.dds",
+						"hdtextures/nose.dds",
+						"hdtextures/skin_with_shading.dds",
+						"hdtextures/skin.dds",
+						"hdtextures/chocker_neck.dds",
+						"hdtextures/torso_frontleft.dds",
+						"hdtextures/torso_frontright.dds",
+						"hdtextures/torso_frontbotleft.dds",
+						"hdtextures/torso_frontbotright.dds",
+						"hdtextures/torso_right.dds",
+						"hdtextures/torso_left.dds",
+						"hdtextures/back_topleft.dds",
+						"hdtextures/back_topright.dds",
+						"hdtextures/back_botleft.dds",
+						"hdtextures/back_botright.dds",
+						"hdtextures/ring_decal.dds",
+						"hdtextures/pants_frontleft.dds",
+						"hdtextures/pants_frontright.dds",
+						"hdtextures/pants_backleft.dds",
+						"hdtextures/pants_backright.dds",
+						"hdtextures/thigh_left.dds",
+						"hdtextures/thigh_left_scar.dds",
+						"hdtextures/thigh_right.dds",
+						"hdtextures/lowerleg_left.dds",
+						"hdtextures/lowerleg_left_back.dds",
+						"hdtextures/shoe_top_hole.dds",
+						"hdtextures/shoe_top_front.dds",
+						"hdtextures/shoe_top_back.dds",
+						"hdtextures/shoe_top_ark.dds",
+						"hdtextures/shoe_bot.dds",
+						"hdtextures/shoe_sole_left.dds",
+						"hdtextures/apron_white.dds",
+						"hdtextures/apron_front.dds",
+						"hdtextures/apron.dds",
+						"hdtextures/apron_strap_top.dds",
+						"hdtextures/apron_strap.dds",
+						"hdtextures/strap_hook.dds",
+						"hdtextures/belt.dds",
+						"hdtextures/pouch_front.dds",
+						"hdtextures/pouch_back.dds",
+						"hdtextures/upperarm_left_front.dds",
+						"hdtextures/upperarm_left_back.dds",
+						"hdtextures/lowerarm_left_front.dds",
+						"hdtextures/lowerarm_left_back.dds",
+						"hdtextures/upperarm_right_front.dds",
+						"hdtextures/upperarm_right_back.dds",
+						"hdtextures/lowerarm_right_front.dds",
+						"hdtextures/lowerarm_right_back.dds",
+						"hdtextures/glove_wrist_top.dds",
+						"hdtextures/glove_wrist_bot.dds",
+						"hdtextures/glove_fingers_top.dds",
+						"hdtextures/glove_fingers_bot.dds",
+						"hdtextures/glove_thumb_top.dds",
+						"hdtextures/glove_thumb_bot.dds",
+						"hdtextures/glove_fist_top.dds",
+						"hdtextures/glove_fist_bot.dds",
+						"hdtextures/glove_fist_front.dds",
+						"hdtextures/glove_fist_back.dds",
+						"hdtextures/rt64.json",
+						"hdtextures/rt64-low-mip-cache.bin"]
+						
 [[manifest.config_options]]
-id = "enum_option"
-name = "Enum Option"
-description = "Test enum config option"
+id = "_recomp_texture_pack_enabled"
+name = "Enable HD Textures"
+description = """
+Toggle on to enable HD textures for Jackie.
+"""
 type = "Enum"
-options = [ "First", "Second" ]
-default = "First"
+options = [ "Off", "On" ]
+default = "Off"
 
 [[manifest.config_options]]
-id = "number_option"
-name = "Number Option"
-description = "Test number config option."
-type = "Number"
-min = 0
-max = 10
-step = 0.1
-precision = 1
-percent = false
-default = 1
+id = "change_hairstyle"
+name = "Change Hairstyle"
+description = """
+Toggle to change the hairstyle (Default or Ponytail)
+"""
+type = "Enum"
+options = [ "Default", "Ponytail" ]
+default = "Default"
 
-[[manifest.config_options]]
-id = "string_option"
-name = "String Option"
-description = "Test string config option."
-type = "String"
-default = "Lorem Ipsum"

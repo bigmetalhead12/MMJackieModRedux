@@ -1,0 +1,531 @@
+{
+    "configuration": {
+        "autoPath": "rt64",
+        "configurationVersion": 3,
+        "defaultOperation": "stream",
+        "defaultShift": "half",
+        "hashVersion": 5
+    },
+    "extraFiles": [],
+    "shiftFilters": [],
+    "textures": [
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "e2783fca23e1ede3"
+            },
+            "path": "eyes_open.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "44f3ddbec02685b5"
+            },
+            "path": "eyes_half.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "d9720cf9154150ef"
+            },
+            "path": "eyes_closed.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "8e51b20316507d46"
+            },
+            "path": "eyes_roll_right.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "92c7f5e020e5a998"
+            },
+            "path": "eyes_roll_left.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "018dbb1d52097622"
+            },
+            "path": "eyes_roll_down.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "d9c1849d5a04c07f"
+            },
+            "path": "eyes_shocked.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "590c920ea515c736"
+            },
+            "path": "mouth_default.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "cfc454325dcdaed2"
+            },
+            "path": "mouth_half.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "22c2a690e00e3588"
+            },
+            "path": "mouth_open.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "8f0e3eb9e1bd3895"
+            },
+            "path": "mouth_smile.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "f72413f346d484aa"
+            },
+            "path": "hair3.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "944ddf33d715f13b"
+            },
+            "path": "hair.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "f669fdc3cb6753a5"
+            },
+            "path": "hair2.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "22650785ed30bf65"
+            },
+            "path": "face_scar.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "12eb10ea0e4f6b1e"
+            },
+            "path": "nose.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "cb62ab5ac45835bf"
+            },
+            "path": "skin_with_shading.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "3427d1be96e8907d"
+            },
+            "path": "skin.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "5cb4df30a10c4f05"
+            },
+            "path": "chocker_neck.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "29138f1fb96630e8"
+            },
+            "path": "torso_frontleft.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "df0fef42144e01d7"
+            },
+            "path": "torso_frontright.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "93b3becea17aa6c5"
+            },
+            "path": "torso_frontbotleft.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "f32f38e8971835a1"
+            },
+            "path": "torso_frontbotright.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "e6926b98af94a893"
+            },
+            "path": "torso_right.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "be339845c3255811"
+            },
+            "path": "torso_left.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "f87f08a032b76107"
+            },
+            "path": "back_topleft.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "9a2667ea4ba44b07"
+            },
+            "path": "back_topright.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "3dfa656456649ca5"
+            },
+            "path": "back_botleft.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "0e85fd791ba99f9c"
+            },
+            "path": "back_botright.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "5cd06b940994caaa"
+            },
+            "path": "ring_decal.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "998c60444fd35c27"
+            },
+            "path": "pants_frontleft.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "09b77ecf9a8bdae1"
+            },
+            "path": "pants_frontright.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "e4d5d3332ce654a9"
+            },
+            "path": "pants_backleft.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "5388a9653305bd4c"
+            },
+            "path": "pants_backright.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "6f537447853abaf3"
+            },
+            "path": "thigh_left.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "98a64566bacd8c93"
+            },
+            "path": "thigh_left_scar.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "92d71fe1d0cb231d"
+            },
+            "path": "thigh_right.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "8090ab12e6485603"
+            },
+            "path": "lowerleg_left.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "4782b25cdc4af87c"
+            },
+            "path": "lowerleg_left_back.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "ee07760fc67f394a"
+            },
+            "path": "shoe_top_hole.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "83aa986b61d96d79"
+            },
+            "path": "shoe_top_front.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "73d83d18c5812a8b"
+            },
+            "path": "shoe_top_back.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "531f9ae6f1b7f2e2"
+            },
+            "path": "shoe_top_ark.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "ed0a32fd7db11faf"
+            },
+            "path": "shoe_bot.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "0a8a91c630c251c5"
+            },
+            "path": "shoe_sole_left.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "7913d59e0fe73f7e"
+            },
+            "path": "apron_white.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "ac6a2fcea4d0350d"
+            },
+            "path": "apron_front.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "5fbf6e610576c932"
+            },
+            "path": "apron.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "0d28c8b5e08be649"
+            },
+            "path": "apron_strap_top.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "486565d6ac25a312"
+            },
+            "path": "apron_strap.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "21cabd480dcc5e66"
+            },
+            "path": "strap_hook.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "555ff59d40f6af91"
+            },
+            "path": "belt.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "488fc89aea30cebb"
+            },
+            "path": "pouch_front.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "cffa0d4cc2d12a2d"
+            },
+            "path": "pouch_back.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "f7a23ed41c6313f8"
+            },
+            "path": "upperarm_left_front.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "22524f750cb628c0"
+            },
+            "path": "upperarm_left_back.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "31d549460fdda48a"
+            },
+            "path": "lowerarm_left_front.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "d08773c3df6c778b"
+            },
+            "path": "lowerarm_left_back.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "2a65204b964ee42b"
+            },
+            "path": "upperarm_right_front.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "7f5a1e3038cc9ba5"
+            },
+            "path": "upperarm_right_back.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "a6a231fa258d45f8"
+            },
+            "path": "lowerarm_right_front.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "e84a5860fc9afb3e"
+            },
+            "path": "lowerarm_right_back.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "300e06095603a7d3"
+            },
+            "path": "glove_wrist_top.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "aa47a6d6080692d2"
+            },
+            "path": "glove_wrist_bot.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "1890e6898d0c474d"
+            },
+            "path": "glove_fingers_top.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "da9912f753894ede"
+            },
+            "path": "glove_fingers_bot.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "76a8c4df9915d3a7"
+            },
+            "path": "glove_thumb_top.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "e6660d1527253ef7"
+            },
+            "path": "glove_thumb_bot.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "cbe83c8a61c48a75"
+            },
+            "path": "glove_fist_top.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "61b7e1228baf9610"
+            },
+            "path": "glove_fist_bot.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "6964e87e99fe0af5"
+            },
+            "path": "glove_fist_front.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "e3a944f23a72522a"
+            },
+            "path": "glove_fist_back.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "e2f736636fea27b5"
+            },
+            "path": "glove_fist_front_fp.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "c10077d26eb955c7"
+            },
+            "path": "glove_fist_fingers_fp.dds"
+        }
+    ]
+}

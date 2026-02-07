@@ -1,0 +1,125 @@
+EYES
+
+eyes_open	=	e2783fca23e1ede3
+eyes_half	=	44f3ddbec02685b5
+eyes_closed	=	d9720cf9154150ef
+eyes_roll_right	=	8e51b20316507d46
+eyes_roll_left	=	92c7f5e020e5a998
+eyes_roll_down	=	018dbb1d52097622
+eyes_shocked	=	d9c1849d5a04c07f
+eyes_shut	=	da0d00b89d3d5653
+
+MOUTH
+
+mouth_closed	=	590c920ea515c736
+mouth_half	=	cfc454325dcdaed2
+mouth_open	=	22c2a690e00e3588
+mouth_smile	=	8f0e3eb9e1bd3895
+
+HAIR
+
+hair3		=	f72413f346d484aa
+hair		=	944ddf33d715f13b
+hair2		=	f669fdc3cb6753a5
+
+FACE
+
+face_scar	=	00dec016b8baa26a
+nose		=	12eb10ea0e4f6b1e
+
+SKIN
+
+skin_shading	=	cb62ab5ac45835bf
+skin		=	3427d1be96e8907d
+
+NECK
+
+choker_neck	=	5cb4df30a10c4f05
+
+TORSO
+
+torso_frontleft	=	29138f1fb96630e8
+torso_frontright=	df0fef42144e01d7
+torso_frontbotl	=	93b3becea17aa6c5
+torso_frontbotr	=	f32f38e8971835a1
+torso_right	=	e6926b98af94a893
+torso_left	=	be339845c3255811
+torso_backtopl	=	f87f08a032b76107
+torso_backtopr	=	9a2667ea4ba44b07
+torso_backbotl	=	3dfa656456649ca5
+torso_backbotr	=	0e85fd791ba99f9c
+
+ring		=	5cd06b940994caaa
+
+PANTS
+
+pants_frontleft	=	998c60444fd35c27
+pants_frontright=	09b77ecf9a8bdae1
+pants_backleft	=	e4d5d3332ce654a9
+pants_backright	=	5388a9653305bd4c
+
+
+THIGHS
+
+thigh_leftchok	=	6f537447853abaf3
+thigh_left_scar	=	98a64566bacd8c93
+thigh_right	=	92d71fe1d0cb231d
+
+LOWER LEG
+
+lowerleg_knee	=	8090ab12e6485603
+lowerleg_back	=	4782b25cdc4af87c
+
+BOOTS
+
+boot_top	=	ee07760fc67f394a
+boot_upper_side	=	83aa986b61d96d79
+boot_upper_back =	73d83d18c5812a8b
+boot_upper_ark	=	531f9ae6f1b7f2e2
+boot_lower	=	ed0a32fd7db11faf
+boot_lower_sole =	0a8a91c630c251c5
+
+APRON
+
+apron_white	=	7913d59e0fe73f7e
+apron_top	=	ac6a2fcea4d0350d
+apron_side	=	5fbf6e610576c932
+apron_strap_top	=	0d28c8b5e08be649
+apron_strap	=	486565d6ac25a312
+apron_strap2	=	0e5aba42f710396d
+apron_strap3	=	b8c0a5dad32b071e
+apron_hook	=	21cabd480dcc5e66
+
+belt		=	555ff59d40f6af91
+pouch_front	=	488fc89aea30cebb
+pouch_back	=	cffa0d4cc2d12a2d
+
+ARMS
+
+upperarm_left_f	=	f7a23ed41c6313f8
+upperarm_left_b	=	22524f750cb628c0
+lowerarm_left_f	=	31d549460fdda48a
+lowerarm_left_b	=	d08773c3df6c778b
+
+upperarm_right_f=	2a65204b964ee42b
+upperarm_right_b=	7f5a1e3038cc9ba5
+lowerarm_right_f=	a6a231fa258d45f8
+lowerarm_right_b=	e84a5860fc9afb3e
+
+HAND
+
+wrist_left_top	=	300e06095603a7d3
+wrist_left_bot	=	aa47a6d6080692d2
+
+-OPEN
+open_left_top	=	1890e6898d0c474d
+open_left_thumbf=	76a8c4df9915d3a7
+open_left_thumbb=	e6660d1527253ef7
+open_left_bot	=	da9912f753894ede
+
+-CLOSED
+closed_fing_top	=	cbe83c8a61c48a75
+closed_fing_bot	=	61b7e1228baf9610
+closed_hand_top	=	6964e87e99fe0af5
+closed_hand_bot	=	e3a944f23a72522a
+
