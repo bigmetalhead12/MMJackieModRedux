@@ -169,20 +169,19 @@ void Ponytail_SetDefaultBodyPartsPos(Ponytail* this, Player* player, StandardLim
     // Root limb's BodyPartsPos and gPhysLimb positions and velocity
     // Velocity only gets assigned to root limb
     // BodyPartsPos keeps track of global XYZ position of each limb
-    Math_Vec3f_Copy(&this->bodyPartsPos[PONYTAIL_BODYPART_ROOT], &player->bodyPartsPos[PLAYER_BODYPART_HEAD]);
+    Vec3s newRootJointPos = { 0, 0, 0 };
+    Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_POS], &newRootJointPos);
     Verlet_InitLimb(gPhysLimbs[PONYTAIL_BODYPART_ROOT], this->actor.world.pos, playerVelocity, LIMB_MASS, PINNED);
 
-    // Root limb's jointTable for position
+    // Root limb's jointTable for rotation
     Vec3s rootPos_Vec3s = {0, 0, 0};
     Math_Vec3f_ToVec3s(&rootPos_Vec3s, &this->actor.world.pos);
     Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_POS], &rootPos_Vec3s);
     Math_Vec3s_Copy(&gPhysLimbs[PONYTAIL_BODYPART_ROOT]->default_jointPos, &rootPos_Vec3s);
 
-    // Root limb's jointTable for rotation
+    // Root limb's jointTable for rotation initialized
     Vec3s newRootJointRot = { 0, 0, 0};
-    newRootJointRot.x = player->skelAnime.jointTable[PLAYER_LIMB_HEAD].x;
-    newRootJointRot.y = -32768 - player->skelAnime.jointTable[PLAYER_LIMB_HEAD].y;
-    newRootJointRot.z = 0;
+    newRootJointRot.y = -32768;
     Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_ROT], &newRootJointRot);
     
     // BodyPartsPos and gPhysLimbs' pos and vel for Rest of the limbs
@@ -212,6 +211,7 @@ void Ponytail_SetDefaultBodyPartsPos(Ponytail* this, Player* player, StandardLim
     }
 }
 
+
 void Ponytail_Init(Actor* thisx, PlayState* play) {
     if (recomp_get_config_u32("change_hairstyle")) {
         Player* player = GET_PLAYER(play);
@@ -225,13 +225,12 @@ void Ponytail_Init(Actor* thisx, PlayState* play) {
         // I can't think of any way aside from hardcoding, because the standardlimbs' jointPos values
         // keep getting updated based on its last jointPos values before map reloads.
         // Values are directly copied from the generated Fast64 model file (in my case, gPonytailSkel.c)
-        Vec3s limb1_jointPos = { 0, 157, -340 };    
+        Vec3s limb1_jointPos = { 0, 157, -268 };
         Vec3s limb2_jointPos = { 0, 0, -206 };
         Vec3s limb3_jointPos = { 0, 0, -191 };
         Vec3s limb4_jointPos = { 0, 0, -197 };
         Vec3s limb5_jointPos = { 0, 0, -158 };
 
-        // default_jointPos values for every limb should NEVER change once assigned here
         Math_Vec3s_Copy(&ponytailPhysLimbs[1]->default_jointPos, &limb1_jointPos);
         Math_Vec3s_Copy(&ponytailPhysLimbs[2]->default_jointPos, &limb2_jointPos);
         Math_Vec3s_Copy(&ponytailPhysLimbs[3]->default_jointPos, &limb3_jointPos);
@@ -251,9 +250,8 @@ void Ponytail_Init(Actor* thisx, PlayState* play) {
 
         // Verlet integration starts here
         Verlet_InitPhysPlayer(&gJackiePhysPlayer, player);
-        Ponytail_SetDefaultBodyPartsPos(this, player, gPonytailLimbs, ponytailPhysLimbs, ponytailPhysBones);
+        Ponytail_SetDefaultBodyPartsPos(this, player, gPonytailLimbs, ponytailPhysLimbs, ponytailPhysBones);   
     }
-    
 }
 
 /*
@@ -286,13 +284,14 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
 
     // jointTable Root Position
     Vec3s newRootJointPos = { 0, 0, 0};
-    Math_Vec3f_ToVec3s(&newRootJointPos, &this->actor.world.pos);
     Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_POS], &newRootJointPos);
 
     // jointTable Root rotation
     Vec3s newRootJointRot = { 0, 0, 0};
     newRootJointRot.x = player->skelAnime.jointTable[PLAYER_LIMB_HEAD].x;
-    newRootJointRot.y = -32768 - player->skelAnime.jointTable[PLAYER_LIMB_HEAD].y;
+    newRootJointRot.y = -32768 
+                    - player->skelAnime.jointTable[PLAYER_LIMB_UPPER_ROOT].y
+                    - player->skelAnime.jointTable[PLAYER_LIMB_HEAD].y;
     newRootJointRot.z = 0;
     Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_ROT], &newRootJointRot);
 
@@ -337,7 +336,6 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
 
 }
 
-
 void Ponytail_RotateJoints(Ponytail* this, PhysBone* gPhysBones[]) {
     // Keep track of all limbs' rotation for subsequent limbs' rotations
     Vec3s offset_rotation = { (s16)0, (s16)0, (s16)0 };
@@ -349,12 +347,11 @@ void Ponytail_RotateJoints(Ponytail* this, PhysBone* gPhysBones[]) {
             continue;
         }
         else {
+            // Find limb_a's pitch and roll values based on direction of bone
             s16 curr_rotate_x = CustomMath_Vec3f_Pitch(&gPhysBones[i]->limb_b->curr_pos, &gPhysBones[i]->limb_a->curr_pos);
-            
-            //s16 curr_rotate_y = CustomMath_Vec3f_Yaw(&gPhysBones[i]->limb_a->curr_pos, &gPhysBones[i]->limb_b->curr_pos);
             s16 curr_rotate_z = CustomMath_Vec3f_Roll(&gPhysBones[i]->limb_a->curr_pos, &gPhysBones[i]->limb_b->curr_pos);
-            //s16 curr_rotate_z = 0;
-
+            
+            // PONYTAIL_BODYPART_LIMB1 is a pinned bone
             if (i == (int)PONYTAIL_BODYPART_LIMB1) {
                 // Get global direction vector from current bone's limb_a to limb_b
                 Vec3f bone_direction = {(f32)0.f, (f32)0.f, (f32)0.f};
@@ -410,6 +407,7 @@ void Ponytail_RotateJoints(Ponytail* this, PhysBone* gPhysBones[]) {
 void Ponytail_Update(Actor* thisx, PlayState* play) {
     Player* player = GET_PLAYER(play);
     if (recomp_get_config_u32("change_hairstyle")) {
+        /*
         Ponytail* this = (Ponytail*)thisx;
 
         Player* player = GET_PLAYER(play);
@@ -419,19 +417,12 @@ void Ponytail_Update(Actor* thisx, PlayState* play) {
         Verlet_UpdatePhysPlayerVelocity(&gJackiePhysPlayer, player);
         Verlet_CalcNetForce(&gJackiePhysPlayer, (f32)GRAVITY, &net_force);
         
-        // Update Ponytail's roobone and other pinned bone's position based on player's position
-        // Note: this may have to be updated to handle both pinned and unpinned bones
-        // where pinned bones get updated to be with player's position, and
-        // unpinned bones get updated with Verlet integration specifically, since verlet
-        // takes into account of positions of limbs directly. It might not be heplful to
-        // separate the two from each other, but I dunno. Anyway, net force needs to be found
-        // on its own anyway, so start from that.
-        //Ponytail_UpdateBodyPartsPos(this, player, net_force, gPonytailLimbs, ponytailPhysLimbs, ponytailPhysBones);
+        // Update ponytail's limbs' global positions based on pin status and verlet integration calculations
         Ponytail_UpdateBodyPartsPos(this, player, net_force, gPonytailLimbs, ponytailPhysLimbs, ponytailPhysBones);
 
         // Uew calculated global positions in ponytailPhysLimbs in ponytailPhysBones to find rotations for jointTable
         Ponytail_RotateJoints(this, ponytailPhysBones);
-
+        */
     }
 }
 
@@ -440,12 +431,24 @@ void Ponytail_Update(Actor* thisx, PlayState* play) {
 Player Draw
 =================
 */
-RECOMP_HOOK_RETURN ("Player_Draw") void return_Skirt_Player_Draw(void) {
-    if (!recomp_get_config_u32("change_hairstyle")) {
-        return;
+RECOMP_HOOK_RETURN ("Player_Draw") void return_Ponytail_Player_Draw(void) {
+    Player* player = GET_PLAYER(gPlayStatePonytail);
+    if (recomp_get_config_u32("change_hairstyle")) {
+        Ponytail* this = gPlayerPonytail;
+
+        Vec3f net_force = { (f32)0, (f32)0, (f32)0 };    // Gravity + movement
+
+        Verlet_UpdatePhysPlayerVelocity(&gJackiePhysPlayer, player);
+        Verlet_CalcNetForce(&gJackiePhysPlayer, (f32)GRAVITY, &net_force);
+        
+        // Update ponytail's limbs' global positions based on pin status and verlet integration calculations
+        Ponytail_UpdateBodyPartsPos(this, player, net_force, gPonytailLimbs, ponytailPhysLimbs, ponytailPhysBones);
+
+        // Uew calculated global positions in ponytailPhysLimbs in ponytailPhysBones to find rotations for jointTable
+        Ponytail_RotateJoints(this, ponytailPhysBones);
     }
     
-    Player* player = GET_PLAYER(gPlayStatePonytail);
+    
 
 }
 
