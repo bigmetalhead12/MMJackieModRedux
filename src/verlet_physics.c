@@ -65,9 +65,7 @@ void Verlet_LimbUpdatePos(PhysLimb* target_limb, Vec3f* apply_force, Vec3f* appl
         // Velocity based on change of limb's positions
         Vec3f new_velocity = { (f32)0, (f32)0, (f32)0 };
         Math_Vec3f_Diff(&target_limb->curr_pos, &target_limb->prev_pos, &new_velocity);
-        recomp_printf("TEST VEL: %f, ", new_velocity.x);
-        recomp_printf("%f, ", new_velocity.y);
-        recomp_printf("%f\n", new_velocity.z);
+
         // test segment for adding opposite vel for hanging ponytail limbs
         Vec3f opposing_vel = { (f32)0, (f32)0, (f32)0 };
         Math_Vec3f_ScaleAndStore(apply_vel, -1.f, &opposing_vel);
@@ -107,13 +105,6 @@ void Verlet_InitBone(PhysBone* target_bone, PhysLimb* limb_a, PhysLimb* limb_b) 
 void Verlet_BoneConstraint(PhysBone* target_bone) {
     // current distance between target_bone's two limbs
     f32 curr_dist = Math_Vec3f_DistXYZ(&target_bone->limb_a->curr_pos, &target_bone->limb_b->curr_pos);
-    recomp_printf("LimbA POS: %f, ", target_bone->limb_a->curr_pos.x);
-    recomp_printf("%f, ", target_bone->limb_a->curr_pos.y);
-    recomp_printf("%f\n", target_bone->limb_a->curr_pos.z);
-    recomp_printf("LimbB POS: %f, ", target_bone->limb_b->curr_pos.x);
-    recomp_printf("%f, ", target_bone->limb_b->curr_pos.y);
-    recomp_printf("%f\n", target_bone->limb_b->curr_pos.z);
-
     f32 diff = target_bone->bone_length - curr_dist;
     f32 percent = (diff/curr_dist);
 
@@ -122,12 +113,6 @@ void Verlet_BoneConstraint(PhysBone* target_bone) {
     Vec3f direction_vec = { (f32)0, (f32)0, (f32)0 };
     Math_Vec3f_Diff(&target_bone->limb_b->curr_pos, &target_bone->limb_a->curr_pos, &direction_vec);
     
-    recomp_printf("direction vec: %f, ", direction_vec.x);
-    recomp_printf("%f, ", direction_vec.y);
-    recomp_printf("%f\n", direction_vec.z);
-    recomp_printf("precent: %f\n", percent);
-
-
     Vec3f offset = { (f32)0, (f32)0, (f32)0 };
     
     // If target bone's both limbs are unpinned, percent is divided by 2

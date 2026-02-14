@@ -35,6 +35,7 @@ typedef struct {
     Vec3f   alt_prev_pos;
     Vec3f   curr_vel;
     Vec3f   prev_vel;
+    Vec3s   default_jointPos;
     f32     mass;
     u8      pinned;
 } PhysLimb;

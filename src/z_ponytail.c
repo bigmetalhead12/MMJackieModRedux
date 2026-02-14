@@ -23,15 +23,15 @@
         - Find velocity and time (delta T)
 
     Now I have to:
-    1. With the current position values, find a way to find net force (gravity + velocity)
-    2. Find a way to connect limbs to my point/stick
-    3. Find a way to impact points
-    4. Find a way to impact stick
+    1. With the current position values, find a way to find net force (gravity + velocity) [Done]
+    2. Find a way to connect limbs to my point/stick [Done]
+    3. Find a way to impact points [Done]
+    4. Find a way to impact stick [Done]
         -May have to start finding way to have stick impact jointTable also
 
-    1. Find a way to have rotation be part of the equation
+    1. Find a way to have rotation be part of the equation [Done]
 
-    1. Find a way to have player model be part of the equation
+    1. Find a way to have player model be part of the equation [Current Task]
 */
 
 
@@ -60,98 +60,12 @@ by BigMetalHead12
 #include "verlet_physics.h"
 #include "proxymm_custom_actor.h"
 #include "math.h"
+#include "customMath.h"
 
 RECOMP_IMPORT("*", int recomp_printf(const char* fmt, ...));
 RECOMP_IMPORT("*", u32 recomp_get_config_u32(const char* key));
 
 #define FLAGS 0
-
-// Designed to calculate bone x-axis rotations beyond -90/+90 degrees from origin
-s16 CustomMath_Vec3f_Pitch(Vec3f* b, Vec3f* a) {
-    // If vector b's z position is >= vector a's z position, proceed as is
-    if (b->z >= a->z) {
-        return Math_Atan2S_XY( b->z - a->z, b->y - a->y);
-        //return Math_Vec3f_Pitch(b, a);
-    }
-    // Else, if b's z position is < a's z position, then apply offset
-    else {
-        s16 low_offset = -32768;    // -180 degrees
-        //return (low_offset - Math_Vec3f_Pitch(b, a));
-        return Math_Atan2S_XY( b->z - a->z, b->y - a->y);
-    }
-}
-
-// Designed to calculate bone y-axis rotations beyond -90/+90 degrees from origin
-s16 CustomMath_Vec3f_Yaw(Vec3f* a, Vec3f* b) {
-    // If vector b's z position is >= vector a's z position, proceed as is
-    if (b->z >= a->z) {
-        return Math_Vec3f_Yaw(a, b);
-    }
-    // Else, if b's z position is > a's z position, then apply offset
-    else {
-        s16 low_offset = -32768;    // -180 degrees
-        return (low_offset + Math_Vec3f_Yaw(a, b));
-    }
-}
-
-// Designed to calculate bone z-axis rotations 
-s16 CustomMath_Vec3f_Roll(Vec3f* a, Vec3f* b) {
-    f32 x_dist = b->x - a->x;
-    f32 y_dist = b->y - a->y;
-    if (y_dist <= 0) {
-        return 32768+Math_Atan2S_XY(y_dist, x_dist);
-    }
-    else {
-        return (Math_Atan2S_XY(y_dist, x_dist));
-    }
-}
-// Vec3s version for Vector Sum
-void CustomMath_Vec3s_Sum(Vec3s* l, Vec3s* r, Vec3s* dest) {
-    dest->x = l->x + r->x;
-    dest->y = l->y + r->y;
-    dest->z = l->z + r->z;
-}
-
-// Vec3s version for Vector Difference
-void CustomMath_Vec3s_Diff(Vec3s* l, Vec3s* r, Vec3s* dest) {
-    dest->x = l->x - r->x;
-    dest->y = l->y - r->y;
-    dest->z = l->z - r->z;
-}
-
-// Scale target Vec3s by input f32 value and put it into Vec3f dest
-void CustomMath_Vec3s_Scale_ToVec3f(Vec3s* target, f32 scale, Vec3f* dest) {
-    Vec3s transformVec3s = {0,0,0};
-    Vec3f transformVec3f = {0.f, 0.f, 0.f};
-
-    Math_Vec3s_Copy(&transformVec3s, target);
-    Math_Vec3s_ToVec3f(&transformVec3f, &transformVec3s);
-    Math_Vec3f_Scale(&transformVec3f, scale);
-
-    Math_Vec3f_Copy(dest, &transformVec3f);
-}
-
-// Rotate target Vec3s based on given s16 angle measure
-// By X axis
-void CustomMath_Vec3s_RotateByX(Vec3s* target, s16 angle, Vec3s* dest) {
-
-}
-
-// By Y axis
-void CustomMath_Vec3s_RotateByY(Vec3s* target, s16 angle, Vec3s* dest) {
-
-}
-
-// By Z axis
-void CustomMath_Vec3s_RotateByZ(Vec3s* target, s16 angle, Vec3s* dest) {
-
-}
-
-void CustomMath_Vec3s_Rotate(Vec3s* target, Vec3s* rotate, Vec3s* dest) {
-    CustomMath_Vec3s_RotateByX(target, rotate->x, dest);
-    CustomMath_Vec3s_RotateByY(target, rotate->y, dest);
-    CustomMath_Vec3s_RotateByZ(target, rotate->z, dest);
-}
 
 
 /***********************************************************************
@@ -253,6 +167,7 @@ void Ponytail_SetDefaultBodyPartsPos(Ponytail* this, Player* player, StandardLim
     Math_Vec3f_Copy(&this->actor.world.pos, &transform);
 
     // Rotation for ponytail's actor
+    Math_Vec3s_Copy(&this->actor.shape.rot, &player->actor.shape.rot);
     Math_Vec3s_Copy(&this->actor.world.rot, &player->actor.world.rot);
 
     // BodyPartsPos and gPhysLimbs' positions and velocity
@@ -266,21 +181,24 @@ void Ponytail_SetDefaultBodyPartsPos(Ponytail* this, Player* player, StandardLim
     
     Math_Vec3f_ToVec3s(&newRootJointPos, &transform);
     Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_POS], &newRootJointPos);
+    Math_Vec3s_Copy(&gPhysLimbs[PONYTAIL_BODYPART_ROOT]->default_jointPos, &newRootJointPos);
 
     // jointTable rotation
     // NOTE: Eventually, I'll have to find Jackie's head limb's rotation relative to actor rotation and apply here
-    Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_ROT], &player->actor.world.rot);
-
+    Vec3s newRootJointRot = { 0, 0, 0};
+    //Math_Vec3s_Copy(&newRootJointRot, &this->actor.shape.rot);
+    newRootJointRot.y = -32768;
+    Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_ROT], &newRootJointRot);
+    
     // BodyPartsPos and gPhysLimbs' pos and vel for Rest of the limbs
     for (int i = 1; i < (int)PONYTAIL_BODYPART_MAX; i++) {
         // Find global position of current limb based on offset from parent limb's position
         Vec3f transformVec3f = {0.f, 0.f, 0.f};
-        
+
         // Apply ponytail root limb's rotation here
-        // NOTE: APPLY PARENT'S ROTATION TO TRANSLATION VECTOR FOR POSITION RELATIVE TO ROTATION
-        // gLimbs[i]->jointPos vs new JointPos based on rotation; make new function for this for new Vec3s
-        // Make target Vec3s vector also to carry new jointPos values
-        CustomMath_Vec3s_Scale_ToVec3f(&gLimbs[i]->jointPos, this->actor.scale.x, &transformVec3f);
+        Vec3s rotatedOffset = {0, 0, 0};
+        CustomMath_Vec3s_Rotate(&gPhysLimbs[i]->default_jointPos, &player->actor.shape.rot, &rotatedOffset);
+        CustomMath_Vec3s_Scale_ToVec3f(&rotatedOffset, this->actor.scale.x, &transformVec3f);
         Math_Vec3f_Sum(&this->bodyPartsPos[i-1], &transformVec3f, &this->bodyPartsPos[i]);
 
         if (i == (int)PONYTAIL_BODYPART_LIMB1) {
@@ -289,16 +207,12 @@ void Ponytail_SetDefaultBodyPartsPos(Ponytail* this, Player* player, StandardLim
         else {
             Vec3f no_velocity = {(f32)0, (f32)0, (f32)0};
             Verlet_InitLimb(gPhysLimbs[i], this->bodyPartsPos[i], no_velocity, (LIMB_MASS), NOT_PINNED);
-            // TEST: Comment when testing rotation verlet and un-comment above
-            //Verlet_InitLimb(gPhysLimbs[i], this->bodyPartsPos[i], playerVelocity, (LIMB_MASS), PINNED);
         }
     }
 
     // Set matching gPhysLimbs to appropriate gPhysBones
     for (int i = 0; i < (int)PONYTAIL_BONE_MAX; i++) {
         Verlet_InitBone(gPhysBones[i], gPhysLimbs[i], gPhysLimbs[i+1]);
-        recomp_printf("BONE [%d", i);
-        recomp_printf("] length: %f\n", gPhysBones[i]->bone_length);
     }
 }
 
@@ -310,6 +224,22 @@ void Ponytail_Init(Actor* thisx, PlayState* play) {
 
         gPlayerPonytail = this;
         gPlayStatePonytail = play;
+
+        // Capture default jointPos
+        // I can't think of any way aside from hardcoding, because the standardlimbs' jointPos values
+        // keep getting updated based on its last jointPos values before map reloads
+        Vec3s limb1_jointPos = { 0, 157, -340 };
+        Vec3s limb2_jointPos = { 0, 0, -206 };
+        Vec3s limb3_jointPos = { 0, 0, -191 };
+        Vec3s limb4_jointPos = { 0, 0, -197 };
+        Vec3s limb5_jointPos = { 0, 0, -158 };
+
+        Math_Vec3s_Copy(&ponytailPhysLimbs[1]->default_jointPos, &limb1_jointPos);
+        Math_Vec3s_Copy(&ponytailPhysLimbs[2]->default_jointPos, &limb2_jointPos);
+        Math_Vec3s_Copy(&ponytailPhysLimbs[3]->default_jointPos, &limb3_jointPos);
+        Math_Vec3s_Copy(&ponytailPhysLimbs[4]->default_jointPos, &limb4_jointPos);
+        Math_Vec3s_Copy(&ponytailPhysLimbs[5]->default_jointPos, &limb5_jointPos);
+
 
         Actor_SetScale(&this->actor, 0.01f);
         SkelAnime_InitFlex(
@@ -350,16 +280,17 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
     Math_Vec3f_Copy(&this->actor.prevPos, &player->actor.prevPos);
     Math_Vec3f_Copy(&this->actor.world.pos, &player->actor.world.pos);
 
-    // Rotation
-    //Math_Vec3s_Copy(&this->actor.world.rot, &player->actor.world.rot);
-
     // BE SURE TO REMOVE THIS AFTER TESTING
     Vec3f offsetVec3f = { (f32)0, (f32)70, (f32)0 };
     Math_Vec3f_Sum(&this->actor.world.pos, &offsetVec3f, &this->actor.world.pos);
 
+    Math_Vec3s_Copy(&this->actor.world.rot, &player->actor.world.rot);
+    Math_Vec3s_Copy(&this->actor.shape.rot, &player->actor.shape.rot);
+    this->actor.shape.rot.y += -32768;  // remove offset from earlier
+
     // Set Root limb's bodyPartsPos
     Math_Vec3f_Copy(&this->bodyPartsPos[PONYTAIL_BODYPART_ROOT], &this->actor.world.pos);
-    Math_Vec3f_Copy(&gPhysLimbs[PONYTAIL_BODYPART_ROOT]->curr_pos, &this->actor.world.pos);
+    Math_Vec3f_Copy(&gPhysLimbs[PONYTAIL_BODYPART_ROOT]->curr_pos, &this->actor.world.pos); // Rotation needs to be applied
 
     // jointTable Root Position
     Vec3s newRootJointPos = { 0, 0, 0};
@@ -367,7 +298,9 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
     Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_POS], &newRootJointPos);
 
     // jointTable Root rotation
-    //Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_ROT], &player->actor.world.rot);
+    Vec3s newRootJointRot = { 0, 0, 0};
+    newRootJointRot.y = -32768;
+    Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_ROT], &newRootJointRot);
 
     // BodyPartsPos Rest of the limbs
     for (int i = 1; i < (int)PONYTAIL_BODYPART_MAX; i++) {
@@ -378,7 +311,9 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
 
             // Find current global position of current limb based on offset from parent limb's position
             Vec3f transformVec3f = {0.f, 0.f, 0.f};
-            CustomMath_Vec3s_Scale_ToVec3f(&gLimbs[i]->jointPos, this->actor.scale.x, &transformVec3f);
+            Vec3s rotatedOffset = { 0, 0, 0};
+            CustomMath_Vec3s_Rotate(&gPhysLimbs[i]->default_jointPos, &this->actor.shape.rot, &rotatedOffset);
+            CustomMath_Vec3s_Scale_ToVec3f(&rotatedOffset, this->actor.scale.x, &transformVec3f);
 
             // Set Current values for current gPhysLimb
             Math_Vec3f_Sum(&this->bodyPartsPos[i-1], &transformVec3f, &this->bodyPartsPos[i]);
@@ -402,78 +337,75 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
     // Bone update
     for (int i = 0; i < 1; i++) {
         for (int i = 0; i < (int)PONYTAIL_BONE_MAX; i++) {
-            recomp_printf("\n[%d]: \n", i);
             Verlet_BoneConstraint(gPhysBones[i]);
-            recomp_printf("\n");
-            
         }
     }
 
 }
 
 void Ponytail_RotateJoints(Ponytail* this, PhysBone* gPhysBones[]) {
-    // Note: Rotation values in jointTable are relative to its parent's rotation
-
-    // I may have to initially add the player's actor's rotation on to this when considering
-    // initial rotation of player. Keep this in mind
+    // Keep track of all limbs' rotation for subsequent limbs' rotations
     Vec3s offset_rotation = { (s16)0, (s16)0, (s16)0 };
 
+    // Go through every bone
     for (int i = (int)PONYTAIL_BONE_ROOT_LIMB1; i < (int)PONYTAIL_BONE_MAX; i++) {
         // Skip to next bone if both limbs in current bone are pinned
         if (gPhysBones[i]->limb_a->pinned == 1 && gPhysBones[i]->limb_b->pinned == 1) {
             continue;
         }
         else {
-            recomp_printf("%d: ", i);
-            if (i == 1) {
-                recomp_printf("limb_b->curr_pos: %.16f, ", gPhysBones[i]->limb_b->curr_pos.x);
-                recomp_printf("%.16f, ", gPhysBones[i]->limb_b->curr_pos.y);
-                recomp_printf("%.16f\n", gPhysBones[i]->limb_b->curr_pos.z);
-                recomp_printf("limb_a->curr_pos: %.16f, ", gPhysBones[i]->limb_a->curr_pos.x);
-                recomp_printf("%.16f, ", gPhysBones[i]->limb_a->curr_pos.y);
-                recomp_printf("%.16f\n", gPhysBones[i]->limb_a->curr_pos.z);
-                recomp_printf("t  e  s  t  :  %.16f, ", gPhysBones[i]->limb_b->curr_pos.x - gPhysBones[i]->limb_a->curr_pos.x);
-                recomp_printf("%.16f, ", gPhysBones[i]->limb_b->curr_pos.y - gPhysBones[i]->limb_a->curr_pos.y);
-                recomp_printf("%.16f\n", gPhysBones[i]->limb_b->curr_pos.z - gPhysBones[i]->limb_a->curr_pos.z);
-            }
-            
             s16 curr_rotate_x = CustomMath_Vec3f_Pitch(&gPhysBones[i]->limb_b->curr_pos, &gPhysBones[i]->limb_a->curr_pos);
             
-            if (i == 1) {
-                recomp_printf("CURR PITCH ROTATE X: %d\n", curr_rotate_x);
-            }
             //s16 curr_rotate_y = CustomMath_Vec3f_Yaw(&gPhysBones[i]->limb_a->curr_pos, &gPhysBones[i]->limb_b->curr_pos);
             s16 curr_rotate_z = CustomMath_Vec3f_Roll(&gPhysBones[i]->limb_a->curr_pos, &gPhysBones[i]->limb_b->curr_pos);
             //s16 curr_rotate_z = 0;
 
-            if (i == 1) {
-                //recomp_printf("CURR YAW ROTATE Y: %d\n", curr_rotate_y);
-                recomp_printf("CURR ROLL ROTATE Z: %d\n", curr_rotate_z);
-            }
-            //s16 curr_rotate_y = -8192;
-            /*
-            if (curr_rotate_y > YAW_LIMIT * i) {
-                curr_rotate_y = YAW_LIMIT * i;
-            }
-            else if (curr_rotate_y < -YAW_LIMIT * i) {
-                curr_rotate_y = -YAW_LIMIT * i;
-            }*/
-
             if (i == (int)PONYTAIL_BODYPART_LIMB1) {
-                //Vec3s curr_rotate = { curr_rotate_x, curr_rotate_y, (s16)0 };
-                Vec3s curr_rotate = { curr_rotate_x, (s16)0, curr_rotate_z };
+                // Get global direction vector from current bone's limb_a to limb_b
+                Vec3f bone_direction = {(f32)0.f, (f32)0.f, (f32)0.f};
+                Math_Vec3f_Diff(&gPhysBones[i]->limb_b->curr_pos, &gPhysBones[i]->limb_a->curr_pos, &bone_direction);
+
+                // Transform direction into local space by removing actor rot & model offset
+                Vec3s actorRotWithOffset = {0, 0, 0};
+                Math_Vec3s_Copy(&actorRotWithOffset, &this->actor.shape.rot);
+                CustomMath_Vec3f_InverseRotate(&bone_direction, &actorRotWithOffset, &bone_direction);
+
+                // Now compute pitch/roll from the local-space direction
+                Vec3f origin = {0, 0, 0};
+                s16 local_pitch = CustomMath_Vec3f_Pitch(&bone_direction, &origin);
+                s16 local_roll = CustomMath_Vec3f_Roll(&origin, &bone_direction);
+                Vec3s curr_rotate = { local_pitch, (s16)0, local_roll };
+
+                // Apply pitch and roll to current limb's jointTable
                 this->skelAnime.jointTable[i + 1] = curr_rotate;
+
+                // Keep note of offset for next limb
                 CustomMath_Vec3s_Sum(&offset_rotation, &curr_rotate, &offset_rotation);
             }
             else {
-                //Vec3s curr_rotate = { curr_rotate_x, curr_rotate_y, (s16)0 };
-                Vec3s curr_rotate = { curr_rotate_x, (s16)0, curr_rotate_z };
-                Vec3s apply_rot = { (s16)0, (s16)0, (s16)0 };
+                // Get global direction vector from current bone's limb_a to limb_b
+                Vec3f bone_direction = {(f32)0.f, (f32)0.f, (f32)0.f};
+                Math_Vec3f_Diff(&gPhysBones[i]->limb_b->curr_pos, &gPhysBones[i]->limb_a->curr_pos, &bone_direction);
 
-                // apply = offset - curr
+                // Transform direction into local space by removing actor rot & model offset
+                Vec3s actorRotWithOffset = {0, 0, 0};
+                Math_Vec3s_Copy(&actorRotWithOffset, &this->actor.shape.rot);
+                CustomMath_Vec3f_InverseRotate(&bone_direction, &actorRotWithOffset, &bone_direction);
+                
+                // Now compute pitch/roll from the local-space direction
+                Vec3f origin = {0, 0, 0};
+                s16 local_pitch = CustomMath_Vec3f_Pitch(&bone_direction, &origin);
+                s16 local_roll = CustomMath_Vec3f_Roll(&origin, &bone_direction);
+                Vec3s curr_rotate = { local_pitch, (s16)0, local_roll };
+
+                // Subtract parent's accumulated rotation to get relative rotation
+                Vec3s apply_rot = { (s16)0, (s16)0, (s16)0 };
                 CustomMath_Vec3s_Diff(&curr_rotate, &offset_rotation, &apply_rot);
 
+                // Apply pitch and roll to current limb's jointTable
                 this->skelAnime.jointTable[i + 1] = apply_rot;
+
+                // Keep note of offset for next limb
                 CustomMath_Vec3s_Sum(&offset_rotation, &apply_rot, &offset_rotation);
             }
         }
@@ -489,20 +421,9 @@ void Ponytail_Update(Actor* thisx, PlayState* play) {
 
         Vec3f net_force = { (f32)0, (f32)0, (f32)0 };    // Gravity + movement
 
-        recomp_printf("PREVIOUS VELOCITY: %f, ", gJackiePhysPlayer.curr_vel.x);
-        recomp_printf("%f, ", gJackiePhysPlayer.curr_vel.y);
-        recomp_printf("%f\n", gJackiePhysPlayer.curr_vel.z);
-
         Verlet_UpdatePhysPlayerVelocity(&gJackiePhysPlayer, player);
         Verlet_CalcNetForce(&gJackiePhysPlayer, (f32)GRAVITY, &net_force);
-        recomp_printf("CURRENT VELOCITY: %f, ", gJackiePhysPlayer.curr_vel.x);
-        recomp_printf("%f, ", gJackiePhysPlayer.curr_vel.y);
-        recomp_printf("%f\n", gJackiePhysPlayer.curr_vel.z);
-
-        recomp_printf("ACCELERATION: %f, ", net_force.x);
-        recomp_printf("%f, ", net_force.y);
-        recomp_printf("%f\n", net_force.z);
-
+        
         // Update Ponytail's roobone and other pinned bone's position based on player's position
         // Note: this may have to be updated to handle both pinned and unpinned bones
         // where pinned bones get updated to be with player's position, and
@@ -510,17 +431,12 @@ void Ponytail_Update(Actor* thisx, PlayState* play) {
         // takes into account of positions of limbs directly. It might not be heplful to
         // separate the two from each other, but I dunno. Anyway, net force needs to be found
         // on its own anyway, so start from that.
-        Ponytail_UpdateBodyPartsPos(this, player, net_force, gPonytailLimbs, ponytailPhysLimbs, ponytailPhysBones);
         //Ponytail_UpdateBodyPartsPos(this, player, net_force, gPonytailLimbs, ponytailPhysLimbs, ponytailPhysBones);
+        Ponytail_UpdateBodyPartsPos(this, player, net_force, gPonytailLimbs, ponytailPhysLimbs, ponytailPhysBones);
 
         // Uew calculated global positions in ponytailPhysLimbs in ponytailPhysBones to find rotations for jointTable
         Ponytail_RotateJoints(this, ponytailPhysBones);
 
-
-
-
-        // After this, figure out how to apply this to ponytail when it's rotating based on link actor
-        // After this, figure out how to properly attach this to Link's head bodyPartPos
     }
 }
 
