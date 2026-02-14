@@ -18,7 +18,12 @@ by BigMetalHead12
 
 ***********************************************************************/
 
-// Pitch, Yaw, and Roll
+/*
+=================
+Pitch, Yaw, and Roll
+=================
+*/
+
 // Designed to calculate bone x-axis rotations beyond -90/+90 degrees from origin
 s16 CustomMath_Vec3f_Pitch(Vec3f* b, Vec3f* a) {
     // If vector b's z position is >= vector a's z position, proceed as is
@@ -58,7 +63,12 @@ s16 CustomMath_Vec3f_Roll(Vec3f* a, Vec3f* b) {
 }
 
 
-// Vector s16 operations
+/*
+=================
+Vec3s (s16) math operations 
+=================
+*/
+
 // Vec3s version for Vector Sum
 void CustomMath_Vec3s_Sum(Vec3s* l, Vec3s* r, Vec3s* dest) {
     dest->x = l->x + r->x;
@@ -86,7 +96,12 @@ void CustomMath_Vec3s_Scale_ToVec3f(Vec3s* target, f32 scale, Vec3f* dest) {
 }
 
 
-// Rotate Vec3s
+/*
+=================
+Vec3s (s16) rotation operations 
+=================
+*/
+
 void CustomMath_Vec3s_RotateByX(Vec3s* src, s16 rotAngle, Vec3s* dest) {
     f32 sin = Math_SinS(rotAngle);
     f32 cos = Math_CosS(rotAngle);
@@ -138,7 +153,12 @@ void CustomMath_Vec3s_RotateInverse(Vec3s* src, Vec3s* rotAngle, Vec3s* dest) {
 }
 
 
-// Rotate Vec3f
+/*
+=================
+Vec3f (f32) rotation operations 
+=================
+*/
+
 void CustomMath_Vec3f_RotateByX(Vec3f* src, s16 rotAngle, Vec3f* dest) {
     f32 sin = Math_SinS(rotAngle);
     f32 cos = Math_CosS(rotAngle);

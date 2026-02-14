@@ -20,6 +20,7 @@ RECOMP_IMPORT("*", int recomp_printf(const char* fmt, ...));
 	Verlet Integration
 
 ***********************************************************************/
+
 // Initialize player velocity and rotation
 void Verlet_InitPhysPlayer(PhysPlayer* target_player, Player* player) {
     target_player->curr_vel = player->actor.velocity;

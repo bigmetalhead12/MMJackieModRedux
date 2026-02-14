@@ -104,17 +104,6 @@ typedef struct Ponytail {
     ColliderJntSph collider;
 } Ponytail;
 
-// Custom Math functions not available in MM decomp library
-s16 CustomMath_Vec3f_Pitch(Vec3f* b, Vec3f* a);
-s16 CustomMath_Vec3f_Yaw(Vec3f* a, Vec3f* b);
-void CustomMath_Vec3s_Sum(Vec3s* l, Vec3s* r, Vec3s* dest);
-void CustomMath_Vec3s_Diff(Vec3s* l, Vec3s* r, Vec3s* dest);
-void CustomMath_Vec3s_Scale_ToVec3f(Vec3s* target, f32 scale, Vec3f* dest);
-void CustomMath_Vec3s_RotateByX(Vec3s* src, s16 rotAngle, Vec3s* dest);
-void CustomMath_Vec3s_RotateByY(Vec3s* src, s16 rotAngle, Vec3s* dest);
-void CustomMath_Vec3s_RotateByZ(Vec3s* src, s16 rotAngle, Vec3s* dest);
-void CustomMath_Vec3s_Rotate(Vec3s* src, Vec3s* rotAngle, Vec3s* dest);
-
 // Ponytail manipulation based on Verlet Integration
 void Ponytail_RotateJoints(Ponytail* this, PhysBone* gPhysBones[]);
 void Ponytail_SetDefaultBodyPartsPos(Ponytail* this, Player* player, StandardLimb* gLimbs[], PhysLimb* gPhysLimbs[], PhysBone* gPhysBones[]) ;

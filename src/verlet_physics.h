@@ -7,6 +7,9 @@ by BigMetalHead12
 
 2026
 
+DESC:
+    Verlet integration designed for Majora's Mask recomp
+
 ========================================================================
 */
 

@@ -7,6 +7,10 @@ by BigMetalHead12
 
 2026
 
+DESC:
+    Some vec3s/vec3f functions I made for cases where MM's math library
+    didn't provide them
+
 ========================================================================
 */
 
