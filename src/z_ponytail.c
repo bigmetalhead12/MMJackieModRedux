@@ -110,12 +110,14 @@ Ponytail Bones
 =================
 */
 typedef enum PonytailBones {
-    /*  0 */ PONYTAIL_ROOT_POS,     // Ponytail's Root bone (position)
-    /*  1 */ PONYTAIL_ROOT_ROT,     // Ponytail's Root bone (rotation)
-    /*  2 */ PONYTAIL_LIMB1,
-    /*  3 */ PONYTAIL_LIMB2,
-    /*  4 */ PONYTAIL_LIMB3,
-    /*  5 */ PONYTAIL_LIMB4
+    PONYTAIL_ROOT_POS,     // Ponytail's Root bone (position)
+    PONYTAIL_ROOT_ROT,     // Ponytail's Root bone (rotation)
+    PONYTAIL_UC,
+    PONYTAIL_HEAD,
+    PONYTAIL_LIMB1,
+    PONYTAIL_LIMB2,
+    PONYTAIL_LIMB3,
+    PONYTAIL_LIMB4
 } PonytailBones;
 
 /*
@@ -162,7 +164,7 @@ void Ponytail_SetDefaultBodyPartsPos(Ponytail* this, Player* player, StandardLim
     Vec3f playerVelocity = player->actor.velocity;
 
     // Set position and rotation of Ponytail
-    Math_Vec3f_Copy(&this->actor.world.pos, &player->bodyPartsPos[PLAYER_BODYPART_HEAD]);
+    Math_Vec3f_Copy(&this->actor.world.pos, &player->actor.world.pos);
     Math_Vec3s_Copy(&this->actor.shape.rot, &player->actor.shape.rot);
     Math_Vec3s_Copy(&this->actor.world.rot, &player->actor.world.rot);
 
@@ -185,7 +187,7 @@ void Ponytail_SetDefaultBodyPartsPos(Ponytail* this, Player* player, StandardLim
     Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_ROT], &newRootJointRot);
     
     // BodyPartsPos and gPhysLimbs' pos and vel for Rest of the limbs
-    for (int i = (int)PONYTAIL_BODYPART_LIMB1; i < (int)PONYTAIL_BODYPART_MAX; i++) {
+    for (int i = (int)PONYTAIL_BODYPART_UPPERCONTROL; i < (int)PONYTAIL_BODYPART_MAX; i++) {
         // Find global position of current limb based on offset from parent limb's position
         Vec3f transformVec3f = {0.f, 0.f, 0.f};
         // Apply ponytail root limb's rotation here
@@ -196,7 +198,7 @@ void Ponytail_SetDefaultBodyPartsPos(Ponytail* this, Player* player, StandardLim
         Math_Vec3f_Sum(&this->bodyPartsPos[i-1], &transformVec3f, &this->bodyPartsPos[i]);
 
         // If limb shouldn't have any verlet physics, pin it
-        if (i == (int)PONYTAIL_BODYPART_LIMB1) {
+        if (i <= (int)PONYTAIL_BODYPART_LIMB1) {
             Verlet_InitLimb(gPhysLimbs[i], this->bodyPartsPos[i], playerVelocity, (LIMB_MASS), PINNED);
         }
         else {
@@ -225,17 +227,21 @@ void Ponytail_Init(Actor* thisx, PlayState* play) {
         // I can't think of any way aside from hardcoding, because the standardlimbs' jointPos values
         // keep getting updated based on its last jointPos values before map reloads.
         // Values are directly copied from the generated Fast64 model file (in my case, gPonytailSkel.c)
-        Vec3s limb1_jointPos = { 0, 157, -268 };
-        Vec3s limb2_jointPos = { 0, 0, -206 };
-        Vec3s limb3_jointPos = { 0, 0, -191 };
-        Vec3s limb4_jointPos = { 0, 0, -197 };
-        Vec3s limb5_jointPos = { 0, 0, -158 };
+        Vec3s uc_jointPos       = { 0, 21, -7 };
+        Vec3s head_jointPos     = { 1392, -259, 0 };
+        Vec3s limb1_jointPos    = { -320, -195, 0 };
+        Vec3s limb2_jointPos    = { 0, 0, -206 };
+        Vec3s limb3_jointPos    = { 0, 0, -191 };
+        Vec3s limb4_jointPos    = { 0, 0, -197 };
+        Vec3s limb5_jointPos    = { 0, 0, -158 };
 
-        Math_Vec3s_Copy(&ponytailPhysLimbs[1]->default_jointPos, &limb1_jointPos);
-        Math_Vec3s_Copy(&ponytailPhysLimbs[2]->default_jointPos, &limb2_jointPos);
-        Math_Vec3s_Copy(&ponytailPhysLimbs[3]->default_jointPos, &limb3_jointPos);
-        Math_Vec3s_Copy(&ponytailPhysLimbs[4]->default_jointPos, &limb4_jointPos);
-        Math_Vec3s_Copy(&ponytailPhysLimbs[5]->default_jointPos, &limb5_jointPos);
+        Math_Vec3s_Copy(&ponytailPhysLimbs[1]->default_jointPos, &uc_jointPos);
+        Math_Vec3s_Copy(&ponytailPhysLimbs[2]->default_jointPos, &head_jointPos);
+        Math_Vec3s_Copy(&ponytailPhysLimbs[3]->default_jointPos, &limb1_jointPos);
+        Math_Vec3s_Copy(&ponytailPhysLimbs[4]->default_jointPos, &limb2_jointPos);
+        Math_Vec3s_Copy(&ponytailPhysLimbs[5]->default_jointPos, &limb3_jointPos);
+        Math_Vec3s_Copy(&ponytailPhysLimbs[6]->default_jointPos, &limb4_jointPos);
+        Math_Vec3s_Copy(&ponytailPhysLimbs[7]->default_jointPos, &limb5_jointPos);
 
         Actor_SetScale(&this->actor, 0.01f);
         SkelAnime_InitFlex(
@@ -273,30 +279,34 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
     Math_Vec3f_Copy(&this->actor.prevPos, &player->actor.prevPos);
 
     // Set Ponytail's position and rotations
-    Math_Vec3f_Copy(&this->actor.world.pos, &player->bodyPartsPos[PLAYER_BODYPART_HEAD]);
+    Math_Vec3f_Copy(&this->actor.world.pos, &player->bodyPartsPos[PLAYER_BODYPART_WAIST]);
     Math_Vec3s_Copy(&this->actor.shape.rot, &player->actor.shape.rot);
-    this->actor.shape.rot.y += -32768;  // remove offset from earlier
-    Math_Vec3s_Copy(&this->actor.world.rot, &player->actor.shape.rot);
 
-    // Set Root limb's bodyPartsPos
-    Math_Vec3f_Copy(&this->bodyPartsPos[PONYTAIL_BODYPART_ROOT], &this->actor.world.pos);
-    Math_Vec3f_Copy(&gPhysLimbs[PONYTAIL_BODYPART_ROOT]->curr_pos, &this->actor.world.pos); // Rotation needs to be applied
+    // Root Limb
+    // bodyPartsPos (ponytail actor & gPhysLimbs)
+    Math_Vec3f_Copy(&this->bodyPartsPos[PONYTAIL_BODYPART_ROOT], &player->bodyPartsPos[PLAYER_BODYPART_WAIST]);
+    Math_Vec3f_Copy(&gPhysLimbs[PONYTAIL_BODYPART_ROOT]->curr_pos, &player->bodyPartsPos[PLAYER_BODYPART_WAIST]);
+    // jointTable (pos and rotation)
+    Vec3s newRootJointPos = { 0, 0, 0}; // Ponytail's root already set to Player's waist (same pos as player's root)
+    Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_POS], &newRootJointPos);  
+    Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_ROT], &player->skelAnime.jointTable[PLAYER_LIMB_ROOT]);
 
-    // jointTable Root Position
-    Vec3s newRootJointPos = { 0, 0, 0};
-    Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_POS], &newRootJointPos);
+    // UC Limb
+    // bodyPartsPos (ponytail actor & gPhysLimbs)
+    Math_Vec3f_Copy(&this->bodyPartsPos[PONYTAIL_BODYPART_UPPERCONTROL], &player->bodyPartsPos[PLAYER_BODYPART_TORSO]); // Torso position same as Upper Control 
+    Math_Vec3f_Copy(&gPhysLimbs[PONYTAIL_BODYPART_UPPERCONTROL]->curr_pos, &player->bodyPartsPos[PLAYER_BODYPART_TORSO]);
+    // jointTable (rotation only)
+    Math_Vec3s_Copy(&this->skelAnime.jointTable[PONYTAIL_UC], &player->skelAnime.jointTable[PLAYER_LIMB_UPPER_ROOT]);
 
-    // jointTable Root rotation
-    Vec3s newRootJointRot = { 0, 0, 0};
-    newRootJointRot.x = player->skelAnime.jointTable[PLAYER_LIMB_HEAD].x;
-    newRootJointRot.y = -32768 
-                    - player->skelAnime.jointTable[PLAYER_LIMB_UPPER_ROOT].y
-                    - player->skelAnime.jointTable[PLAYER_LIMB_HEAD].y;
-    newRootJointRot.z = 0;
-    Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_ROT], &newRootJointRot);
+    // Head Limb
+    // bodyPartsPos (ponytail actor & gPhysLimbs)
+    Math_Vec3f_Copy(&this->bodyPartsPos[PONYTAIL_BODYPART_HEAD], &player->bodyPartsPos[PLAYER_BODYPART_HEAD]);
+    Math_Vec3f_Copy(&gPhysLimbs[PONYTAIL_BODYPART_HEAD]->curr_pos, &player->bodyPartsPos[PLAYER_BODYPART_HEAD]);
+    // jointTable (rotation only)
+    Math_Vec3s_Copy(&this->skelAnime.jointTable[PONYTAIL_HEAD], &player->skelAnime.jointTable[PLAYER_LIMB_HEAD]);
 
     // BodyPartsPos Rest of the limbs
-    for (int i = 1; i < (int)PONYTAIL_BODYPART_MAX; i++) {
+    for (int i = (int)PONYTAIL_BODYPART_LIMB1; i < (int)PONYTAIL_BODYPART_MAX; i++) {
         if (gPhysLimbs[i]->pinned == 1) {
             // Set previous values for current gPhysLimb
             Math_Vec3f_Copy(&gPhysLimbs[i]->prev_pos, &gPhysLimbs[i]->curr_pos);    // Previous Position
@@ -336,21 +346,23 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
 
 }
 
-void Ponytail_RotateJoints(Ponytail* this, PhysBone* gPhysBones[]) {
+void Ponytail_RotateJoints(Ponytail* this, Player* player, PhysBone* gPhysBones[]) {
     // Keep track of all limbs' rotation for subsequent limbs' rotations
     Vec3s offset_rotation = { (s16)0, (s16)0, (s16)0 };
 
     // Go through every bone
-    for (int i = (int)PONYTAIL_BONE_ROOT_LIMB1; i < (int)PONYTAIL_BONE_MAX; i++) {
+    for (int i = (int)PONYTAIL_BONE_ROOT_UPPERCONTROL; i < (int)PONYTAIL_BONE_MAX; i++) {
         // Skip to next bone if both limbs in current bone are pinned
         if (gPhysBones[i]->limb_a->pinned == 1 && gPhysBones[i]->limb_b->pinned == 1) {
+            CustomMath_Vec3s_Sum(&offset_rotation, &this->skelAnime.jointTable[i + 1], &offset_rotation);
             continue;
         }
         else {
+            recomp_printf("[%d] offset: %d, %d, %d\n", i, offset_rotation.x, offset_rotation.y, offset_rotation.z);
             // Find limb_a's pitch and roll values based on direction of bone
             s16 curr_rotate_x = CustomMath_Vec3f_Pitch(&gPhysBones[i]->limb_b->curr_pos, &gPhysBones[i]->limb_a->curr_pos);
             s16 curr_rotate_z = CustomMath_Vec3f_Roll(&gPhysBones[i]->limb_a->curr_pos, &gPhysBones[i]->limb_b->curr_pos);
-            
+
             // PONYTAIL_BODYPART_LIMB1 is a pinned bone
             if (i == (int)PONYTAIL_BODYPART_LIMB1) {
                 // Get global direction vector from current bone's limb_a to limb_b
@@ -364,15 +376,23 @@ void Ponytail_RotateJoints(Ponytail* this, PhysBone* gPhysBones[]) {
 
                 // Now compute pitch/roll from the local-space direction
                 Vec3f origin = {0, 0, 0};
-                s16 local_pitch = CustomMath_Vec3f_Pitch(&bone_direction, &origin);
+                s16 local_pitch = CustomMath_Vec3f_Pitch(&bone_direction, &origin) + 16384;
                 s16 local_roll = CustomMath_Vec3f_Roll(&origin, &bone_direction);
-                Vec3s curr_rotate = { local_pitch, (s16)0, local_roll };
+                Vec3s curr_rotate = { 0, (s16)0, 0 };
 
+                Vec3s new_rotate = { 0, 0, 0};
+                curr_rotate.x = -offset_rotation.x + local_roll;
+                curr_rotate.y = -offset_rotation.y;
+                curr_rotate.z = -offset_rotation.z - local_pitch;
+
+                new_rotate.x = curr_rotate.x;
+                new_rotate.y = curr_rotate.y;
+                new_rotate.z = curr_rotate.z;
                 // Apply pitch and roll to current limb's jointTable
-                this->skelAnime.jointTable[i + 1] = curr_rotate;
+                this->skelAnime.jointTable[i + 1] = new_rotate;
 
                 // Keep note of offset for next limb
-                CustomMath_Vec3s_Sum(&offset_rotation, &curr_rotate, &offset_rotation);
+                CustomMath_Vec3s_Sum(&offset_rotation, &new_rotate, &offset_rotation);
             }
             else {
                 // Get global direction vector from current bone's limb_a to limb_b
@@ -385,20 +405,29 @@ void Ponytail_RotateJoints(Ponytail* this, PhysBone* gPhysBones[]) {
                 CustomMath_Vec3f_InverseRotate(&bone_direction, &actorRotWithOffset, &bone_direction);
                 
                 // Now compute pitch/roll from the local-space direction
-                Vec3f origin = {0, 0, 0};
-                s16 local_pitch = CustomMath_Vec3f_Pitch(&bone_direction, &origin);
+                Vec3f origin = {0, 0, 0}; 
+                s16 local_pitch = CustomMath_Vec3f_Pitch(&bone_direction, &origin)  + 16384;
                 s16 local_roll = CustomMath_Vec3f_Roll(&origin, &bone_direction);
-                Vec3s curr_rotate = { local_pitch, (s16)0, local_roll };
+                Vec3s curr_rotate = { 0, (s16)0, 0 };
+
+                Vec3s new_rotate = { 0, 0, 0};
+                curr_rotate.x = -offset_rotation.x + local_roll;
+                curr_rotate.y = -offset_rotation.y;
+                curr_rotate.z = -offset_rotation.z - local_pitch;
+
+                new_rotate.x = curr_rotate.x;
+                new_rotate.y = curr_rotate.y;
+                new_rotate.z = curr_rotate.z;
 
                 // Subtract parent's accumulated rotation to get relative rotation
-                Vec3s apply_rot = { (s16)0, (s16)0, (s16)0 };
-                CustomMath_Vec3s_Diff(&curr_rotate, &offset_rotation, &apply_rot);
+                
+                //CustomMath_Vec3s_Diff(&curr_rotate, &offset_rotation, &apply_rot);
 
                 // Apply pitch and roll to current limb's jointTable
-                this->skelAnime.jointTable[i + 1] = apply_rot;
+                this->skelAnime.jointTable[i + 1] = new_rotate;
 
                 // Keep note of offset for next limb
-                CustomMath_Vec3s_Sum(&offset_rotation, &apply_rot, &offset_rotation);
+                CustomMath_Vec3s_Sum(&offset_rotation, &new_rotate, &offset_rotation);
             }
         }
     }
@@ -445,7 +474,7 @@ RECOMP_HOOK_RETURN ("Player_Draw") void return_Ponytail_Player_Draw(void) {
         Ponytail_UpdateBodyPartsPos(this, player, net_force, gPonytailLimbs, ponytailPhysLimbs, ponytailPhysBones);
 
         // Uew calculated global positions in ponytailPhysLimbs in ponytailPhysBones to find rotations for jointTable
-        Ponytail_RotateJoints(this, ponytailPhysBones);
+        Ponytail_RotateJoints(this, player, ponytailPhysBones);
     }
     
     
