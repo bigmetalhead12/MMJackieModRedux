@@ -106,14 +106,7 @@ Ponytail* gPlayerPonytail = NULL;
 PlayState* gPlayStatePonytail = NULL;
 
 RECOMP_HOOK("Player_Init") void on_player_init(Actor* thisx, PlayState* play) {
-    Player* player = GET_PLAYER(play);
     if (recomp_get_config_u32("change_hairstyle") && gPlayerPonytail == NULL) {
-        s32 pad;
-        Player* this = (Player*)thisx;
-        s8 objectSlot;
-        s32 respawnFlag;
-        s32 var_a1;
-        PlayerStartMode startMode;
         Actor_SpawnAsChildAndCutscene(&play->actorCtx, play, CUSTOM_ACTOR_PONYTAIL, 
                                     -367.0f, 0.0f, -245.0f, 0, 0x8000, 0, 0, 0, 
                                     0, 0);
@@ -141,7 +134,6 @@ void Ponytail_SetDefaultBodyPartsPos(Ponytail* this, Player* player, StandardLim
     Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_POS], &rootPos_Vec3s);
     Math_Vec3s_Copy(&gPhysLimbs[PONYTAIL_BODYPART_ROOT]->default_jointPos, &rootPos_Vec3s);
 
-
     // Root limb's jointTable for rotation
     Vec3s newRootJointRot = { 0, 0, 0};
     Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_ROT], &newRootJointRot);
@@ -153,7 +145,6 @@ void Ponytail_SetDefaultBodyPartsPos(Ponytail* this, Player* player, StandardLim
 
         // Apply ponytail root limb's rotation here
         Vec3s rotatedOffset = {0, 0, 0};
-
         CustomMath_Vec3s_Rotate(&gPhysLimbs[i]->default_jointPos, &player->actor.shape.rot, &rotatedOffset);
         CustomMath_Vec3s_Scale_ToVec3f(&rotatedOffset, this->actor.scale.x, &transformVec3f);
         Math_Vec3f_Sum(&this->bodyPartsPos[i-1], &transformVec3f, &this->bodyPartsPos[i]);
@@ -200,7 +191,6 @@ void Ponytail_Init(Actor* thisx, PlayState* play) {
         Math_Vec3s_Copy(&ponytailPhysLimbs[4]->default_jointPos, &limb4_jointPos);
         Math_Vec3s_Copy(&ponytailPhysLimbs[5]->default_jointPos, &limb5_jointPos);
 
-
         Actor_SetScale(&this->actor, 0.01f);
         SkelAnime_InitFlex(
             play,
@@ -220,16 +210,16 @@ void Ponytail_Init(Actor* thisx, PlayState* play) {
 
 }
 
+
 /*
 =================
 Ponytail Destroy
 =================
 */
 void Ponytail_Destroy(Actor* thisx, PlayState* play) {
-    Player* player = GET_PLAYER(play);
-    Ponytail* this = (Ponytail*)thisx;
     gPlayerPonytail = NULL;
 }
+
 
 /*
 =================
@@ -399,12 +389,13 @@ void Ponytail_Update(Actor* thisx, PlayState* play) {
     Ponytail* this = (Ponytail*)thisx;
 
     // Remove Ponytail when player transforms from human to non-human
-    if (player->transformation != PLAYER_FORM_HUMAN && gPlayerPonytail != NULL && player->actor.draw == NULL) {
+    if (player->transformation != PLAYER_FORM_HUMAN && gPlayerPonytail != NULL && player->actor.draw == NULL && (player->stateFlags2 & PLAYER_STATE2_20000000)) {
         Actor_Kill(&this->actor);
         gPlayerPonytail = NULL;
         return;
     }
 }
+
 
 /*
 =================
@@ -413,7 +404,7 @@ Player Draw
 */
 RECOMP_HOOK_RETURN ("Player_Draw") void return_Skirt_Player_Draw(void) {
     Player* player = GET_PLAYER(gPlayStatePonytail);
-    if (recomp_get_config_u32("change_hairstyle") && gPlayerPonytail != NULL && player->transformation == PLAYER_FORM_HUMAN && player->actor.draw != NULL) {
+    if (recomp_get_config_u32("change_hairstyle") && gPlayerPonytail != NULL && player->transformation == PLAYER_FORM_HUMAN && player->actor.draw != NULL && !(player->stateFlags2 & PLAYER_STATE2_20000000)) {
         Ponytail* this = gPlayerPonytail;
 
         // Calculate Force
@@ -432,7 +423,7 @@ RECOMP_HOOK_RETURN ("Player_Draw") void return_Skirt_Player_Draw(void) {
 
 void Ponytail_Draw(Actor* thisx, PlayState* play) {
     Player* player = GET_PLAYER(play);
-    if (recomp_get_config_u32("change_hairstyle")  && player->transformation == PLAYER_FORM_HUMAN && player->actor.draw != NULL) {
+    if (recomp_get_config_u32("change_hairstyle") && player->transformation == PLAYER_FORM_HUMAN && player->actor.draw != NULL && !(player->stateFlags2 & PLAYER_STATE2_20000000)) {
         Ponytail* this = (Ponytail*)thisx;
 
         OPEN_DISPS(play->state.gfxCtx);
@@ -452,7 +443,7 @@ void Ponytail_Draw(Actor* thisx, PlayState* play) {
         if (player->invincibilityTimer > 0 || gSaveContext.jinxTimer != 0) {
             POLY_OPA_DISP = Play_SetFog(play, POLY_OPA_DISP);
         }
-        
+
         CLOSE_DISPS(play->state.gfxCtx);
     }
 }
