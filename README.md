@@ -16,6 +16,9 @@ To install...
 2. Open MM Recomp and select the Mods page
 3. Click and drag the downloaded NRM file into the game.
 
+## Explaining Verlet Integration
+[Verlet Integration — How the Ponytail Physics Work](VerletIntegration.md)
+
 ## Planned Features
 * Elegy of Emptiness Statue
 * Collision and offset fix for ponytail rotations
