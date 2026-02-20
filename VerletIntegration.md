@@ -18,7 +18,7 @@ Verlet integration is all about positions. This real-time physics system is esse
 * The difference in time between the previous frame and the current frame.
 
 $$
-\vec{x}_{new} = \vec{x}_{curr} + (\vec{x}_{curr} - \vec{x}_{prev}) + \vec{a} \Delta t^2
+x_{new_pos} = x_{curr_pos} + (x_{curr_pos} - x_{prev_pos}) + a \Delta t^2
 $$
 
 To review Verlet Integration, there are two essential components that need to be used: **points** and **bones**. 
