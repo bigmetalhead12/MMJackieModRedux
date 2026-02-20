@@ -50,7 +50,9 @@ First, considering that the ponytail model has 5 limbs (where each limb would be
 * Limb2
 * Limb3
 * Limb4
+ 
 the ponytail would have 4 bones:
+
 * RootLimb1 (bone with root limb and limb1)
 * Limb1Limb2
 * Limb2Limb3
