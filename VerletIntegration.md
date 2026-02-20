@@ -11,11 +11,15 @@ The physics itself is easy to design. The challenge is implementing this system 
 
 ## Designing Verlet Integration in Majora's Mask Recomp
 ### Parameters and Behaviors of Verlet Integration
-The essential parameters of Verlet Integration are the following:
+Verlet integration is all about positions. This real-time physics system is essentially an equation that figures out a target object's next position based on the following:
 * Previous Position of the Target Object
 * Current Position of the Target Object
 * Force (accleration) being applied to Target Object
 * The difference in time between the previous frame and the current frame.
+
+$$
+\vec{x}_{new} = \vec{x}_{curr} + (\vec{x}_{curr} - \vec{x}_{prev}) + \vec{a} \Delta t^2
+$$
 
 To review Verlet Integration, there are two essential components that need to be used: **points** and **bones**. 
 
