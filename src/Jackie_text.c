@@ -1498,6 +1498,24 @@ EZTR_ON_INIT void replace_msgs() {
             "thanks!" EZTR_CC_END "",
             NULL
         );
+        EZTR_Basic_ReplaceText(
+            0x33C3,
+            EZTR_STANDARD_TEXT_BOX_I,
+            0,
+            EZTR_ICON_NO_ICON,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            true,
+            "Good people like you are hard" EZTR_CC_NEWLINE \
+            "to come by." EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "That " EZTR_CC_COLOR_RED "mask " EZTR_CC_COLOR_DEFAULT "is only given to a" EZTR_CC_NEWLINE \
+            "limited number of customers." EZTR_CC_NEWLINE \
+            "It's " EZTR_CC_COLOR_RED "proof of membership" EZTR_CC_COLOR_DEFAULT "." EZTR_CC_NEWLINE "" EZTR_CC_BOX_BREAK2 \
+            "A kind-hearted woman like you" EZTR_CC_NEWLINE \
+            "definitely deserve it!" EZTR_CC_EVENT2,
+            NULL
+        );
 
         // Igos Du Ikana & Henchmen
         EZTR_Basic_ReplaceText(

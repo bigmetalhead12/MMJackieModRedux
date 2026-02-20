@@ -14,7 +14,7 @@ by BigMetalHead12
 #define CHAR_EPONA_HEIGHT_MODIFIER 1100.f
 #define CHAR_BREMEN_HEIGHT_MODIFIER 1250.0f
 
-#define OSN_MODIFIER 1000.f
+#define OSN_MODIFIER 0.f    // Happy Mask Salesman Height modifier
 #define ITEM_HEIGHT_MODIFIER 2.5f
 
 #define MOVEARROWX -0x0070
@@ -46,6 +46,8 @@ by BigMetalHead12
 #include "overlays/actors/ovl_En_Railgibud/z_en_railgibud.h"
 #include "overlays/actors/ovl_En_Talk_Gibud/z_en_talk_gibud.h"
 
+RECOMP_IMPORT("*", int recomp_printf(const char* fmt, ...));
+RECOMP_IMPORT("*", u32 recomp_get_config_u32(const char* key));
 
 
 /***********************************************************************
@@ -54,19 +56,17 @@ by BigMetalHead12
 
 ***********************************************************************/
 
-//
-// EYES AND MOUTH FLIPBOOKS
-// Utilize Jackie's custom flipbook eyes and mouth textures
-//
 /*
-
+=================
+Eyes and Mouth Flipbooks
+=================
 */
+
 extern TexturePtr sPlayerMouthTextures[PLAYER_MOUTH_MAX];   // Mouth
 extern TexturePtr sPlayerEyesTextures[PLAYER_EYES_MAX];     // Eyes
 
-
 // Eyes Texture Variables
-// Default
+// Default Head 
 extern u64 gJackieEyesOpenTex[];
 extern u64 gJackieEyesHalfTex[];
 extern u64 gJackieEyesClosedTex[];
@@ -76,7 +76,7 @@ extern u64 gJackieEyesShockTex[];
 extern u64 gJackieEyesRollDownTex[];    // gLinkAdultEyesUnk1Tex 
 extern u64 gJackieEyesShutTex[];        // gLinkAdultEyesUnk2Tex
 
-// Ponytail
+// Ponytail Head
 extern u64 gJackiePTEyesOpenTex[];
 extern u64 gJackiePTEyesHalfTex[];
 extern u64 gJackiePTEyesClosedTex[];
@@ -87,7 +87,7 @@ extern u64 gJackiePTEyesRollDownTex[];    // gLinkAdultEyesUnk1Tex
 extern u64 gJackiePTEyesShutTex[];        // gLinkAdultEyesUnk2Tex
 
 // Eyes Flipbook for Jackie
-// default
+// Default Head
 void* sEyeTextures[PLAYER_EYES_MAX] = {
     gJackieEyesOpenTex,
     gJackieEyesHalfTex,
@@ -99,7 +99,7 @@ void* sEyeTextures[PLAYER_EYES_MAX] = {
     gJackieEyesShutTex,
 };
 
-// Ponytail
+// Ponytail Head
 void* sPTEyeTextures[PLAYER_EYES_MAX] = {
     gJackiePTEyesOpenTex,
     gJackiePTEyesHalfTex,
@@ -198,10 +198,11 @@ TexturePtr sZoraMouthTextures[PLAYER_MOUTH_MAX] = {
 };
 
 
-//
-// MODEL REPLACEMENT
-// Redefine Link's DLs with Jackie's DLs to replace Link model parts
-//
+/*
+=================
+Replace Link's DLs with Jackie's DLs
+=================
+*/
 
 // Right Hand
 extern Gfx* gPlayerRightHandOpenDLs[2 * PLAYER_FORM_MAX];
@@ -309,6 +310,11 @@ Gfx gJackieRightHandHoldingHookshotDL[] = {
 };
 
 
+/*
+=================
+Jackie Properties
+=================
+*/
 // Player Age properties
 extern PlayerAgeProperties sPlayerAgeProperties[PLAYER_FORM_MAX];
 
@@ -347,7 +353,6 @@ void updateLink(PlayState* play) {
 
 // Enable Jackie's Strength to be equal to Zora Link's strength for pushable blocks
 extern u8 sPlayerStrengths[];
-
 RECOMP_PATCH u8 Player_GetStrength(void) {
     if (GET_PLAYER_FORM == PLAYER_FORM_HUMAN) {
         return sPlayerStrengths[PLAYER_FORM_ZORA];
@@ -370,26 +375,19 @@ RECOMP_HOOK_RETURN ("Player_GetHeight") void return_Player_GetHeight(void) {
     gOriginalPlayer->transformation = gOriginalPlayerTransformation;
 }
 
-
-
-RECOMP_IMPORT("*", int recomp_printf(const char* fmt, ...));
-RECOMP_IMPORT("*", u32 recomp_get_config_u32(const char* key));
-
 extern FlexSkeletonHeader gJackiePTSkel;
+
 
 // Function to replace Link's model with Jackie's model
 RECOMP_HOOK("Player_Init") void on_Player_Init(Actor* thisx, PlayState* play) {
-    // Change body based on hairstyle toggle
-
     Player* player = GET_PLAYER(play);
 
-    
     gPlayerSkeletons[PLAYER_FORM_HUMAN] = &gJackieSkel;
 
+    // Change body based on hairstyle toggle
     if (recomp_get_config_u32("change_hairstyle")) {
         gPlayerSkeletons[PLAYER_FORM_HUMAN] = &gJackiePTSkel;
     }
-
     
     // Right Hand DLs
     gPlayerRightHandOpenDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieSkel_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
@@ -405,7 +403,6 @@ RECOMP_HOOK("Player_Init") void on_Player_Init(Actor* thisx, PlayState* play) {
 
     gPlayerRightHandHookshotDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieRightHandHoldingHookshotDL;
     gPlayerRightHandHookshotDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieRightHandHoldingHookshotDL;
-    /**/
 
     // Left Hand DLs
     gPlayerLeftHandOpenDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieSkel_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
@@ -419,7 +416,7 @@ RECOMP_HOOK("Player_Init") void on_Player_Init(Actor* thisx, PlayState* play) {
     gPlayerLeftHandTwoHandSwordDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieLeftHandHoldingGreatFairysSwordDL;
     gPlayerLeftHandBottleDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieSkel_hands_bottle_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
     gPlayerLeftHandBottleDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieSkel_hands_bottle_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
-    /* */
+
     // First Person Left Limb DLs
     sPlayerFirstPersonLeftForearmDLs[PLAYER_FORM_HUMAN] = gJackieSkel_fps_leftarmhand_bone014_gLinkAdultLeftArmLimb_mesh_layer_Opaque;
     sPlayerFirstPersonLeftHandDLs[PLAYER_FORM_HUMAN] = gJackieSkel_fps_leftarmhand_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
@@ -428,13 +425,11 @@ RECOMP_HOOK("Player_Init") void on_Player_Init(Actor* thisx, PlayState* play) {
     sPlayerFirstPersonRightShoulderDLs[PLAYER_FORM_HUMAN] = gJackieRightHandShoulderAndForearm;
     sPlayerFirstPersonRightHandDLs[PLAYER_FORM_HUMAN] = gJackieSkel_fps_bow_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
     sPlayerFirstPersonRightHandHookshotDLs[PLAYER_FORM_HUMAN] = gJackieSkel_fps_hookshot_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
-
     
     // Waist DLs
     gPlayerWaistDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieSkel_bone001_gLinkAdultWaistLimb_mesh_layer_Opaque;
     gPlayerWaistDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieSkel_bone001_gLinkAdultWaistLimb_mesh_layer_Opaque;
 
-    /**/
     // Shield DL
     gPlayerHandHoldingShields[0] = gJackieRightHandHoldingHeroShieldDL;
     gPlayerHandHoldingShields[1] = gJackieRightHandHoldingHeroShieldDL;
@@ -527,13 +522,12 @@ void mainUpdate(PlayState* play) {
     updateLink(play);
 }
 
-// Voice when opening 
 
-
-//
-// MODEL'S HEIGHT ON EPONA FIX
-// Update Jackie's height position while sitting on Epona
-//
+/*
+=================
+Jackie's Height on Epona Fix
+=================
+*/
 PlayState* gPlayState;
 RECOMP_HOOK("Player_UpdateCommon") void Player_UpdateCommon(Player* this, PlayState* play, Input* input) {
     gPlayState = play;
@@ -547,10 +541,11 @@ RECOMP_HOOK_RETURN("Player_UpdateCommon") void Player_UpdateCommonReturn(void) {
 }
 
 
-//
-// EnOsn_Draw POSITION FIX
-// EnOsn_Draw
-//
+/*
+=================
+EnOsn_Draw fix
+=================
+*/
 RECOMP_HOOK ("EnOsn_Draw") void on_EnOsn_Draw(Actor* thisx, PlayState* play) {
     OPEN_DISPS(play->state.gfxCtx);
     Matrix_Push();
@@ -564,20 +559,22 @@ RECOMP_HOOK_RETURN ("EnOsn_Draw") void return_EnOsn_Draw(Actor* thisx, PlayState
 }
 
 
-//
-// GET ITEM SCREEN POSITION UPDATE
-// Update item's position when Jackie acquires said item
-//
+/*
+=================
+Get Item Screen Position Fix
+=================
+*/
 RECOMP_HOOK ("Player_DrawGetItemImpl") void on_Player_DrawGetItemImpl(PlayState* play, Player* player, Vec3f* refPos, s32 drawIdPlusOne) {
     refPos->y += ITEM_HEIGHT_MODIFIER;
     refPos->z += 0.f;
 }
 
 
-//
-// FIX JACKIE'S POSITION WHEN DOING BREMEN'S MARCH
-// Update Jackie's position when doing Bremen's march
-//
+/*
+=================
+Bremen March Fix
+=================
+*/
 u8 gPushedMatrixBremen = 0;
 RECOMP_HOOK("Player_Draw") void on_Player_Draw(Actor* thisx, PlayState* play) {
     Player* this = (Player*)thisx;
@@ -599,11 +596,11 @@ RECOMP_HOOK_RETURN ("Player_Draw") void return_Player_Draw(Actor* thisx, PlaySta
     gPushedMatrixBremen = 0;
 }
 
-
-//
-// FIX DRAWN ARROW'S POSITION
-// Update arrow's position on the bow when being drawn by Jackie
-//
+/*
+=================
+Drawn Arrow Position Fix
+=================
+*/
 RECOMP_HOOK ("Player_PostLimbDrawGameplay") void on_PostLimbDrawGameplay(PlayState* play, s32 limbIndex, Gfx** dList1, Gfx** dList2, Vec3s* rot, Actor* actor) {
     Player* player = (Player*) actor;
     if (limbIndex == PLAYER_LIMB_LEFT_HAND && player->actor.scale.y >= 0.0f) {
@@ -625,15 +622,15 @@ RECOMP_HOOK ("Player_PostLimbDrawGameplay") void on_PostLimbDrawGameplay(PlaySta
     }
 }
 
-
-//
-// FIX FOR REDEAD GRAB POSITION
-// Adjust the Gibdos/Redeads' grab position
+/*
+=================
+Redead/Gibdo Grab Position Fix
+=================
+*/
 // There are three different actor types for Gibdos/Redeads:
 // 1) Ikana Castle (redeads only)
 // 2) Music Box
 // 3) Well
-//
 
 // Ikana Castle Redeads grab fix
 typedef enum {
@@ -671,11 +668,6 @@ RECOMP_PATCH s32 EnRailgibud_MoveToIdealGrabPositionAndRotation(EnRailgibud* thi
     distanceFromTargetAngle = Math_SmoothStepToS(&this->actor.shape.rot.y, player->actor.shape.rot.y, 1, 0x1770, 0x64);
     this->actor.world.rot.y = this->actor.shape.rot.y;
     
-    /*
-    if (GET_PLAYER_FORM == PLAYER_FORM_HUMAN) {
-        distanceFromTargetYOffset = Math_SmoothStepToF(&this->actor.shape.yOffset, -1500.0f, 1.0f, 150.0f, 0.0f);\
-    }*/
-
     if ((distanceFromTargetPos == 0.0f) && (ABS_ALT(distanceFromTargetAngle) < 100) &&
         (distanceFromTargetYOffset == 0.0f)) {
         return true;
@@ -699,10 +691,6 @@ RECOMP_PATCH s32 EnTalkGibud_MoveToIdealGrabPositionAndRotation(EnTalkGibud* thi
     distanceFromTargetPos = Math_Vec3f_StepTo(&this->actor.world.pos, &targetPos, 10.0f);
     distanceFromTargetAngle = Math_SmoothStepToS(&this->actor.shape.rot.y, player->actor.shape.rot.y, 1, 0x1770, 0x64);
     this->actor.world.rot.y = this->actor.shape.rot.y;
-    /*
-    if (GET_PLAYER_FORM == PLAYER_FORM_HUMAN) {
-        distanceFromTargetYOffset = Math_SmoothStepToF(&this->actor.shape.yOffset, -1500.0f, 1.0f, 150.0f, 0.0f);
-    }*/
 
     if ((distanceFromTargetPos == 0.0f) && (ABS_ALT(distanceFromTargetAngle) < 100) &&
         (distanceFromTargetYOffset == 0.0f)) {
