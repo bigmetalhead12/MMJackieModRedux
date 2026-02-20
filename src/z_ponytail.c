@@ -55,11 +55,28 @@ void Ponytail_Update(Actor* thisx, PlayState* play);    // Called every single f
 void Ponytail_Draw(Actor* thisx, PlayState* play);      // Draw displaylist
                                                         // Separate from Update
 
+
 /*
 =================
-Ponytail Profile
+Ponytail Limbs
 =================
 */
+// Enum of ponytail limbs for jointTable
+typedef enum PonytailLimbs {
+    /*  0 */ PONYTAIL_ROOT_POS,     // Ponytail's Root bone (position)
+    /*  1 */ PONYTAIL_ROOT_ROT,     // Ponytail's Root bone (rotation)
+    /*  2 */ PONYTAIL_LIMB1,
+    /*  3 */ PONYTAIL_LIMB2,
+    /*  4 */ PONYTAIL_LIMB3,
+    /*  5 */ PONYTAIL_LIMB4
+} PonytailLimbs;
+
+/*
+=================
+Set Ponytail as Custom Actor
+=================
+*/
+// Sets profile for ponytail before registering it as actor
 ActorProfile Ponytail_Profile = {
     ACTOR_ID_MAX,
     ACTORCAT_ITEMACTION,
@@ -72,27 +89,9 @@ ActorProfile Ponytail_Profile = {
     Ponytail_Draw,
 };
 
-/*
-=================
-Ponytail Bones
-=================
-*/
-typedef enum PonytailBones {
-    /*  0 */ PONYTAIL_ROOT_POS,     // Ponytail's Root bone (position)
-    /*  1 */ PONYTAIL_ROOT_ROT,     // Ponytail's Root bone (rotation)
-    /*  2 */ PONYTAIL_LIMB1,
-    /*  3 */ PONYTAIL_LIMB2,
-    /*  4 */ PONYTAIL_LIMB3,
-    /*  5 */ PONYTAIL_LIMB4
-} PonytailBones;
-
-/*
-=================
-Set Ponytail as Custom Actor
-=================
-*/
 s16 CUSTOM_ACTOR_PONYTAIL = ACTOR_ID_MAX;
 
+// Register ponytail as custom actor
 RECOMP_CALLBACK("*", recomp_on_init) void Ponytail_OnRecompInit() {
     CUSTOM_ACTOR_PONYTAIL = CustomActor_Register(&Ponytail_Profile);
 }
