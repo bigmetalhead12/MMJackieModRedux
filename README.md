@@ -23,10 +23,13 @@ To install...
 * Elegy of Emptiness Statue
 * Collision and offset fix for ponytail rotations
 
-## Special Thanks
-- **ProxySaw** for creating the CustomActor library
-- **Magemods** for creating the Audio API
-- **LT_Schmiddy** for creating the EZTR API
-- **kentonm** for suggesting Verlet Integration
-- **Lime** for helping me understand Verlet Integration
-- **Neirn** for player model code help
+## Acknowledgements and Thanks
+This project could not have been possible without the help of the MM Recomp and Zelda Decompilation communities. I would also like to specifically thank the following people:
+- To **LT_Schmiddy**, for creating the EZTR API, providing coding help, and the continued support throughout the development of this project.
+- To **Lime**, for suggesting Verlet Integration for this project, providing coding help, and the words of encouragement.
+- To **ProxySaw**, for creating the CustomActor library and providing coding help.
+- To **Magemods**, for creating the Audio API and making custom voice clips possible.
+- To **kentonm**, for suggesting Verlet Integration, providing coding help, and helping me better understand the inner mechanisms of Majora's Mask.
+- To **Neirn**, **danielryb**, **Fig**, **Dragorn421**, and **MelonSpeedruns** for providing various coding help.
+- To **grubbz** and **El Regolante**, for sharing my work in their Eternal Return Community Monthly Art Gallery
+- To **Pikuma**, for providing a great learning source for Verlet Integration
