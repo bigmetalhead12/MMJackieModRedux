@@ -30,11 +30,11 @@ For the Fast64 plugin, be sure to get the MM Branch version of Fast64 from [here
 The implementation of verlet integration is arguably this mod's key feature. I explain the process of how I designed this sytem in this link:
 [Verlet Integration — How the Ponytail Physics Work](VerletIntegration.md)
 
-## Planned Features
+# Planned Features
 * Elegy of Emptiness Statue
 * Collision and offset fix for ponytail rotations
 
-## Acknowledgements and Thanks
+# Acknowledgements and Thanks
 This project could not have been possible without the help of the MM Recomp and Zelda Decompilation communities. I would also like to specifically thank the following people:
 - To **LT_Schmiddy**, for creating the EZTR API, providing coding help, and the continued support throughout the development of this project.
 - To **Lime**, for suggesting Verlet Integration for this project, providing coding help, and the words of encouragement.
@@ -47,5 +47,5 @@ This project could not have been possible without the help of the MM Recomp and 
 - To **grubbz** and **El Regolante**, for sharing my work in their Discord community's Monthly Art Gallery
 - To **Pikuma**, for the [guide on Verlet Integration](https://www.youtube.com/watch?v=-GWTDhOQU6M)
 
-## Feedback
+# Feedback
 If you notice any mistakes or omissions in the documentation, please leave a comment to report the issues. Thanks! 👍
