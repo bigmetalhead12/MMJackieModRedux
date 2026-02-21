@@ -59,7 +59,7 @@ When positioning the root limb of the ponytail, I did the following:
 
 All limbs need to be formatted properly. To do this, I used this following script on the ponytail's skeleton.
 
-'''python
+```python
 import bpy
 import mathutils
 
@@ -74,7 +74,7 @@ for bone in obj.data.edit_bones:
     head = bone.head.copy()
     bone.tail = head + mathutils.Vector((0, 0, 0.3))
     bone.roll = 0.0
-'''
+```
 (*gPonytailSkel* is the name of my ponytail model's skeleton)
 
 I ensured that all the limbs' weights were properly done. 
