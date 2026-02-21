@@ -27,6 +27,8 @@ If you are used to creating custom player models for Majora's Mask, then there i
 ## ProxySaw's CustomAPI Library
 ProxySaw developed a really useful library that allows people to add their own actors into Majora's Mask Recomp. It is used as a foundation for this mod.
 
+You can download the library [here](https://thunderstore.io/c/zelda-64-recompiled/p/ProxyMM/CustomActor/). If you're curious, you can view the source code [here](https://github.com/garrettjoecox/ProxyMM_RecompMods/tree/main/packages/CustomActor)
+
 # Designing Verlet Integration in Majora's Mask Recomp
 ## Parameters and Behaviors of Verlet Integration
 Verlet integration is all about positions. This real-time physics system is essentially an equation that figures out a target object's next position based on the following:
@@ -63,7 +65,7 @@ All limbs need to be formatted properly. To do this, I used this following scrip
 import bpy
 import mathutils
 
-target_name = "gPonytailSkel"
+target_name = "gPonytailSkel"    # Replace with name of your model's skeleton
 1119
 obj = bpy.data.objects.get(target_name)
 bpy.context.view_layer.objects.active = obj
@@ -75,7 +77,7 @@ for bone in obj.data.edit_bones:
     bone.tail = head + mathutils.Vector((0, 0, 0.3))
     bone.roll = 0.0
 ```
-(*gPonytailSkel* is the name of my ponytail model's skeleton)
+(Credit to kentonm for writing this script)
 
 I ensured that all the limbs' weights were properly done. 
 
