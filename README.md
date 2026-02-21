@@ -2,7 +2,9 @@
 
 This mod replaces Link with my custom model of Jackie Quilt, a character from Eternal Return.
 
-This mod also features an alternative, selectable ponytail hair, which is designed with Verlet Integration.
+Made with the MM build of the Fast64 Blender plugin, this Jackie model replaces only the player model of Link's human form. The model was designed to be (somewhat) accurate to the OoT/MM model aesthetic. The model also uses the Adult Link skeleton, with none of the animations altered.
+
+This mod features real-time physics in the alternative, selectable ponytail hairstyle. The ponytail moves purely based on Jackie's movement; no animation is involved in its behavior. The ponytail was designed with Verlet Integration.
 
 ## Current Features
 * Complete model replacement
@@ -29,7 +31,11 @@ This project could not have been possible without the help of the MM Recomp and 
 - To **Lime**, for suggesting Verlet Integration for this project, providing coding help, and the words of encouragement.
 - To **ProxySaw**, for creating the CustomActor library and providing coding help.
 - To **Magemods**, for creating the Audio API and making custom voice clips possible.
-- To **kentonm**, for suggesting Verlet Integration, providing coding help, and helping me better understand the inner mechanisms of Majora's Mask.
+- To **kentonm**, for suggesting Verlet Integration, providing coding help, and helping me understand the inner mechanisms of Majora's Mask.
 - To **Neirn**, **danielryb**, **Fig**, **Dragorn421**, and **MelonSpeedruns** for providing various coding help.
-- To **grubbz** and **El Regolante**, for sharing my work in their Eternal Return Community Monthly Art Gallery
-- To **Pikuma**, for providing a great learning source for Verlet Integration
+- To **PxExYxTxOxN**, for the [guide on creating player models](https://www.youtube.com/watch?v=6Ji_12w5B1M)
+- To **grubbz** and **El Regolante**, for sharing my work in their Discord community's Monthly Art Gallery
+- To **Pikuma**, for the [guide on Verlet Integration](https://www.youtube.com/watch?v=-GWTDhOQU6M)
+
+## Feedback
+If you notice any mistakes or omissions in the documentation, please leave a comment to report the issues. Thanks! 👍
