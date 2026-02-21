@@ -21,6 +21,7 @@ To install...
 # Additional Information
 ## Modeling
 Creating a model for MM Recomp should be a similar process to creating a model for Ship of Harkinian. As such, this video should provide the important steps for making your own model:
+
 [![Modeling](https://img.youtube.com/vi/6Ji_12w5B1M/0.jpg)](https://www.youtube.com/watch?v=6Ji_12w5B1M)
 
 For the Fast64 plugin, be sure to get the MM Branch version of Fast64 from [here](https://github.com/Yanis002/fast64/tree/mm_dev).
