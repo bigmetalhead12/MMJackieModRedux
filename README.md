@@ -1,36 +1,67 @@
 # Majora's Mask Recomp: Jackie Quilt Mod Redux
 
-This mod replaces Link with my custom model of Jackie Quilt, a character from Eternal Return.
+This mod replaces Link (human form) with my custom model of Jackie Quilt, a character from Eternal Return.
 
-Made with the MM build of the Fast64 Blender plugin, this Jackie model replaces only the player model of Link's human form. The model was designed to be (somewhat) accurate to the OoT/MM model aesthetic. The model also uses the Adult Link skeleton, with none of the animations altered.
+This Jackie model replaces only the player model of Link's human form. The model was designed to be (somewhat) accurate to the OoT/MM model aesthetic. The model also uses the Adult Link skeleton, with none of the animations altered.
 
-This mod features real-time physics in the alternative, selectable ponytail hairstyle. The ponytail moves purely based on Jackie's movement; no animation is involved in its behavior. The ponytail was designed with Verlet Integration.
-
-# Current Features
-* Complete model replacement
-* Alternative ponytail hairstyle with real-time physics
-* Complete voice replacement
-* Alternative texts written with EZTR
+The arguably most notable feature of this mod is the selectable, alternative hairstyle: a ponytail hairstyle with **real-time physics**. Along with this feature, the mod also includes the HD texture option, full voice replacement, and minor text replacements.
 
 # Installation
-To install...
+To install this mod, follow the instructions:
 1. Download the NRM file
 2. Open MM Recomp and select the Mods page
 3. Click and drag the downloaded NRM file into the game.
 
-# Additional Information
-## Modeling
+# Toggleable Features
+This mod gives you control over which features to activate or deactivate. After installing the NRM file into your Majora's Mask Recomp, you can toggle on/off the following features before starting the game:
+*  **HD Textures** - This toggle lets you select between the *default low-res* textures or *HD textures*.
+*  **Alternative Hairstyle** - This toggle lets you select between the *default hairstyle* or the *ponytail hairstyle*. Keep note that the ponytail hairstyle has real-time physics while the default hairstyle does not.
+*  **Alternative Text** - This toggle lets you select between the *game's default texts* or the *slightly modified texts*. The slightly modified texts only changed the pronouns, titles, and few lines of text to match Jackie's character.
+
+# Mod Construction
+This section includes the explanation of how this mod was constructed. I divided up the info to explain each key component of this mod separately. If you are new to MM modding and want to use this mod as learning material to make your own mod, or if you just want to know how this mod was made, feel free to read through this section.
+
+This mod contains the following components: 
+* Model
+* Audio (voice) replacement
+* Text replacement
+* Real-time physics (for ponytail).
+
+## Mod Template
+This mod was created using [Wiseguy's MMRecompModTemplate](https://github.com/Zelda64Recomp/MMRecompModTemplate).
+
+If you are new to MM Recomp Modding, it is crucial you understand how to work with this template before doing anything else. If you are able to build an NRM from this template on your machine, you are ready to mod the game.
+
+## Model (under construction)
+Model modding consists of two parts: making a useable model and replacing the model in the game.
+
+(possible link to separate MD here)
+
 Creating a model for MM Recomp should be a similar process to creating a model for Ship of Harkinian. As such, this video should provide the important steps for making your own model:
 
 [![Modeling](https://img.youtube.com/vi/6Ji_12w5B1M/0.jpg)](https://www.youtube.com/watch?v=6Ji_12w5B1M)
 
 For the Fast64 plugin, be sure to get the MM Branch version of Fast64 from [here](https://github.com/Yanis002/fast64/tree/mm_dev).
 
-## Verlet Integration
-The implementation of verlet integration is arguably this mod's key feature. I explain the process of how I designed this sytem in this link:
+## Audio Replacement (under construction)
+Link's voice was replaced entirely with [Magemods' MM Audio API](https://github.com/magemods/mm-audio-api).
+
+Audio replacement consists of two parts: making audio files and replacing the audio in the game using the API.
+
+(possible link to separate MD here)
+
+## Text Replacement (under construction)
+The in-game text was slightly modified using [LT_Schmiddy's MM EZ Text Replacement](https://github.com/LT-Schmiddy/mm-ez-text-replacement-utils).
+
+(possible link to separate MD here)
+
+## Real-Time Physics for the Ponytail
+The ponytail's real-time physics was designed with **verlet integration**. Verlet integration is a computationally cheap physics method that is easy to implement to any game engine. The ponytail serves as a demonstration of this real-time physics in action.
+
+I explain the process of how I coded verlet integration into Majora's Mask Recomp in more detail in this link:
 [Verlet Integration — How the Ponytail Physics Work](VerletIntegration.md)
 
-# Planned Features
+# What's Missing
 * Elegy of Emptiness Statue
 * Collision and offset fix for ponytail rotations
 
