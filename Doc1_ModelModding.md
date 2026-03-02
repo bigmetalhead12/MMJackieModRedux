@@ -26,7 +26,7 @@ For example, I exported Jackie's model + skeleton with the custom Fast64 and got
 Both files need to be put into the mod template's "src" directory.
 
 # Implementing the Model
-To replace a target model (human Link in this mod's case) with the exported model, a separate .C file needs to be set up. In this mod's case, (jackie_code.c)[https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_code.c] was set up.
+To replace a target model (human Link in this mod's case) with the exported model, a separate .C file needs to be set up. In this mod's case, [jackie_code.c](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_code.c) was set up.
 
 To properly implement the exported custom model, this file needs to do the following:
 1. Setting Link's properties to match your model's intended property
