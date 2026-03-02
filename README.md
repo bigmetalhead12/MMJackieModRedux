@@ -35,13 +35,8 @@ If you are new to MM Recomp Modding, it is crucial you understand how to work wi
 ## Model (under construction)
 Model modding consists of two parts: making a useable model and replacing the model in the game.
 
-(possible link to separate MD here)
-
-Creating a model for MM Recomp should be a similar process to creating a model for Ship of Harkinian. As such, this video should provide the important steps for making your own model:
-
-[![Modeling](https://img.youtube.com/vi/6Ji_12w5B1M/0.jpg)](https://www.youtube.com/watch?v=6Ji_12w5B1M)
-
-For the Fast64 plugin, be sure to get the MM Branch version of Fast64 from [here](https://github.com/Yanis002/fast64/tree/mm_dev).
+Further explanation is provided here:
+[Model Modding](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/Doc1_ModelModding.md)
 
 ## Audio Replacement (under construction)
 Link's voice was replaced entirely with [Magemods' MM Audio API](https://github.com/magemods/mm-audio-api).
