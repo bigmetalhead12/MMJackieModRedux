@@ -77,14 +77,14 @@ extern u64 gJackieEyesRollDownTex[];    // gLinkAdultEyesUnk1Tex
 extern u64 gJackieEyesShutTex[];        // gLinkAdultEyesUnk2Tex
 
 // Ponytail Head
-extern u64 gJackiePTEyesOpenTex[];
-extern u64 gJackiePTEyesHalfTex[];
-extern u64 gJackiePTEyesClosedTex[];
-extern u64 gJackiePTEyesRollLeftTex[];
-extern u64 gJackiePTEyesRollRightTex[];
-extern u64 gJackiePTEyesShockTex[];
-extern u64 gJackiePTEyesRollDownTex[];    // gLinkAdultEyesUnk1Tex 
-extern u64 gJackiePTEyesShutTex[];        // gLinkAdultEyesUnk2Tex
+extern u64 gJackiePonytailSkel_eyes_open_LOWRES_rgba16[];
+extern u64 gJackiePonytailSkel_eyes_half_LOWRES_rgba16[];
+extern u64 gJackiePonytailSkel_eyes_closed_LOWRES_rgba16[];
+extern u64 gJackiePonytailSkel_eyes_roll_left_LOWRES_rgba16[];
+extern u64 gJackiePonytailSkel_eyes_roll_right_LOWRES_rgba16[];
+extern u64 gJackiePonytailSkel_eyes_shocked_LOWRES_rgba16[];
+extern u64 gJackiePonytailSkel_eyes_roll_down_LOWRES_rgba16[];    // gLinkAdultEyesUnk1Tex 
+extern u64 gJackiePonytailSkel_eyes_shut_LOWRES_rgba16[];        // gLinkAdultEyesUnk2Tex
 
 // Eyes Flipbook for Jackie
 // Default Head
@@ -101,14 +101,14 @@ void* sEyeTextures[PLAYER_EYES_MAX] = {
 
 // Ponytail Head
 void* sPTEyeTextures[PLAYER_EYES_MAX] = {
-    gJackiePTEyesOpenTex,
-    gJackiePTEyesHalfTex,
-    gJackiePTEyesClosedTex,
-    gJackiePTEyesRollLeftTex,
-    gJackiePTEyesRollRightTex,
-    gJackiePTEyesShockTex,
-    gJackiePTEyesRollDownTex,
-    gJackiePTEyesShutTex,
+    gJackiePonytailSkel_eyes_open_LOWRES_rgba16,
+    gJackiePonytailSkel_eyes_half_LOWRES_rgba16,
+    gJackiePonytailSkel_eyes_closed_LOWRES_rgba16,
+    gJackiePonytailSkel_eyes_roll_left_LOWRES_rgba16,
+    gJackiePonytailSkel_eyes_roll_right_LOWRES_rgba16,
+    gJackiePonytailSkel_eyes_shocked_LOWRES_rgba16,
+    gJackiePonytailSkel_eyes_roll_down_LOWRES_rgba16,
+    gJackiePonytailSkel_eyes_shut_LOWRES_rgba16,
 };
 
 // Mouth Texture Variables
@@ -119,10 +119,10 @@ extern u64 gJackieMouthOpen[];      // gLinkAdultMouth3Tex
 extern u64 gJackieMouthSmile[];     // gLinkAdultMouth4Tex
 
 // Ponytail
-extern u64 gJackiePTMouthClosed[];    // gLinkAdultMouth1Tex
-extern u64 gJackiePTMouthHalf[];      // gLinkAdultMouth2Tex
-extern u64 gJackiePTMouthOpen[];      // gLinkAdultMouth3Tex
-extern u64 gJackiePTMouthSmile[];     // gLinkAdultMouth4Tex
+extern u64 gJackiePonytailSkel_mouth_default_LOWRES_rgba16[];    // gLinkAdultMouth1Tex
+extern u64 gJackiePonytailSkel_mouth_half_LOWRES_rgba16[];      // gLinkAdultMouth2Tex
+extern u64 gJackiePonytailSkel_mouth_open_LOWRES_rgba16[];      // gLinkAdultMouth3Tex
+extern u64 gJackiePonytailSkel_mouth_smile_LOWRES_rgba16[];     // gLinkAdultMouth4Tex
 
 // Mouth Flipbook for Jackie
 // Default
@@ -135,10 +135,10 @@ void* sMouthTextures[PLAYER_MOUTH_MAX] = {
 
 // Ponytail
 void* sPTMouthTextures[PLAYER_MOUTH_MAX] = {
-    gJackiePTMouthClosed,
-    gJackiePTMouthHalf,
-    gJackiePTMouthOpen,
-    gJackiePTMouthSmile,
+    gJackiePonytailSkel_mouth_default_LOWRES_rgba16,
+    gJackiePonytailSkel_mouth_half_LOWRES_rgba16,
+    gJackiePonytailSkel_mouth_open_LOWRES_rgba16,
+    gJackiePonytailSkel_mouth_smile_LOWRES_rgba16,
 };
 
 // Rough fix for some issue caused by replacing these for child/adult (from OoT Link mod)

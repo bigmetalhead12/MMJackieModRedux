@@ -131,6 +131,9 @@ additional_files = [ "thumb.png",
 						"hdtextures/glove_fist_bot.dds",
 						"hdtextures/glove_fist_front.dds",
 						"hdtextures/glove_fist_back.dds",
+						"hdtextures/glove_fist_front_fp.dds",
+						"hdtextures/glove_fist_fingers_fp.dds",
+						"hdtextures/ear.dds",
 						"hdtextures/rt64.json",
 						"hdtextures/rt64-low-mip-cache.bin"]
 						
@@ -152,5 +155,15 @@ Toggle to change the hairstyle (Default or Ponytail)
 """
 type = "Enum"
 options = [ "Default", "Ponytail" ]
+default = "Default"
+
+[[manifest.config_options]]
+id = "alternative_text"
+name = "Change Text"
+description = """
+Toggle to change the text (Default or Alternative)
+"""
+type = "Enum"
+options = [ "Default", "Alternative" ]
 default = "Default"
 

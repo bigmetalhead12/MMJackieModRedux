@@ -402,6 +402,10 @@ Player Draw
 =================
 */
 RECOMP_HOOK_RETURN ("Player_Draw") void return_Skirt_Player_Draw(void) {
+    if (!recomp_get_config_u32("change_hairstyle") || gPlayerPonytail == NULL || gPlayStatePonytail == NULL) {
+        return;
+    }
+    
     Player* player = GET_PLAYER(gPlayStatePonytail);
     if (recomp_get_config_u32("change_hairstyle") && gPlayerPonytail != NULL && player->transformation == PLAYER_FORM_HUMAN && player->actor.draw != NULL && !(player->stateFlags2 & PLAYER_STATE2_20000000)) {
         Ponytail* this = gPlayerPonytail;

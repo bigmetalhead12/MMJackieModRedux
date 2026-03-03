@@ -526,6 +526,13 @@
                 "rt64": "c10077d26eb955c7"
             },
             "path": "glove_fist_fingers_fp.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "ba97d0ca28630ab3"
+            },
+            "path": "ear.dds"
         }
     ]
 }
