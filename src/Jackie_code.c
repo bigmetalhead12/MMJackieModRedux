@@ -254,6 +254,9 @@ extern Gfx* gLinkHumanHookshotDL[];
 // Array of DLs for different kinds of sword in hand
 extern Gfx* D_801C018C[];
 
+// Array of DLs for different kinds of shield in hand
+extern Gfx* gPlayerHandHoldingShields[];
+
 // Used to replace animation to adult link animation
 extern PlayerAnimationHeader* D_8085BE84[PLAYER_ANIMGROUP_MAX][PLAYER_ANIMTYPE_MAX];
 
@@ -317,9 +320,6 @@ Jackie Properties
 */
 // Player Age properties
 extern PlayerAgeProperties sPlayerAgeProperties[PLAYER_FORM_MAX];
-
-// Array of DLs for different kinds of shield in hand
-extern Gfx* gPlayerHandHoldingShields[];
 
 extern Input* sPlayerControlInput;
 
