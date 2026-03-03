@@ -11,6 +11,7 @@ Before modding MM models, you only need:
 2. Blender 3.2+
 
 # Exporting Model
+## Basics
 There is a highly informative video that explains step-by-step on how to take a model and export it in a format that Zelda64 likes. Although this video was made for Ship of Harkinian, the steps for setting up your model and exporting it should be *almost* exactly the same.
 
 The only difference is that you will have to use the [Custom MM-branch Fast 64](https://github.com/Yanis002/fast64/tree/mm_dev) instead of the one used in the video.
@@ -25,6 +26,29 @@ For example, I exported Jackie's model + skeleton with the custom Fast64 and got
 
 Both files need to be put into the mod template's "src" directory.
 
+## Hands
+As shown in the video, hands are handled significantly different from other parts of the body. You will have to have separate hand models for the following:
+* Default open hands (should be part of your base model)
+* Closed hands (fists)
+* Left hand holding the bottle (bottle should not be included in this model)
+* First person view arms and hands holding bow
+* First person view arm and hand holding hookshot
+
+I had each mesh have its own skeleton, but it may be fine to just have these meshes be under a single skeleton. I am unsure about this, however, so if you want to be on the safe side and don't want to experiment, just have each mesh have its own skeleton.
+
+Export each skeleton as you did for the base model using Fast64. Take the resulting sets of `.c` and `.h` files and save them into your mod template directory's `src` directory.
+
+## Eyes and Mouth
+Eyes and mouth are handled differently through a feature called "flipbooks". Flipbooks are, as the name implies, a book of textures for a part of the mesh where textures are meant to change in-game based on its events. For example, for the eyes flipbook, the default open eye expression would be set. When the character looks to the right, however, the eye flipbook would "flip" the texture to the eyes texture that is looking to the right.
+
+Both flipbooks are set in the same way, but with different values for specific attributes.
+
+### Eyes Flipbook
+(here)
+
+### Mouth Flipbook
+(here)
+
 # Implementing the Model
 To replace a target model (human Link in this mod's case) with the exported model, a separate .C file needs to be set up. In this mod's case, [jackie_code.c](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_code.c) was set up.
 
@@ -32,6 +56,19 @@ To properly implement the exported custom model, this file needs to do the follo
 1. Setting Link's properties to match your model's intended property
 2. Setting up Display Lists
 3. Adjusting miscellaneous in-game characteristics
+
+Before proceeding with this, it is important to include the right header files, like [this](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_code.c#L28-L34). By default, `modding.h`, `global.h`, and `ultra64.h` should be set. Afterward, the `.h` file of the exported model files should also be included. In my case, this was `gJackieSkel.h`.
+
+
+```c
+// Default Header Files
+#include "modding.h"
+#include "global.h"
+#include "ultra64.h"
+
+// Model Header Files
+#include "gJackieSkel.h"
+```
 
 ## Link's Properties
 If your model is to be the equivalent of Young Link, then Link's properties most likely do not need to be changed. If your model is to be the equivalent of Adult Link, however, then Link's properties will have to be changed to match your model's behavior.
@@ -102,9 +139,11 @@ RECOMP_HOOK_RETURN ("Player_GetHeight") void return_Player_GetHeight(void) {
 }
 ```
 
-I used the properties of both Fierce Deity Link and Zora Link to match Jackie's properties, which is intended to match Adult Link's properties.
+I used the properties of both Fierce Deity Link and Zora Link to match Jackie's properties, which are intended to match Adult Link's properties.
 
 
+## Setting Up Display Lists (DLs)
+DLs make up different parts of Link's model. For example, Link's hand carrying a Kokiri sword is a separate DL from Link's hand carrying a Razor Sword, or a Hero's Shield, and so on. Setting up DLs is tedious but easy as long as you made the model parts for them.
 
 
 
