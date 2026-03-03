@@ -27,10 +27,10 @@ If you are new to MM Recomp Modding, it is crucial you understand how to work wi
 This section includes the explanation of how this mod was constructed. I divided up the info to explain each key component of this mod separately. If you are new to MM modding and want to use this mod as learning material to make your own mod, or if you just want to know how this mod was made, feel free to read through this section.
 
 This mod contains the following components: 
-* [Model Modding](Doc1_ModelModding.md)
+* [Model Modding](docs/MODEL.md)
 * Audio (voice) replacement
 * Text replacement
-* [Real-time physics (for ponytail)](VerletIntegration.md)
+* [Real-time physics (for ponytail)](docs/VERLETINTEGRATION.md)
 
 # What's Missing
 * Elegy of Emptiness Statue
