@@ -65,7 +65,7 @@ To replace a target model (human Link in this mod's case) with the exported mode
 To properly implement the exported custom model, this file needs to do the following:
 1. Setting Link's properties to match your model's intended property
 2. Setting up Display Lists
-3. Adjusting miscellaneous in-game characteristics
+3. Adjusting miscellaneous in-game characteristics (For Adult Link Model Modding)
 
 Before proceeding with this, it is important to include the right header files, like [this](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_code.c#L28-L34). By default, `modding.h`, `global.h`, and `ultra64.h` should be set. Afterward, the `.h` file of the exported model files should also be included. In my case, this was `gJackieSkel.h`.
 
@@ -130,16 +130,7 @@ void updateLink(PlayState* play) {
     }
 }
 
-// Enable Jackie's Strength to be equal to Zora Link's strength for pushable blocks
-extern u8 sPlayerStrengths[];
-RECOMP_PATCH u8 Player_GetStrength(void) {
-    if (GET_PLAYER_FORM == PLAYER_FORM_HUMAN) {
-        return sPlayerStrengths[PLAYER_FORM_ZORA];
-    }
-    else {
-        return sPlayerStrengths[GET_PLAYER_FORM];
-    }
-}
+// ...
 
 // Function to update Jackie's height with Zora Link's height
 // The RECOMP_HOOK ("Player_GetHeight") function means that this function will run BEFORE Player_GetHeight() runs in the game
@@ -397,6 +388,308 @@ This function replaces all of Link's DLs.
 ### Flipbooks for Eyes and Mouth
 (explain flipbooks here)
 
-## Misc. In-Game Characteristics
-Although all the model parts are replaced by this point, there are still other quirks that need to be addressed for a more complete experience.
+## Misc. In-Game Characteristics (Adult Link Model Modding)
+Note: This section is primarily concerned with modding human Link with a model meant to replace Adult Link from OoT (i.e. my Jackie model). If your mod is clearly for Young Link, then this part can be disregarded.
 
+Although all the model parts are replaced by this point, there are still other quirks that need to be addressed for a more complete experience. 
+
+### Strength
+If you're replacing Link with a model that's meant to be for Adult Link, then chances are your character should be as strong as Zora Link, at least. This strength attribute can be modified like I did in [this block of code](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_code.c#L354-L363):
+
+```c
+// Enable Jackie's Strength to be equal to Zora Link's strength for pushable blocks
+extern u8 sPlayerStrengths[];
+RECOMP_PATCH u8 Player_GetStrength(void) {
+    if (GET_PLAYER_FORM == PLAYER_FORM_HUMAN) {
+        return sPlayerStrengths[PLAYER_FORM_ZORA];
+    }
+    else {
+        return sPlayerStrengths[GET_PLAYER_FORM];
+    }
+}
+```
+
+### Door-Opening Animation
+If you don't touch Link's door animation code, then your character will always open a door like Young Link, which is probably what you're not going for if you have a model meant for Adult Link. In this case, you need to follow this series of steps:
+
+1. Redeclare the animation array for door opening animations like [this](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_code.c#L260-L265).
+
+```c
+// Used to replace animation to adult link animation
+extern PlayerAnimationHeader* D_8085BE84[PLAYER_ANIMGROUP_MAX][PLAYER_ANIMTYPE_MAX];
+
+// Adult Link door animation
+extern LinkAnimationHeader gPlayerAnim_clink_demo_doorA_link;
+extern LinkAnimationHeader gPlayerAnim_clink_demo_doorB_link;
+```
+
+2. Replace the door animations like [this](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_code.c#L449-L464).
+
+```c
+// Replace Door Animation
+RECOMP_HOOK("Player_Door_Knob") void replaceDoorAnim_on_Player_Door_Knob(PlayState *play, Player *this, Actor *door) {
+    if (this->actor.category == ACTORCAT_PLAYER && this->transformation == PLAYER_FORM_HUMAN) {
+        for (int i = 0; i < PLAYER_ANIMTYPE_MAX; i++) {
+            D_8085BE84[PLAYER_ANIMGROUP_doorA][i] = D_8085BE84[PLAYER_ANIMGROUP_doorA_free][i];
+            D_8085BE84[PLAYER_ANIMGROUP_doorB][i] = D_8085BE84[PLAYER_ANIMGROUP_doorB_free][i];
+        }
+    }
+}
+
+RECOMP_HOOK_RETURN("Player_Door_Knob") void replaceDoorAnim_on_return_Player_Door_Knob() {
+    for (int i = 0; i < PLAYER_ANIMTYPE_MAX; i++) {
+        D_8085BE84[PLAYER_ANIMGROUP_doorA][i] = &gPlayerAnim_clink_demo_doorA_link;
+        D_8085BE84[PLAYER_ANIMGROUP_doorB][i] = &gPlayerAnim_clink_demo_doorB_link;
+    }
+}
+```
+
+### Treasure Chest Voice
+When opening the treasure chest, even if you set the properties to not be like Child Link earlier, the chest-opening animation will still play Child Link's voices. Although strange considering that the Adult Link treasure chest animation plays, the voices will have to be manually disabled. Disabling the voices can be done like [this](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_code.c#L467-L481):
+
+```c
+// Remove Child Link's chest-opening voice
+// Credit: Neirn
+
+typedef struct AnimSfxEntry {
+    /* 0x0 */ u16 sfxId;
+    /* 0x2 */ s16 flags; // negative marks the end
+} AnimSfxEntry;          // size = 0x4
+
+void dontPlayChildSfx_on_Player_Action_65(Player *this) {
+    extern AnimSfxEntry D_8085D73C[];
+    D_8085D73C[0].flags = -1;
+    D_8085D73C[1].sfxId = NA_SE_NONE;
+    D_8085D73C[2].sfxId = NA_SE_NONE;
+    D_8085D73C[3].flags = -1;
+}
+
+RECOMP_HOOK ("Player_PlayAnimSfx") void on_Player_Action_65(Player* this, PlayState* play) {
+    dontPlayChildSfx_on_Player_Action_65(this);
+}
+```
+Credit to Neirn for finding how to disable the voice audio in this animation
+
+### Height while riding Epona
+Unfortunately, there is no mod that replaces Epona with a full-grown Epona model. Until then, we are stuck with young Epona.
+
+The issue with young Epona with an Adult Link-sized model is that your model will be floating above Epona. To fix this height issue, the following [code](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_code.c#L526-L541) can be run:
+
+```c
+// At the beginning of the file
+#define CHAR_EPONA_HEIGHT_MODIFIER 1100.f
+
+// ...
+
+
+/*
+=================
+Jackie's Height on Epona Fix
+=================
+*/
+PlayState* gPlayState;
+RECOMP_HOOK("Player_UpdateCommon") void Player_UpdateCommon(Player* this, PlayState* play, Input* input) {
+    gPlayState = play;
+}
+
+RECOMP_HOOK_RETURN("Player_UpdateCommon") void Player_UpdateCommonReturn(void) {
+    Player* player = GET_PLAYER(gPlayState);
+    if (player->stateFlags1 & PLAYER_STATE1_800000) {
+        player->actor.shape.yOffset -= CHAR_EPONA_HEIGHT_MODIFIER;
+    }
+}
+```
+
+### Getting Item Position Fix
+When getting an item for the first time or from a chest, Link sometimes holds it above his head. The position of the floating item becomes misaligned when an Adult Link-sized model performs this animation. To adjust the item's position, the following [code](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_code.c#L562-L570) can be used:
+
+```c
+// At the beginning of the file
+#define ITEM_HEIGHT_MODIFIER 2.5f
+
+
+// ...
+
+
+/*
+=================
+Get Item Screen Position Fix
+=================
+*/
+RECOMP_HOOK ("Player_DrawGetItemImpl") void on_Player_DrawGetItemImpl(PlayState* play, Player* player, Vec3f* refPos, s32 drawIdPlusOne) {
+    refPos->y += ITEM_HEIGHT_MODIFIER;
+    refPos->z += 0.f;
+}
+```
+
+### Bremen March Animation Fix
+When Adult Link performs a Bremen March, he sinks into the ground to match Young Link's position on the ground. To prevent this sinking, the following [code](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_code.c#L573-L590) can be used:
+
+```c
+// At the beginning of the file
+#define CHAR_BREMEN_HEIGHT_MODIFIER 1250.0f
+
+
+// ...
+
+
+/*
+=================
+Bremen March Fix
+=================
+*/
+u8 gPushedMatrixBremen = 0;
+RECOMP_HOOK("Player_Draw") void on_Player_Draw(Actor* thisx, PlayState* play) {
+    Player* this = (Player*)thisx;
+
+    if (this-> stateFlags3 & PLAYER_STATE3_20000000) {
+        OPEN_DISPS(play->state.gfxCtx);
+        Matrix_Push();
+        gPushedMatrixBremen = 1;
+        Matrix_Translate(0.f, CHAR_BREMEN_HEIGHT_MODIFIER, 0.f, MTXMODE_APPLY);
+        MATRIX_FINALIZE_AND_LOAD(POLY_OPA_DISP++, play->state.gfxCtx);
+        CLOSE_DISPS(play->state.gfxCtx);
+    }
+}
+```
+
+### Redead/Gibdo Grab Position Fix
+When Adult Link gets grabbed by a Redead or Gibdo, the body position does not get adjusted. To fix the grab position, the following [code[](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_code.c#L625-L701) can be used
+
+```c
+//At the beginning of the file
+#define CASTLE_RD_GRABSTART_POS_Y 30.f        // Position values written in float
+#define CASTLE_RD_GRABATTACK_POS_Y 0.f
+
+
+// ...
+
+
+/*
+=================
+Redead/Gibdo Grab Position Fix
+=================
+*/
+// There are three different actor types for Gibdos/Redeads:
+// 1) Ikana Castle (redeads only)
+// 2) Music Box
+// 3) Well
+
+// Ikana Castle Redeads grab fix
+typedef enum {
+    /* 0 */ EN_RD_GRAB_START,
+    /* 1 */ EN_RD_GRAB_INITIAL_DAMAGE,
+    /* 2 */ EN_RD_GRAB_ATTACK,
+    /* 3 */ EN_RD_GRAB_RELEASE,
+    /* 4 */ EN_RD_GRAB_END
+} EnRdGrabState;
+
+RECOMP_HOOK ("EnRd_Grab") void on_EnRd_Grab(EnRd* this, PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    if ((this->grabState == EN_RD_GRAB_START) && (player->transformation == PLAYER_FORM_HUMAN)) {
+        this->actor.shape.yOffset = CASTLE_RD_GRABSTART_POS_Y;
+    }
+
+    if ((this->grabState == EN_RD_GRAB_ATTACK) && (player->transformation == PLAYER_FORM_HUMAN)) {
+        this->actor.shape.yOffset = CASTLE_RD_GRABATTACK_POS_Y;
+    }
+}
+
+// Music Box Gibdos/Redeads grab fix
+// Only difference is that the first if statement block was commented out
+RECOMP_PATCH s32 EnRailgibud_MoveToIdealGrabPositionAndRotation(EnRailgibud* this, PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    Vec3f targetPos;
+    f32 distanceFromTargetPos;
+    f32 distanceFromTargetYOffset = 0.0f;
+    s16 distanceFromTargetAngle;
+
+    targetPos = player->actor.world.pos;
+    targetPos.x -= 25.0f * Math_SinS(player->actor.shape.rot.y);
+    targetPos.z -= 25.0f * Math_CosS(player->actor.shape.rot.y);
+    distanceFromTargetPos = Math_Vec3f_StepTo(&this->actor.world.pos, &targetPos, 10.0f);
+    distanceFromTargetAngle = Math_SmoothStepToS(&this->actor.shape.rot.y, player->actor.shape.rot.y, 1, 0x1770, 0x64);
+    this->actor.world.rot.y = this->actor.shape.rot.y;
+    
+    if ((distanceFromTargetPos == 0.0f) && (ABS_ALT(distanceFromTargetAngle) < 100) &&
+        (distanceFromTargetYOffset == 0.0f)) {
+        return true;
+    }
+
+    return false;
+}
+
+// Well Gibdos/Redeads grab fix
+// Only difference is that the first if statement block was commented out
+RECOMP_PATCH s32 EnTalkGibud_MoveToIdealGrabPositionAndRotation(EnTalkGibud* this, PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    Vec3f targetPos;
+    f32 distanceFromTargetPos;
+    f32 distanceFromTargetYOffset = 0.0f;
+    s16 distanceFromTargetAngle;
+
+    targetPos = player->actor.world.pos;
+    targetPos.x -= 25.0f * Math_SinS(player->actor.shape.rot.y);
+    targetPos.z -= 25.0f * Math_CosS(player->actor.shape.rot.y);
+    distanceFromTargetPos = Math_Vec3f_StepTo(&this->actor.world.pos, &targetPos, 10.0f);
+    distanceFromTargetAngle = Math_SmoothStepToS(&this->actor.shape.rot.y, player->actor.shape.rot.y, 1, 0x1770, 0x64);
+    this->actor.world.rot.y = this->actor.shape.rot.y;
+
+    if ((distanceFromTargetPos == 0.0f) && (ABS_ALT(distanceFromTargetAngle) < 100) &&
+        (distanceFromTargetYOffset == 0.0f)) {
+        return true;
+    }
+
+    return false;
+}
+```
+
+If you notice, there are three types of Redeads and Gibdos, which are all separately changed. This is because these three types are all written separately in the main source code.
+
+*NOTE*: An issue I would like to see fixed with this set of functions is that they use `RECOMP_PATCH`. If you are unaware, `RECOMP_PATCH` directly replaces the target function with the following function block, which can be dangerous when applying other mods that may rely on the target functions. It is ideal if this set of functions are replaced with code written with `RECOMP_HOOK` or `RECOMP_HOOK_RETURN`.
+
+### Drawn Arrow Position Fix
+The messiest and most tedious part of adjust miscellaneous characteristics to match Adult Link's properties is fixing the position of the arrow's position in the player's first person view. When aiming with the bow in first person while using Adult Link properties, the position of the bow and arrow becomes very misaligned. This is an issue because the first person view becomes ugly to look at, and it also makes the arrows very difficult to aim with.
+
+This part requires you to adjust the position of the arm models inside Blender to make them look right in the game. Additionally, the following [code](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_code.c#L599-L623) manually fixes the issue:
+
+```c
+// At the beginning of the file
+#define MOVEARROWX -0x0070        // Position values written in Hex
+#define MOVEARROWY 0x0120
+#define MOVEARROWZ 0x0000
+
+
+// ...
+
+
+/*
+=================
+Drawn Arrow Position Fix
+=================
+*/
+RECOMP_HOOK ("Player_PostLimbDrawGameplay") void on_PostLimbDrawGameplay(PlayState* play, s32 limbIndex, Gfx** dList1, Gfx** dList2, Vec3s* rot, Actor* actor) {
+    Player* player = (Player*) actor;
+    if (limbIndex == PLAYER_LIMB_LEFT_HAND && player->actor.scale.y >= 0.0f) {
+        Actor* heldActor;
+        MtxF sp230;
+        if (!Player_IsHoldingHookshot(player) && ((heldActor = player->heldActor) != NULL)) {
+            if ((player->stateFlags3 & PLAYER_STATE3_40) && (player->transformation != PLAYER_FORM_DEKU)) {
+                if (player->transformation == PLAYER_FORM_HUMAN) {
+                    Vec3s* temp_s1;
+                    Matrix_Translate(MOVEARROWX, MOVEARROWY, MOVEARROWZ, MTXMODE_APPLY);    // Move arrow's drawn position
+    
+                    Matrix_Get(&sp230);
+                    temp_s1 = &heldActor->world.rot;
+                    Matrix_MtxFToYXZRot(&sp230, temp_s1, false);
+                    heldActor->shape.rot = *temp_s1;
+                }
+            }
+        }
+    }
+}
+```
+
+Please keep in mind, however, that you may need to adjust your macro values `MOVEARROWX`, `MOVEARROWY`, and `MOVEARROWZ` based on how your first person arms and bow look in the game while you are aiming with the bow in first person. There is a ton of trial and error involved in this step, so be warned.
+
+If there is any other cleaner method of fixing the position of the drawn arrow and arms in first person, let me know.
