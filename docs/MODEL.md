@@ -1,4 +1,12 @@
 # Model Modding
+## Preface
+This mod would not have been possible without [Reonu](https://github.com/Reonu)'s [CJ player model mod](https://thunderstore.io/c/zelda-64-recompiled/p/Reonu/Play_as_CJ/). His work served as a strong starting point for my Jackie mod code. While many parts of model modding code have been improved along the way, this modding category would not have started off so quickly without Reonu's early contribution to the MM Recomp community.
+
+As a sidenote, if you wish to take a much more streamlined and simplified method of replacing Link's model with the same quality, I strongly recommend using [Neirn](https://github.com/YAZ64MT)'s [Player Model Manager](https://thunderstore.io/c/zelda-64-recompiled/p/YAZMT/Player_Model_Manager/) (PMM).
+
+My mod takes a more manual approach Reonu used to replacing Link's model. While PMM makes modding Link's model easier than ever, this method is still useful as a bit of gentle introduction to modding in Majora's Mask.
+
+## Introduction
 This doc covers two parts of model modding Majora's Mask Recomp. This mod specifically replaced Link's human form model with my custom model. Notably, my custom model used OoT Adult Link's skeleton, so there were additional steps I had to take for this mod.
 
 The two parts of model modding are:
