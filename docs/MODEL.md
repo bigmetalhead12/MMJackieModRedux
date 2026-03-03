@@ -38,7 +38,7 @@ If your model is to be the equivalent of Young Link, then Link's properties most
 
 To do this, `PlayerAgeProperties` need to be adjusted to match Adult Link's properties. In my [code](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_code.c#L316-L376), this is how I set up Jackie's properties
 
-```
+```c
 /*
 =================
 Jackie Properties
