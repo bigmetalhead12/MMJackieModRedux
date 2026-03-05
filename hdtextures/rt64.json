@@ -533,6 +533,209 @@
                 "rt64": "ba97d0ca28630ab3"
             },
             "path": "ear.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "028406d75a6b01a6"
+            },
+            "path": "elegy_eyes.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "e75b868af66a0ea3"
+            },
+            "path": "collar.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "473903d0bbb282cc"
+            },
+            "path": "dress_shirt_front_right.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "64dbe6e49904cdf4"
+            },
+            "path": "dress_shirt_front_left.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "2aa29d433ad482d2"
+            },
+            "path": "jacket_collar.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "c01d67d0f3574f6c"
+            },
+            "path": "jacket_collar_back.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "bb2139d9b0e9d8ef"
+            },
+            "path": "jacket_front_right.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "8b926528c70c094e"
+            },
+            "path": "jacket_front_left.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "514067e5b8c7a2d3"
+            },
+            "path": "jacket_back.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "936dfd9e2c63d999"
+            },
+            "path": "jacket_shoulder.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "8c6ae4233567d5e5"
+            },
+            "path": "jacket_arm_front.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "a179bea74e3c928b"
+            },
+            "path": "jacket_arm_back.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "f090c24ff518161d"
+            },
+            "path": "skirt_trim.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "212e42be53f1e960"
+            },
+            "path": "dress_trim.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "3970f18cb30ef57b"
+            },
+            "path": "skin_arm_back.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "65caf30098db1d73"
+            },
+            "path": "skin_fingers_top.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "5cde6a7bcdc8d88e"
+            },
+            "path": "skin_fingers_bot.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "d45334657fcda4fb"
+            },
+            "path": "skin_thumb.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "5cde6a7bcdc8d88e"
+            },
+            "path": "skin_fist_top.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "5cde6a7bcdc8d88e"
+            },
+            "path": "skin_fist_front.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "e07897d8480928ce"
+            },
+            "path": "skin_fist_bot.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "0cf9f04a16efe03c"
+            },
+            "path": "skin_fist_back.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "11d483dbe0ad5a0d"
+            },
+            "path": "corset.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "cf3dbb427037b189"
+            },
+            "path": "skirt_front.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "e04bed19d1aca6a6"
+            },
+            "path": "skirt.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "3a50994b5dcdfd52"
+            },
+            "path": "lowerleg_front.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "08176a11380624b1"
+            },
+            "path": "shoe_strings_top.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "2a1a2ed077e3b4de"
+            },
+            "path": "shoe_strings_bot.dds"
+        },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "4c567d28a6cae6ec"
+            },
+            "path": "shoe_bot_elegy.dds"
         }
     ]
 }
