@@ -11,13 +11,17 @@
 // Header
 #include "eztr_api.h"
 
-// Guard
-#include "overlays/actors/ovl_En_Stop_heishi/z_en_stop_heishi.h"
-
-// Prof Shikashi
-#include "overlays/actors/ovl_En_Bji_01/z_en_bji_01.h"
+#include "overlays/actors/ovl_En_Stop_heishi/z_en_stop_heishi.h"    // Town Guard
+#include "overlays/actors/ovl_En_Bji_01/z_en_bji_01.h"              // Prof. Shikashi
 
 RECOMP_IMPORT("*", u32 recomp_get_config_u32(const char* key));
+
+
+/***********************************************************************
+
+	NPCS Behavior Changes
+
+***********************************************************************/
 
 // Disable guard blocking Jackie
 RECOMP_HOOK("func_80AE7F34") void on_func_80AE7F34(EnStopheishi* this, PlayState* play) {
@@ -25,7 +29,6 @@ RECOMP_HOOK("func_80AE7F34") void on_func_80AE7F34(EnStopheishi* this, PlayState
         SET_WEEKEVENTREG(WEEKEVENTREG_12_20);   // Sets event to already having talked to guard as human
     }
 }
-
 
 // Prof. Shikashi
 // Change text dialogue to target Zora Link
@@ -71,6 +74,401 @@ RECOMP_HOOK_RETURN("EnBji01_DialogueHandler") void return_EnBji01_DialogueHandle
         }
     }
 }
+
+/***********************************************************************
+
+	Message Callbacks
+
+***********************************************************************/
+
+// Tingle
+EZTR_MSG_CALLBACK(jackie_tingle_intro1) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "" EZTR_CC_SFX "|69|79What's this?" EZTR_CC_NEWLINE \
+            "Strange clothes...White fairy..." EZTR_CC_NEWLINE \
+            "Ma'am, could you, by chance, be a" EZTR_CC_NEWLINE \
+            "forest fairy?" EZTR_CC_BOX_BREAK \
+            "Oh my!" EZTR_CC_EVENT EZTR_CC_END);
+    }
+}
+EZTR_MSG_CALLBACK(jackie_tingle_intro2) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "" EZTR_CC_SFX "|69|7AMy name is " EZTR_CC_COLOR_PINK "Tingle" EZTR_CC_COLOR_DEFAULT "!" EZTR_CC_NEWLINE \
+            "I think I am the same as you, ma'am." EZTR_CC_NEWLINE \
+            "A forest fairy!" EZTR_CC_NEWLINE "" EZTR_CC_BOX_BREAK2 \
+            "Alas, though I am already age 35," EZTR_CC_NEWLINE \
+            "no fairy has come to me yet..." EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "My father tells me to grow up" EZTR_CC_NEWLINE \
+            "and act my age, but why?" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "I tell you...Tingle is the very" EZTR_CC_NEWLINE \
+            "reincarnation of a fairy!" EZTR_CC_EVENT "" EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_tingle_intro3) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "" EZTR_CC_SFX "|69|79Uh, ma'am?" EZTR_CC_EVENT "" EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_tingle_intro4) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "" EZTR_CC_SFX "|69|7AHello, Ms. Fairy!" EZTR_CC_EVENT "" EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_tingle_no_money) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "" EZTR_CC_SFX "|69|7BSir, you don't have enough" EZTR_CC_NEWLINE \
+            "" EZTR_CC_COLOR_PINK "Rupees" EZTR_CC_COLOR_DEFAULT "!" EZTR_CC_END "");
+    }
+}
+
+// Banker
+EZTR_MSG_CALLBACK(jackie_bank_intro1) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "Hello there, miss!" EZTR_CC_NEWLINE \
+            "Won't you deposit some " EZTR_CC_COLOR_PINK "Rupees" EZTR_CC_COLOR_DEFAULT "?" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "Nowadays, even if people have" EZTR_CC_NEWLINE \
+            "money, they don't deposit any." EZTR_CC_NEWLINE "" EZTR_CC_QUICKTEXT_ENABLE \
+            "Nothing!" EZTR_CC_QUICKTEXT_DISABLE "  " EZTR_CC_QUICKTEXT_ENABLE "Nothing!!!" EZTR_CC_QUICKTEXT_DISABLE "" EZTR_CC_NEWLINE "" EZTR_CC_BOX_BREAK2 \
+            "So, for a limited time, I'll give you" EZTR_CC_NEWLINE \
+            "a special gift based on how much" EZTR_CC_NEWLINE \
+            "you deposit." EZTR_CC_EVENT "" EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_bank_intro2) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "So, miss, what's your name?" EZTR_CC_EVENT "" EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_bank_intro3) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "All right, miss, now I've got a" EZTR_CC_NEWLINE \
+            "total of " EZTR_CC_COLOR_PINK "" EZTR_CC_RUPEES_TOTAL "" EZTR_CC_COLOR_DEFAULT " from you!" EZTR_CC_EVENT "" EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_bank_intro4) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "What's this? You need somethin'" EZTR_CC_NEWLINE \
+            "on a day like this?" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "You haven't evacuated yet? You're" EZTR_CC_NEWLINE \
+            "one brave young lady!" EZTR_CC_EVENT "" EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_bank_transaction1) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "Ah, yes..." EZTR_CC_COLOR_RED "" EZTR_CC_NAME "" EZTR_CC_COLOR_DEFAULT "." EZTR_CC_NEWLINE \
+            "If I remember, you're the young" EZTR_CC_NEWLINE \
+            "lady who deposited " EZTR_CC_COLOR_PINK "" EZTR_CC_RUPEES_TOTAL "" EZTR_CC_COLOR_DEFAULT "." EZTR_CC_EVENT "" EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_bank_transaction2) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "" EZTR_CC_QUICKTEXT_ENABLE "Hmm...You play mean jokes," EZTR_CC_NEWLINE \
+            "miss! You haven't even got a" EZTR_CC_NEWLINE \
+            "single " EZTR_CC_COLOR_PINK "Rupee" EZTR_CC_COLOR_DEFAULT "!" EZTR_CC_QUICKTEXT_DISABLE "" EZTR_CC_NEWLINE "" EZTR_CC_BOX_BREAK2 \
+            "Come back and deposit some after" EZTR_CC_NEWLINE "you save up a bunch!" EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_bank_transaction3) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "Is that so?" EZTR_CC_NEWLINE \
+            "Think it over, miss!" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "So what are you gonna do?" EZTR_CC_EVENT "" EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_bank_transaction4) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "What's this?" EZTR_CC_NEWLINE \
+            "Look, miss, you can't hold" EZTR_CC_NEWLINE \
+            "this many rupees! You got that?" EZTR_CC_EVENT "" EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_bank_transaction5) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "Heyyy! You don't have that much!" EZTR_CC_NEWLINE \
+            "You shouldn't lie to people!" EZTR_CC_NEWLINE \
+            "And you can take that to the" EZTR_CC_NEWLINE \
+            "bank, miss!" EZTR_CC_EVENT "" EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_bank_transaction6) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "Whaaat?!?" EZTR_CC_NEWLINE \
+            "How rich are you?! Are you" EZTR_CC_NEWLINE \
+            "some noble lady or what?" EZTR_CC_EVENT "" EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_bank_transaction7) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "" EZTR_CC_QUICKTEXT_ENABLE "Excuuuse me! But I can't take" EZTR_CC_NEWLINE \
+            "anymore deposits!" EZTR_CC_QUICKTEXT_DISABLE "" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "Sheesh, little guy! " EZTR_CC_NEWLINE \
+            "You're young, but you sure are" EZTR_CC_NEWLINE \
+            "serious about saving!" EZTR_CC_NEWLINE \
+            "I'm impressed!" EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_bank_no_money) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "Look, miss, all the " EZTR_CC_COLOR_PINK "Rupees" EZTR_CC_NEWLINE "" EZTR_CC_COLOR_DEFAULT \
+            "you deposited are gone, so you" EZTR_CC_NEWLINE \
+            "can't use that " EZTR_CC_COLOR_RED "stamp" EZTR_CC_COLOR_DEFAULT " anymore." EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_bank_reward1) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "" EZTR_CC_QUICKTEXT_ENABLE "What's this? You've already" EZTR_CC_NEWLINE \
+            "saved up " EZTR_CC_COLOR_RED "200 Rupees" EZTR_CC_COLOR_DEFAULT "!?!" EZTR_CC_QUICKTEXT_DISABLE "" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2\
+            "Well, miss, here's your special" EZTR_CC_NEWLINE \
+            "gift. Take it!" EZTR_CC_EVENT2 "" EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_bank_reward2) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "" EZTR_CC_QUICKTEXT_ENABLE "What's this? You've already saved" EZTR_CC_NEWLINE \
+            "up " EZTR_CC_COLOR_RED "5000 Rupees" EZTR_CC_COLOR_DEFAULT "?!" EZTR_CC_QUICKTEXT_DISABLE "" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "Well, miss, I can't take any" EZTR_CC_NEWLINE \
+            "more deposits. Sorry, but this is" EZTR_CC_NEWLINE \
+            "all I can give you." EZTR_CC_EVENT2 "" EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_bank_reward3) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "" EZTR_CC_QUICKTEXT_ENABLE "What's this? You've already saved" EZTR_CC_NEWLINE \
+            "up " EZTR_CC_COLOR_RED "1000 Rupees" EZTR_CC_COLOR_DEFAULT "!?!" EZTR_CC_QUICKTEXT_DISABLE "" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "Well, miss, here's your special" EZTR_CC_NEWLINE \
+            "gift. Take it!" EZTR_CC_EVENT2 "" EZTR_CC_END "");
+    }
+}
+
+// Lottery
+EZTR_MSG_CALLBACK(jackie_lottery_no_money) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "Mmm, ma'am, if you don't have any" EZTR_CC_NEWLINE "" \
+            EZTR_CC_COLOR_PINK "Rupees" EZTR_CC_COLOR_DEFAULT ", you can't buy your" EZTR_CC_NEWLINE \
+            "dreams." EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_lottery_late) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "Ma'am, we are now exchanging" EZTR_CC_NEWLINE \
+            "winning tickets." EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "If you'd like to buy a ticket, we'll" EZTR_CC_NEWLINE \
+            "start selling them tomorrow" EZTR_CC_NEWLINE "" EZTR_CC_COLOR_RED \
+            "morning " EZTR_CC_COLOR_DEFAULT "at" EZTR_CC_COLOR_RED " 6 o'clock" EZTR_CC_COLOR_DEFAULT "." EZTR_CC_END "");
+    }
+}
+
+// Guru-Guru
+EZTR_MSG_CALLBACK(jackie_guru_1) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "" EZTR_CC_SFX "|69|59Why could a...? Why could a...?" EZTR_CC_NEWLINE \
+            "Why could a man join?!?" EZTR_CC_NEWLINE \
+            "That's 'cause a man is an animal," EZTR_CC_NEWLINE \
+            "too, my girl!" EZTR_CC_EVENT "" EZTR_CC_END "");
+    }
+}
+
+// Talon (Milk Bar Owner)
+EZTR_MSG_CALLBACK(jackie_talon_1) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "The bar opens at night, ma'am." EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "And it's members-only. We refuse" EZTR_CC_NEWLINE \
+            "people who don't have " EZTR_CC_COLOR_RED "proof of" EZTR_CC_NEWLINE \
+            "membership" EZTR_CC_COLOR_DEFAULT "." EZTR_CC_NEWLINE "" EZTR_CC_BOX_BREAK2 \
+            "Well, now I'm getting things ready," EZTR_CC_NEWLINE \
+            "so as long as you don't get in the" EZTR_CC_NEWLINE \
+            "way of my cleaning, you can stay." EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_talon_no_mask) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "Ma'am...It's the rules. Please wear" EZTR_CC_NEWLINE \
+            "your " EZTR_CC_COLOR_RED "Romani's Mask" EZTR_CC_COLOR_DEFAULT " inside the bar." EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_talon_no_money) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "You don't have enough " EZTR_CC_COLOR_PINK "Rupees" EZTR_CC_COLOR_DEFAULT ", ma'am." EZTR_CC_END "");
+    }
+}
+
+// Business Scrub (Town)
+EZTR_MSG_CALLBACK(jackie_business_scrub_town_1) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "" EZTR_CC_SFX "|3A|D1Ma'am! Ma'am!" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "I keep hearing about a stone" EZTR_CC_NEWLINE \
+            "called a " EZTR_CC_COLOR_RED "Moon's Tear" EZTR_CC_COLOR_DEFAULT ", and it's" EZTR_CC_NEWLINE \
+            "supposed to be the shiniest stone" EZTR_CC_NEWLINE \
+            "in the world!" EZTR_CC_BOX_BREAK \
+            "Do you have one?" EZTR_CC_EVENT "" EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_business_scrub_town_2) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "" EZTR_CC_SFX "|3A|D2Ma'am, if you have a " EZTR_CC_COLOR_RED "Moon's Tear" EZTR_CC_COLOR_DEFAULT "," EZTR_CC_NEWLINE \
+            "I must get it from you...And I'm" EZTR_CC_NEWLINE \
+            "not asking to get it for free!" EZTR_CC_EVENT "" EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_business_scrub_town_3) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "" EZTR_CC_SFX "|38|81Ma'am, you've really helped me out!" EZTR_CC_NEWLINE \
+            "Now I have the perfect souvenir" EZTR_CC_NEWLINE \
+            "for my wife!" EZTR_CC_NEWLINE "" EZTR_CC_BOX_BREAK2 \
+            "She hasn't seen a jewel or" EZTR_CC_NEWLINE \
+            "strange, shining stone like this in" EZTR_CC_NEWLINE \
+            "quite a long time...Hee-hee!" EZTR_CC_NEWLINE "" EZTR_CC_BOX_BREAK2 \
+            "The " EZTR_CC_COLOR_RED "Title Deed" EZTR_CC_COLOR_DEFAULT " for this spot will" EZTR_CC_NEWLINE \
+            "be in big demand by Deku Scrubs" EZTR_CC_NEWLINE \
+            "outside of town." EZTR_CC_NEWLINE "" EZTR_CC_BOX_BREAK2 \
+            "You should be able to sell it to a" EZTR_CC_NEWLINE \
+            "Deku Scrub for a good price!" EZTR_CC_EVENT2 "" EZTR_CC_END "");
+    }
+}
+
+// Captain Keeta
+EZTR_MSG_CALLBACK(jackie_keeta1) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "" EZTR_CC_QUICKTEXT_ENABLE "Captain, ma'am!" EZTR_CC_QUICKTEXT_DISABLE "" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "May I take leave, ma'am?" EZTR_CC_CONTINUE "" EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_keeta2) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "" EZTR_CC_SFX "|3A|C5Yes, ma'am!" EZTR_CC_END "");
+    }
+}
+
+
+/***********************************************************************
+
+	Message Replacements
+
+***********************************************************************/
 
 EZTR_ON_INIT void replace_msgs() {
     if (recomp_get_config_u32("alternative_text")) {
@@ -137,6 +535,7 @@ EZTR_ON_INIT void replace_msgs() {
         );
 
         // Tingle
+        
         EZTR_Basic_ReplaceText(
             0x1D00,
             EZTR_STANDARD_TEXT_BOX_I,
@@ -146,8 +545,11 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "" EZTR_CC_SFX "|69|79What's this?" EZTR_CC_NEWLINE "Strange clothes...White fairy..." EZTR_CC_NEWLINE "Ma'am, could you, by chance, be a" EZTR_CC_NEWLINE "forest fairy?" EZTR_CC_BOX_BREAK "Oh my!" EZTR_CC_EVENT "" EZTR_CC_END "",
-            NULL
+            "" EZTR_CC_SFX "|69|79What's this?" EZTR_CC_NEWLINE \
+            "Green clothes...White fairy..." EZTR_CC_NEWLINE \
+            "Sir, could you, by chance, be a" EZTR_CC_NEWLINE \
+            "forest fairy?" EZTR_CC_BOX_BREAK "Oh my!" EZTR_CC_EVENT "" EZTR_CC_END "",
+            jackie_tingle_intro1
         );
         EZTR_Basic_ReplaceText(
             0x1D01,
@@ -158,8 +560,16 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "" EZTR_CC_SFX "|69|7AMy name is " EZTR_CC_COLOR_PINK "Tingle" EZTR_CC_COLOR_DEFAULT "!" EZTR_CC_NEWLINE "I think I am the same as you, ma'am." EZTR_CC_NEWLINE "A forest fairy!" EZTR_CC_NEWLINE "" EZTR_CC_BOX_BREAK2 "Alas, though I am already age 35," EZTR_CC_NEWLINE "no fairy has come to me yet..." EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 "My father tells me to grow up" EZTR_CC_NEWLINE "and act my age, but why?" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 "I tell you...Tingle is the very" EZTR_CC_NEWLINE "reincarnation of a fairy!" EZTR_CC_EVENT "" EZTR_CC_END "",
-            NULL
+            "" EZTR_CC_SFX "|69|7AMy name is " EZTR_CC_COLOR_PINK "Tingle" EZTR_CC_COLOR_DEFAULT "!" EZTR_CC_NEWLINE \
+            "I think I am the same as you, sir." EZTR_CC_NEWLINE \
+            "A forest fairy!" EZTR_CC_NEWLINE "" EZTR_CC_BOX_BREAK2 \
+            "Alas, though I am already age 35," EZTR_CC_NEWLINE \
+            "no fairy has come to me yet..." EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "My father tells me to grow up" EZTR_CC_NEWLINE \
+            "and act my age, but why?" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "I tell you...Tingle is the very" EZTR_CC_NEWLINE \
+            "reincarnation of a fairy!" EZTR_CC_EVENT "" EZTR_CC_END "",
+            jackie_tingle_intro2
         );
         EZTR_Basic_ReplaceText(
             0x1D0C,
@@ -170,8 +580,8 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "" EZTR_CC_SFX "|69|79Uh, ma'am?" EZTR_CC_EVENT "" EZTR_CC_END "",
-            NULL
+            "" EZTR_CC_SFX "|69|79Uh, sir?" EZTR_CC_EVENT "" EZTR_CC_END "",
+            jackie_tingle_intro3
         );
         EZTR_Basic_ReplaceText(
             0x1D0D,
@@ -182,8 +592,8 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "" EZTR_CC_SFX "|69|7AHello, Ms. Fairy!" EZTR_CC_EVENT "" EZTR_CC_END "",
-            NULL
+            "" EZTR_CC_SFX "|69|7AHello, Mr. Fairy!" EZTR_CC_EVENT "" EZTR_CC_END "",
+            jackie_tingle_intro4
         );
         EZTR_Basic_ReplaceText(
             0x1D0A,
@@ -194,10 +604,11 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "" EZTR_CC_SFX "|69|7BMa'am, you don't have enough" EZTR_CC_NEWLINE "" EZTR_CC_COLOR_PINK "Rupees" EZTR_CC_COLOR_DEFAULT "!" EZTR_CC_END "",
-            NULL
+            "" EZTR_CC_SFX "|69|7BSir, you don't have enough" EZTR_CC_NEWLINE \
+            "" EZTR_CC_COLOR_PINK "Rupees" EZTR_CC_COLOR_DEFAULT "!" EZTR_CC_END "",
+            jackie_tingle_no_money
         );
-
+        
         // Guru-Guru
         EZTR_Basic_ReplaceText(
             0x292F,
@@ -211,8 +622,8 @@ EZTR_ON_INIT void replace_msgs() {
             "" EZTR_CC_SFX "|69|59Why could a...? Why could a...?" EZTR_CC_NEWLINE \
             "Why could a man join?!?" EZTR_CC_NEWLINE \
             "That's 'cause a man is an animal," EZTR_CC_NEWLINE \
-            "too, my girl!" EZTR_CC_EVENT "" EZTR_CC_END "",
-            NULL
+            "too, my boy!" EZTR_CC_EVENT "" EZTR_CC_END "",
+            jackie_guru_1
         );
 
         // Lottery
@@ -225,10 +636,10 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "Mmm, ma'am, if you don't have any" EZTR_CC_NEWLINE "" \
+            "Mmm, sir, if you don't have any" EZTR_CC_NEWLINE "" \
             EZTR_CC_COLOR_PINK "Rupees" EZTR_CC_COLOR_DEFAULT ", you can't buy your" EZTR_CC_NEWLINE \
             "dreams." EZTR_CC_END "",
-            NULL
+            jackie_lottery_no_money
         );
         EZTR_Basic_ReplaceText(
             0x2B63,
@@ -239,16 +650,16 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "Ma'am, we are now exchanging" EZTR_CC_NEWLINE \
+            "Sir, we are now exchanging" EZTR_CC_NEWLINE \
             "winning tickets." EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
             "If you'd like to buy a ticket, we'll" EZTR_CC_NEWLINE \
             "start selling them tomorrow" EZTR_CC_NEWLINE "" EZTR_CC_COLOR_RED \
             "morning " EZTR_CC_COLOR_DEFAULT "at" EZTR_CC_COLOR_RED " 6 o'clock" EZTR_CC_COLOR_DEFAULT "." EZTR_CC_END "",
-            NULL
+            jackie_lottery_late
         );
 
         // Banker
-        // First Time Meeting
+        // First time meeting
         EZTR_Basic_ReplaceText(
             0x044C,
             EZTR_STANDARD_TEXT_BOX_I,
@@ -258,11 +669,15 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "Hello there, miss!" EZTR_CC_NEWLINE \
+            "Hey there, little guy!" EZTR_CC_NEWLINE \
             "Won't you deposit some " EZTR_CC_COLOR_PINK "Rupees" EZTR_CC_COLOR_DEFAULT "?" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
             "Nowadays, even if people have" EZTR_CC_NEWLINE \
-            "money, they don't deposit any." EZTR_CC_NEWLINE "" EZTR_CC_QUICKTEXT_ENABLE "Nothing!" EZTR_CC_QUICKTEXT_DISABLE "  " EZTR_CC_QUICKTEXT_ENABLE "Nothing!!!" EZTR_CC_QUICKTEXT_DISABLE "" EZTR_CC_NEWLINE "" EZTR_CC_BOX_BREAK2 "So, for a limited time, I'll give you" EZTR_CC_NEWLINE "a special gift based on how much" EZTR_CC_NEWLINE "you deposit." EZTR_CC_EVENT "" EZTR_CC_END "",
-            NULL
+            "money, they don't deposit any." EZTR_CC_NEWLINE "" EZTR_CC_QUICKTEXT_ENABLE \
+            "Nothing!" EZTR_CC_QUICKTEXT_DISABLE "  " EZTR_CC_QUICKTEXT_ENABLE "Nothing!!!" EZTR_CC_QUICKTEXT_DISABLE "" EZTR_CC_NEWLINE "" EZTR_CC_BOX_BREAK2 \
+            "So, for a limited time, I'll give you" EZTR_CC_NEWLINE \
+            "a special gift based on how much" EZTR_CC_NEWLINE \
+            "you deposit." EZTR_CC_EVENT "" EZTR_CC_END "",
+            jackie_bank_intro1
         );
         EZTR_Basic_ReplaceText(
             0x0461,
@@ -273,8 +688,8 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "So, lady, what's your name?" EZTR_CC_EVENT "" EZTR_CC_END "",
-            NULL
+            "So, little guy, what's your name?" EZTR_CC_EVENT "" EZTR_CC_END "",
+            jackie_bank_intro2
         );
         EZTR_Basic_ReplaceText(
             0x045A,
@@ -285,8 +700,9 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "All right, miss, now I've got a" EZTR_CC_NEWLINE "total of " EZTR_CC_COLOR_PINK "" EZTR_CC_RUPEES_TOTAL "" EZTR_CC_COLOR_DEFAULT " from you!" EZTR_CC_EVENT "" EZTR_CC_END "",
-            NULL
+            "All right, little guy, now I've got a" EZTR_CC_NEWLINE \
+            "total of " EZTR_CC_COLOR_PINK "" EZTR_CC_RUPEES_TOTAL "" EZTR_CC_COLOR_DEFAULT " from you!" EZTR_CC_EVENT "" EZTR_CC_END "",
+            jackie_bank_intro3
         );
         EZTR_Basic_ReplaceText(
             0x0467,
@@ -297,8 +713,11 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "What's this? You need somethin'" EZTR_CC_NEWLINE "on a day like this?" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 "You haven't evacuated yet? You're" EZTR_CC_NEWLINE "one brave lady!" EZTR_CC_EVENT "" EZTR_CC_END "",
-            NULL
+            "What's this? You need somethin'" EZTR_CC_NEWLINE \
+            "on a day like this?" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "You haven't evacuated yet? You're" EZTR_CC_NEWLINE \
+            "one brave little guy!" EZTR_CC_EVENT "" EZTR_CC_END "",
+            jackie_bank_intro4
         );
         // Transaction
         EZTR_Basic_ReplaceText(
@@ -310,8 +729,10 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "Ah, yes..." EZTR_CC_COLOR_RED "" EZTR_CC_NAME "" EZTR_CC_COLOR_DEFAULT "." EZTR_CC_NEWLINE "If I remember, you're the young" EZTR_CC_NEWLINE "lady who deposited " EZTR_CC_COLOR_PINK "" EZTR_CC_RUPEES_TOTAL "" EZTR_CC_COLOR_DEFAULT "." EZTR_CC_EVENT "" EZTR_CC_END "",
-            NULL
+            "Ah, yes..." EZTR_CC_COLOR_RED "" EZTR_CC_NAME "" EZTR_CC_COLOR_DEFAULT "." EZTR_CC_NEWLINE \
+            "If I remember, you're the little" EZTR_CC_NEWLINE \
+            "guy who deposited " EZTR_CC_COLOR_PINK "" EZTR_CC_RUPEES_TOTAL "" EZTR_CC_COLOR_DEFAULT "." EZTR_CC_EVENT "" EZTR_CC_END "",
+            jackie_bank_transaction1
         );
         EZTR_Basic_ReplaceText(
             0x0458,
@@ -322,8 +743,26 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "" EZTR_CC_QUICKTEXT_ENABLE "Hmm...You play mean jokes," EZTR_CC_NEWLINE "miss! You haven't even got a" EZTR_CC_NEWLINE "single " EZTR_CC_COLOR_PINK "Rupee" EZTR_CC_COLOR_DEFAULT "!" EZTR_CC_QUICKTEXT_DISABLE "" EZTR_CC_NEWLINE "" EZTR_CC_BOX_BREAK2 "Come back and deposit some after" EZTR_CC_NEWLINE "you save up a bunch!" EZTR_CC_END "",
-            NULL
+            "" EZTR_CC_QUICKTEXT_ENABLE "Hmm...You play mean jokes," EZTR_CC_NEWLINE \
+            "little guy! You haven't even got a" EZTR_CC_NEWLINE \
+            "single " EZTR_CC_COLOR_PINK "Rupee" EZTR_CC_COLOR_DEFAULT "!" EZTR_CC_QUICKTEXT_DISABLE "" EZTR_CC_NEWLINE "" EZTR_CC_BOX_BREAK2 \
+            "Come back and deposit some after" EZTR_CC_NEWLINE \
+            "you save up a bunch!" EZTR_CC_END "",
+            jackie_bank_transaction2
+        );
+        EZTR_Basic_ReplaceText(
+            0x047D,
+            EZTR_STANDARD_TEXT_BOX_II,
+            0,
+            EZTR_ICON_NO_ICON,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            true,
+            "Is that so?" EZTR_CC_NEWLINE \
+            "Think it over, little guy!" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "So what are you gonna do?" EZTR_CC_EVENT "" EZTR_CC_END "",
+            jackie_bank_transaction3
         );
         EZTR_Basic_ReplaceText(
             0x0475,
@@ -334,8 +773,10 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "What's this?" EZTR_CC_NEWLINE "Look, miss, you can't hold" EZTR_CC_NEWLINE "this many rupees! You got that?" EZTR_CC_EVENT "" EZTR_CC_END "",
-            NULL
+            "What's this?" EZTR_CC_NEWLINE \
+            "Look, little guy, you can't hold" EZTR_CC_NEWLINE \
+            "this many rupees! You got that?" EZTR_CC_EVENT "" EZTR_CC_END "",
+            jackie_bank_transaction4
         );
         EZTR_Basic_ReplaceText(
             0x0459,
@@ -346,8 +787,11 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "Heyyy! You don't have that much!" EZTR_CC_NEWLINE "You shouldn't lie to people!" EZTR_CC_NEWLINE "And you can take that to the" EZTR_CC_NEWLINE "bank, miss!" EZTR_CC_EVENT "" EZTR_CC_END "",
-            NULL
+            "Heyyy! You don't have that much!" EZTR_CC_NEWLINE \
+            "You shouldn't lie to people!" EZTR_CC_NEWLINE \
+            "And you can take that to the" EZTR_CC_NEWLINE \
+            "bank, little guy!" EZTR_CC_EVENT "" EZTR_CC_END "",
+            jackie_bank_transaction5
         );
         EZTR_Basic_ReplaceText(
             0x0455,
@@ -358,8 +802,10 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "Whaaat?!?" EZTR_CC_NEWLINE "How rich are you?! Are you" EZTR_CC_NEWLINE "some noble lady or what?" EZTR_CC_EVENT "" EZTR_CC_END "",
-            NULL
+            "Whaaat?!?" EZTR_CC_NEWLINE \
+            "You're really gonna give me that" EZTR_CC_NEWLINE \
+            "much? You're one rich little guy!" EZTR_CC_EVENT "" EZTR_CC_END "",
+            jackie_bank_transaction6
         );
         EZTR_Basic_ReplaceText(
             0x045F,
@@ -370,9 +816,16 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "" EZTR_CC_QUICKTEXT_ENABLE "Excuuuse me! But I can't take" EZTR_CC_NEWLINE "anymore deposits!" EZTR_CC_QUICKTEXT_DISABLE "" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 "Sheesh, miss! " EZTR_CC_NEWLINE "You're young, but you sure are" EZTR_CC_NEWLINE "serious about saving!" EZTR_CC_NEWLINE "I'm impressed!" EZTR_CC_END "",
-            NULL
+            "" EZTR_CC_QUICKTEXT_ENABLE "Excuuuse me! But I can't take" EZTR_CC_NEWLINE \
+            "anymore deposits!" EZTR_CC_QUICKTEXT_DISABLE "" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "Sheesh, little guy! " EZTR_CC_NEWLINE \
+            "You're young, but you sure are" EZTR_CC_NEWLINE \
+            "serious about saving!" EZTR_CC_NEWLINE \
+            "I'm impressed!" EZTR_CC_END "",
+            jackie_bank_transaction7
         );
+
+        // Empty
         EZTR_Basic_ReplaceText(
             0x0478,
             EZTR_STANDARD_TEXT_BOX_II,
@@ -382,9 +835,12 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "Look, miss, all the " EZTR_CC_COLOR_PINK "Rupees" EZTR_CC_NEWLINE "" EZTR_CC_COLOR_DEFAULT "you deposited are gone, so you" EZTR_CC_NEWLINE "can't use that " EZTR_CC_COLOR_RED "stamp" EZTR_CC_COLOR_DEFAULT " anymore." EZTR_CC_END "",
-            NULL
+            "Look, little guy, all the " EZTR_CC_COLOR_PINK "Rupees" EZTR_CC_NEWLINE "" EZTR_CC_COLOR_DEFAULT \
+            "you deposited are gone, so you" EZTR_CC_NEWLINE \
+            "can't use that " EZTR_CC_COLOR_RED "stamp" EZTR_CC_COLOR_DEFAULT " anymore." EZTR_CC_END "",
+            jackie_bank_no_money
         );
+
         // Rewards
         EZTR_Basic_ReplaceText(
             0x045B,
@@ -397,8 +853,9 @@ EZTR_ON_INIT void replace_msgs() {
             true,
             "" EZTR_CC_QUICKTEXT_ENABLE "What's this? You've already" EZTR_CC_NEWLINE \
             "saved up " EZTR_CC_COLOR_RED "200 Rupees" EZTR_CC_COLOR_DEFAULT "!?!" EZTR_CC_QUICKTEXT_DISABLE "" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2\
-            "Well, miss, here's your special" EZTR_CC_NEWLINE "gift. Take it!" EZTR_CC_EVENT2 "" EZTR_CC_END "",
-            NULL
+            "Well, little guy, here's your special" EZTR_CC_NEWLINE \
+            "gift. Take it!" EZTR_CC_EVENT2 "" EZTR_CC_END "",
+            jackie_bank_reward1
         );
         EZTR_Basic_ReplaceText(
             0x045D,
@@ -409,8 +866,27 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "" EZTR_CC_QUICKTEXT_ENABLE "What's this? You've already saved" EZTR_CC_NEWLINE "up " EZTR_CC_COLOR_RED "5000 Rupees" EZTR_CC_COLOR_DEFAULT "?!" EZTR_CC_QUICKTEXT_DISABLE "" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 "Well, miss, I can't take any" EZTR_CC_NEWLINE "more deposits. Sorry, but this is" EZTR_CC_NEWLINE "all I can give you." EZTR_CC_EVENT2 "" EZTR_CC_END "",
-            NULL
+            "" EZTR_CC_QUICKTEXT_ENABLE "What's this? You've already saved" EZTR_CC_NEWLINE \
+            "up " EZTR_CC_COLOR_RED "5000 Rupees" EZTR_CC_COLOR_DEFAULT "?!" EZTR_CC_QUICKTEXT_DISABLE "" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "Well, little guy, I can't take any" EZTR_CC_NEWLINE \
+            "more deposits. Sorry, but this is" EZTR_CC_NEWLINE \
+            "all I can give you." EZTR_CC_EVENT2 "" EZTR_CC_END "",
+            jackie_bank_reward2
+        );
+        EZTR_Basic_ReplaceText(
+            0x045C,
+            EZTR_STANDARD_TEXT_BOX_I,
+            0,
+            EZTR_ICON_NO_ICON,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            true,
+            "" EZTR_CC_QUICKTEXT_ENABLE "What's this? You've already saved" EZTR_CC_NEWLINE \
+            "up " EZTR_CC_COLOR_RED "1000 Rupees" EZTR_CC_COLOR_DEFAULT "!?!" EZTR_CC_QUICKTEXT_DISABLE "" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "Well, little guy, here's your special" EZTR_CC_NEWLINE \
+            "gift. Take it!" EZTR_CC_EVENT2 "" EZTR_CC_END "",
+            jackie_bank_reward3
         );
 
         // Trading Post Guy
@@ -568,10 +1044,14 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "The bar opens at night, ma'am." EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "The bar opens at night, sir." EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
             "And it's members-only. We refuse" EZTR_CC_NEWLINE \
-            "people who don't have " EZTR_CC_COLOR_RED "proof of" EZTR_CC_NEWLINE "membership" EZTR_CC_COLOR_DEFAULT "." EZTR_CC_NEWLINE "" EZTR_CC_BOX_BREAK2 "Well, now I'm getting things ready," EZTR_CC_NEWLINE "so as long as you don't get in the" EZTR_CC_NEWLINE "way of my cleaning, you can stay." EZTR_CC_END "",
-            NULL
+            "people who don't have " EZTR_CC_COLOR_RED "proof of" EZTR_CC_NEWLINE \
+            "membership" EZTR_CC_COLOR_DEFAULT "." EZTR_CC_NEWLINE "" EZTR_CC_BOX_BREAK2 \
+            "Well, now I'm getting things ready," EZTR_CC_NEWLINE \
+            "so as long as you don't get in the" EZTR_CC_NEWLINE \
+            "way of my cleaning, you can stay." EZTR_CC_END "",
+            jackie_talon_1
         );
         EZTR_Basic_ReplaceText(
             0x2B09,
@@ -582,8 +1062,9 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "Ma'am...It's the rules. Please wear" EZTR_CC_NEWLINE "your " EZTR_CC_COLOR_RED "Romani's Mask" EZTR_CC_COLOR_DEFAULT " inside the bar." EZTR_CC_END "",
-            NULL
+            "Sir...It's the rules. Please wear" EZTR_CC_NEWLINE \
+            "your " EZTR_CC_COLOR_RED "Romani's Mask" EZTR_CC_COLOR_DEFAULT " inside the bar." EZTR_CC_END "",
+            jackie_talon_no_mask
         );
         EZTR_Basic_ReplaceText(
             0x2B0C,
@@ -594,8 +1075,8 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "You don't have enough " EZTR_CC_COLOR_PINK "Rupees" EZTR_CC_COLOR_DEFAULT ", ma'am." EZTR_CC_END "",
-            NULL
+            "You don't have enough " EZTR_CC_COLOR_PINK "Rupees" EZTR_CC_COLOR_DEFAULT ", sir." EZTR_CC_END "",
+            jackie_talon_no_money
         );
 
         // Mayor
@@ -654,12 +1135,13 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "" EZTR_CC_SFX "|3A|D1Excuse me!" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "" EZTR_CC_SFX "|3A|D1Sir! Sir!" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
             "I keep hearing about a stone" EZTR_CC_NEWLINE \
             "called a " EZTR_CC_COLOR_RED "Moon's Tear" EZTR_CC_COLOR_DEFAULT ", and it's" EZTR_CC_NEWLINE \
             "supposed to be the shiniest stone" EZTR_CC_NEWLINE \
-            "in the world!" EZTR_CC_BOX_BREAK "Do you have one?" EZTR_CC_EVENT "" EZTR_CC_END "",
-            NULL
+            "in the world!" EZTR_CC_BOX_BREAK \
+            "Do you have one?" EZTR_CC_EVENT "" EZTR_CC_END "",
+            jackie_business_scrub_town_1
         );
         EZTR_Basic_ReplaceText(
             0x0616,
@@ -670,8 +1152,8 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "" EZTR_CC_SFX "|3A|D2If you have a " EZTR_CC_COLOR_RED "Moon's Tear" EZTR_CC_COLOR_DEFAULT "," EZTR_CC_NEWLINE "I must get it from you...And I'm" EZTR_CC_NEWLINE "not asking to get it for free!" EZTR_CC_EVENT "" EZTR_CC_END "",
-            NULL
+            "" EZTR_CC_SFX "|3A|D2Sir, if you have a " EZTR_CC_COLOR_RED "Moon's Tear" EZTR_CC_COLOR_DEFAULT "," EZTR_CC_NEWLINE "I must get it from you...And I'm" EZTR_CC_NEWLINE "not asking to get it for free!" EZTR_CC_EVENT "" EZTR_CC_END "",
+            jackie_business_scrub_town_2
         );
         EZTR_Basic_ReplaceText(
             0x0619,
@@ -682,7 +1164,7 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "" EZTR_CC_SFX "|38|81You've really helped me out!" EZTR_CC_NEWLINE \
+            "" EZTR_CC_SFX "|38|81Sir, you've really helped me out!" EZTR_CC_NEWLINE \
             "Now I have the perfect souvenir" EZTR_CC_NEWLINE \
             "for my wife!" EZTR_CC_NEWLINE "" EZTR_CC_BOX_BREAK2 \
             "She hasn't seen a jewel or" EZTR_CC_NEWLINE \
@@ -693,7 +1175,7 @@ EZTR_ON_INIT void replace_msgs() {
             "outside of town." EZTR_CC_NEWLINE "" EZTR_CC_BOX_BREAK2 \
             "You should be able to sell it to a" EZTR_CC_NEWLINE \
             "Deku Scrub for a good price!" EZTR_CC_EVENT2 "" EZTR_CC_END "",
-            NULL
+            jackie_business_scrub_town_3
         );
 
         // Deku Princess
@@ -753,7 +1235,7 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             true,
             "" EZTR_CC_SFX "|39|8CWhy yes, thanks to" EZTR_CC_NEWLINE \
-            "MS. " EZTR_CC_NAME " here." EZTR_CC_NEWLINE \
+            "Ms. " EZTR_CC_NAME " here." EZTR_CC_NEWLINE \
             "I am very, truly grateful." EZTR_CC_END "",
             NULL
         );
@@ -835,8 +1317,9 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "" EZTR_CC_QUICKTEXT_ENABLE "Captain, ma'am!" EZTR_CC_QUICKTEXT_DISABLE "" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 "May I take leave, ma'am?" EZTR_CC_CONTINUE "" EZTR_CC_END "",
-            NULL
+            "" EZTR_CC_QUICKTEXT_ENABLE "Captain, sir!" EZTR_CC_QUICKTEXT_DISABLE "" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 \
+            "May I take leave, sir?" EZTR_CC_CONTINUE "" EZTR_CC_END "",
+            jackie_keeta1
         );
         EZTR_Basic_ReplaceText(
             0x153D,
@@ -847,8 +1330,8 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "" EZTR_CC_SFX "|3A|C5Yes, ma'am!" EZTR_CC_END "",
-            NULL
+            "" EZTR_CC_SFX "|3A|C5Yes, sir!" EZTR_CC_END "",
+            jackie_keeta2
         );
 
         // Gorman Brothers
