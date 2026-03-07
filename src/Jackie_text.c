@@ -1443,6 +1443,115 @@ EZTR_ON_INIT void replace_msgs() {
             NULL
         );
 
+        // Madame Aroma
+        EZTR_Basic_ReplaceText(
+            0x2A9E,
+            EZTR_STANDARD_TEXT_BOX_I,
+            0,
+            EZTR_ICON_NO_ICON,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            true,
+            "" EZTR_CC_SFX "|69|0DOh dear, are you here for an" EZTR_CC_NEWLINE \
+            "appointment? ...Or are you the" EZTR_CC_NEWLINE \
+            "expert person-finder I hired?" EZTR_CC_NEWLINE "" \
+            EZTR_CC_BOX_BREAK2 \
+            "Yes, yes, yes. I say, you have the" EZTR_CC_NEWLINE \
+            "face of a pro." EZTR_CC_NEWLINE " " EZTR_CC_NEWLINE "" \
+            EZTR_CC_BOX_BREAK2 \
+            "The characteristics of the person" EZTR_CC_NEWLINE \
+            "I want you to find.." EZTR_CC_NEWLINE \
+            "Yes, yes. I know them." EZTR_CC_EVENT "" EZTR_CC_END "",
+            NULL
+        );
+        EZTR_Basic_ReplaceText(
+            0x2A9F,
+            EZTR_STANDARD_TEXT_BOX_I,
+            0,
+            EZTR_ICON_NO_ICON,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            true,
+            "The person I want you to locate" EZTR_CC_NEWLINE \
+            "is my son, Kafei. You know him," EZTR_CC_NEWLINE \
+            "don't you? " EZTR_CC_NEWLINE \
+            "...You don't? Really?" \
+            EZTR_CC_BOX_BREAK \
+            "He disappeared about a month ago." EZTR_CC_NEWLINE \
+            "It's terrible! I'm so very worried..." EZTR_CC_NEWLINE \
+            "I can't get food down my throat," EZTR_CC_NEWLINE \
+            "and I've lost five pounds." \
+            EZTR_CC_BOX_BREAK \
+            "You haven't anything, though?" EZTR_CC_NEWLINE \
+            "Oh, dear..." EZTR_CC_EVENT "" EZTR_CC_END "",
+            NULL
+        );
+        EZTR_Basic_ReplaceText(
+            0x2AA1,
+            EZTR_STANDARD_TEXT_BOX_I,
+            0,
+            EZTR_ICON_NO_ICON,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            true,
+            "" EZTR_CC_SFX \
+            "|69|0EOh, that won't do." EZTR_CC_NEWLINE \
+            "I cannot accept that." EZTR_CC_END "",
+            NULL
+        );
+        EZTR_Basic_ReplaceText(
+            0x2AA2,
+            EZTR_STANDARD_TEXT_BOX_I,
+            0,
+            EZTR_ICON_NO_ICON,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            true,
+            "" EZTR_CC_SFX \
+            "|69|0EOh, yes. I like your enthusiasm!" EZTR_CC_NEWLINE \
+            "Well, I'm counting on you!" EZTR_CC_EVENT2 "" EZTR_CC_END "",
+            NULL
+        );
+        EZTR_Basic_ReplaceText(
+            0x008F,
+            EZTR_TRANSLUSCENT_BLUE_TEXT_BOX,
+            1,
+            EZTR_ICON_KAFEIS_MASK,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            true,
+            "" EZTR_CC_QUICKTEXT_ENABLE \
+            "You've been given " EZTR_CC_COLOR_RED "Kafei's Mask" EZTR_CC_NEWLINE "" EZTR_CC_COLOR_DEFAULT "and recruited to locate a missing" EZTR_CC_NEWLINE \
+            "person!" EZTR_CC_QUICKTEXT_DISABLE "" EZTR_CC_NEWLINE "" EZTR_CC_BOX_BREAK2 "" EZTR_CC_DELAY \
+            "|00|0AWear this to inquire about the" EZTR_CC_NEWLINE \
+            "missing Kafei." EZTR_CC_END "",
+            NULL
+        );
+        EZTR_Basic_ReplaceText(
+            0x2A9D,
+            EZTR_STANDARD_TEXT_BOX_I,
+            0,
+            EZTR_ICON_NO_ICON,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            true,
+            "" EZTR_CC_SFX \
+            "|69|0DOh dear, are you here for an" EZTR_CC_NEWLINE \
+            "appointment? This is my office. The " EZTR_CC_NEWLINE \
+            EZTR_CC_COLOR_RED "Mayor's office" EZTR_CC_COLOR_DEFAULT " is next door." EZTR_CC_NEWLINE "" \
+            EZTR_CC_BOX_BREAK2 \
+            "If you need to speak to me about" EZTR_CC_NEWLINE \
+            "the carnival performances, make" EZTR_CC_NEWLINE \
+            "an appointment, please." EZTR_CC_END "",
+            NULL
+        );
+
         // Ikana Canyon Wanderer
         EZTR_Basic_ReplaceText(
             0x14F1,
