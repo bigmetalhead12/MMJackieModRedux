@@ -116,3 +116,47 @@ RECOMP_HOOK_RETURN("EnBji01_DialogueHandler") void return_EnBji01_DialogueHandle
 
 ```
 
+# Replacing NPC Text with EZTR
+When using EZTR, be sure to refer to the [official documentation](https://lt-schmiddy.github.io/docs/EZTR_for_Zelda64Recomp/index.html) for help. It is highly detailed and easy to follow, so I strongly recommend you refer to the linked documentation if you need additional help.
+
+For some NPCs, I changed the text to match Jackie's characteristics. Many texts that I replaced are NPCs' special dialogue meant for Human Link, specifically (not other transformations). 
+
+When replacing these lines, I used the following [code](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_text.c#L33-L76).
+
+```c
+EZTR_ON_INIT void replace_msgs() {
+    if (recomp_get_config_u32("alternative_text")) {
+        // Jim
+        EZTR_Basic_ReplaceText(
+            0x0719,
+            EZTR_STANDARD_TEXT_BOX_I,
+            0,
+            EZTR_ICON_NO_ICON,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            true,
+            "" EZTR_CC_SFX "|69|02What do you want, weirdo?" EZTR_CC_NEWLINE \
+			"I'm busy practicing with my" EZTR_CC_NEWLINE \
+			"blowgun! Don't mess with me!" EZTR_CC_EVENT2 "" EZTR_CC_END "",
+            NULL
+        );
+		// ... More text replacements here
+	}
+}	
+```
+Note, EZTR can actually give you specific `EZTR_Basic_ReplaceText` blocks when triggering the dialogue in the game. Just be sure to go to the directory your `Zelda64Recompiled.exe` is in, open your Powershell/Terminal in this directory, and then run the following code:
+
+`./Zelda64Recompiled.exe --show-console`
+
+This would allow you to run the game in debug mode. While running the game in debug mode, go to Mods, and then select the EZ Text Replacer API mod. Click on "Configure" and select the following options:
+<img width="409" height="363" alt="image" src="https://github.com/user-attachments/assets/1f97e25b-9f25-44ef-a6a2-af7b692b49ed" />
+
+When doing this and having any text show up in the game, the respective `EZTR_Basic_ReplaceText` will show up in your console window. Copy and paste that into your `EZTR_ON_INIT` void function and replace the text to your liking.
+
+Back to the code, you can see that I edited the text so that Jim would say:
+
+"What do you want, weirdo?"
+
+This would dynamically replace Jim's dialogue with the specified text.
+
