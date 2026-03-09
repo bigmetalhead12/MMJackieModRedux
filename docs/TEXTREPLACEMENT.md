@@ -117,6 +117,7 @@ RECOMP_HOOK_RETURN("EnBji01_DialogueHandler") void return_EnBji01_DialogueHandle
 ```
 
 # Replacing NPC Text with EZTR
+## Basic Replacement
 When using EZTR, be sure to refer to the [official documentation](https://lt-schmiddy.github.io/docs/EZTR_for_Zelda64Recomp/index.html) for help. It is highly detailed and easy to follow, so I strongly recommend you refer to the linked documentation if you need additional help.
 
 For some NPCs, I changed the text to match Jackie's characteristics. Many texts that I replaced are NPCs' special dialogue meant for Human Link, specifically (not other transformations). 
@@ -161,3 +162,64 @@ Back to the code, you can see that I edited the text so that Jim would say:
 
 This would dynamically replace Jim's dialogue with the specified text.
 
+## Advanced Replacement
+Sometimes, however, a simple text replacement doesn't suffice. There are cases with text where NPCs say a certain phrase that is meant to be said to all Link's forms. For example, here's an EZTR_Basic_ReplaceText for the [Lottery NPC](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_text.c#L639-L641)
+
+(directly from the EZTR text dump):
+```c
+EZTR_Basic_ReplaceText(
+	0x2B62,
+	EZTR_STANDARD_TEXT_BOX_I,
+	0,
+	EZTR_ICON_NO_ICON,
+	EZTR_NO_VALUE,
+	EZTR_NO_VALUE,
+	EZTR_NO_VALUE,
+	true,
+	"Mmm, sir, if you don't have any" EZTR_CC_NEWLINE "" \
+	EZTR_CC_COLOR_PINK "Rupees" EZTR_CC_COLOR_DEFAULT ", you can't buy your" EZTR_CC_NEWLINE \
+	"dreams." EZTR_CC_END "",
+	NULL
+);
+```
+
+The Lottery NPC refers to all forms of Link as "sir", which doesn't fit Jackie. However, simply changing the text here to "ma'am" would change the dialogue for all transformation forms to "ma'am". For my mod, I want "ma'am" to only be used for Jackie and the default "sir" for other forms.
+
+The solution for this is to use the Message Callbacks, which is explained in further detail [here](https://lt-schmiddy.github.io/docs/EZTR_for_Zelda64Recomp/the_message_buffer.html#message_buffer_and_callbacks).
+
+To spare you the details, I implemented a message callback for Jackie like [this](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_text.c#L324-L334).
+
+```c
+EZTR_MSG_CALLBACK(jackie_lottery_no_money) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "Mmm, ma'am, if you don't have any" EZTR_CC_NEWLINE "" \
+            EZTR_CC_COLOR_PINK "Rupees" EZTR_CC_COLOR_DEFAULT ", you can't buy your" EZTR_CC_NEWLINE \
+            "dreams." EZTR_CC_END "");
+    }
+}
+```
+
+`jackie_lottery_no_money` is then applied like [this](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_text.c#L630-L643).
+
+```c
+EZTR_Basic_ReplaceText(
+	0x2B62,
+	EZTR_STANDARD_TEXT_BOX_I,
+	0,
+	EZTR_ICON_NO_ICON,
+	EZTR_NO_VALUE,
+	EZTR_NO_VALUE,
+	EZTR_NO_VALUE,
+	true,
+	"Mmm, sir, if you don't have any" EZTR_CC_NEWLINE "" \										// The text from the text dump is unchanged
+	EZTR_CC_COLOR_PINK "Rupees" EZTR_CC_COLOR_DEFAULT ", you can't buy your" EZTR_CC_NEWLINE \
+	"dreams." EZTR_CC_END "",
+	jackie_lottery_no_money		// jackie_lotter_no_money is applied here instead of Null
+);
+```
+
+This ensures that the text is replaced only when the transformation state is human.
