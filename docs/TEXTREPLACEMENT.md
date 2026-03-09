@@ -150,6 +150,7 @@ Note, EZTR can actually give you specific `EZTR_Basic_ReplaceText` blocks when t
 `./Zelda64Recompiled.exe --show-console`
 
 This would allow you to run the game in debug mode. While running the game in debug mode, go to Mods, and then select the EZ Text Replacer API mod. Click on "Configure" and select the following options:
+
 <img width="409" height="363" alt="image" src="https://github.com/user-attachments/assets/1f97e25b-9f25-44ef-a6a2-af7b692b49ed" />
 
 When doing this and having any text show up in the game, the respective `EZTR_Basic_ReplaceText` will show up in your console window. Copy and paste that into your `EZTR_ON_INIT` void function and replace the text to your liking.
