@@ -29,12 +29,12 @@ This section includes the explanation of how this mod was constructed. I divided
 This mod contains the following components: 
 * [Model Modding](docs/MODEL.md)
 * Audio (voice) replacement
-* Text replacement
-* [Real-time physics (for ponytail)](docs/VERLETINTEGRATION.md)
+* [Text Replacement](docs/TEXTREPLACEMENT.md)
+* [Real-Time Physics (for ponytail)](docs/VERLETINTEGRATION.md)
 
 # What's Missing
-* Elegy of Emptiness Statue
 * Collision and offset fix for ponytail rotations
+* Completing documentation
 
 # Acknowledgements and Thanks
 This project could not have been possible without the help of the MM Recomp and Zelda Decompilation communities. I would also like to specifically thank the following people:
