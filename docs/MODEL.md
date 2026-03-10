@@ -26,15 +26,21 @@ The only difference is that you will have to use the [Custom MM-branch Fast 64](
 
 [![Modeling](https://img.youtube.com/vi/6Ji_12w5B1M/0.jpg)](https://www.youtube.com/watch?v=6Ji_12w5B1M)
 
-For each skeleton you export, you should get a .C file and a .H file. 
+When exporting this for Majora's Mask, be sure to first select the skeleton (not mesh) in your viewer. Afterward, enable "Replace Vanilla Skeletons on Export" and "Use Custom Path". Once these are selected, set your path to where you want to save your exported model-related files. Finally, press the "Export Skeleton". If there are issues with your model, error messages will show up, which you will have to address. If there are no issues, the model will be exported with no issue. For each skeleton you export, you should get a .C file and a .H file.
 
-<img width="733" height="590" alt="image" src="https://github.com/user-attachments/assets/e698ed10-be6a-49bd-b511-a007b5aec57d" />
+<img width="751" height="591" alt="image" src="https://github.com/user-attachments/assets/3cc93f55-d5ee-4061-8ab0-b13954b4612f" />
 
 For example, I exported Jackie's model + skeleton with the custom Fast64 and got 
 * [gJackieSkel.c](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/gJackieSkel.c)
 * [gJackieSkel.h](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/gJackieSkel.h)
 
 Both files need to be put into the mod template's "src" directory.
+
+A common error you can make that would prevent you from exporting your model is invalid texture file. Make sure they are in the right size format and also in the F3D format.
+
+Another common error you can make (which Fast64 will NOT catch) is ensuring that all default vertex groups of have something mapped to them. If one or more of your vertex groups do not have anything mapped to it, you can make a plane with an invisible F3D material and map that to a vertex group.
+
+Speaking of vertex groups, make sure that no vertex point in your model is mapped to two or more vertex groups.
 
 ## Hands
 As shown in the video, hands are handled significantly different from other parts of the body. You will have to have separate hand models for the following:
