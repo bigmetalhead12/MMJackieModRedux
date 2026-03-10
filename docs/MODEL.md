@@ -28,6 +28,8 @@ The only difference is that you will have to use the [Custom MM-branch Fast 64](
 
 For each skeleton you export, you should get a .C file and a .H file. 
 
+<img width="733" height="590" alt="image" src="https://github.com/user-attachments/assets/e698ed10-be6a-49bd-b511-a007b5aec57d" />
+
 For example, I exported Jackie's model + skeleton with the custom Fast64 and got 
 * [gJackieSkel.c](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/gJackieSkel.c)
 * [gJackieSkel.h](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/gJackieSkel.h)
