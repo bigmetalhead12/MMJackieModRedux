@@ -43,8 +43,11 @@ This project could not have been possible without the help of the MM Recomp and 
 - To **ProxySaw**, for creating the CustomActor library and providing coding help.
 - To **Magemods**, for creating the Audio API and making custom voice clips possible.
 - To **kentonm**, for suggesting Verlet Integration, providing coding help, and helping me understand the inner mechanisms of Majora's Mask.
+- To **Wiseguy**, for Majora's Mask Recomp and the Mod Template
+- To **Darío**, for RT64 and helping with setting up the HD Texture Pack 
 - To **Reonu** and **Bird of Light**, for providing modeling help.
 - To **Neirn**, **danielryb**, **Fig**, **Dragorn421**, and **MelonSpeedruns** for providing various coding help.
+- To **Dana the Elf**, for providing a guide on Flipbooks
 - To **PxExYxTxOxN**, for the [guide on creating player models](https://www.youtube.com/watch?v=6Ji_12w5B1M)
 - To **grubbz** and **El Regolante**, for sharing my work in their Discord community's Monthly Art Gallery
 - To **Pikuma**, for the [guide on Verlet Integration](https://www.youtube.com/watch?v=-GWTDhOQU6M)
