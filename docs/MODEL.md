@@ -61,11 +61,55 @@ Eyes and mouth are handled differently through a feature called "flipbooks". Fli
 
 Both flipbooks are set in the same way, but with different values for specific attributes.
 
+If you intend to add these flipbooks, be sure to first set your Fast64 Global Setting's game to "OoT", as the flipbook option will not show up in "MM".
+
+<img width="251" height="152" alt="image" src="https://github.com/user-attachments/assets/bffa171c-d69a-4482-86ff-9f728967a00c" />
+
 ### Eyes Flipbook
-(here)
+When setting the eyes flipbook, be sure to have the following eye textures with the same image sizes:
+* Open (default)
+* Half-open
+* Closed
+* Looking left
+* Looking right
+* Shocked/Surprised
+* Looking down
+* Squeezed shut
+
+On your mesh, select the faces of which you want to apply your default eye texture to and then assign it to a material. Afterward, apply the default open eyes image texture to the material.
+
+<img width="581" height="309" alt="image" src="https://github.com/user-attachments/assets/409320fb-4c31-41ff-92ec-83b453f60d0f" />
+
+Once the texture is set, be sure to enable "Use Texture Reference" and fill in `0x08000000`.
+
+<img width="216" height="385" alt="image" src="https://github.com/user-attachments/assets/8920428a-9c49-4b10-8549-816b330d8533" />
+
+This opens up the Flipbook Properties for the eye texture, which you can reach by scrolling down in the same tab. The flipbook property has two modes: "Array" and "Individual". This is where you have to upload the various eye textures and name them. For both modes, I did the following:
+
+<img width="514" height="503" alt="image" src="https://github.com/user-attachments/assets/34f2b516-3212-417a-b4fc-75523e3db125" />
+
+Keep note of the Texture Names for "Individual".
 
 ### Mouth Flipbook
-(here)
+When setting the mouth flipbook, be sure to have the following mouth textures with the same image sizes:
+* Closed (Default)
+* Half
+* Open/Surprised
+* Laugh/Smile
+
+On your mesh, select the faces of which you want to apply your default closed mouth texture to and then assign it to a material. Afterward, apply the default closed mouth image texture to the material.
+
+<img width="563" height="256" alt="image" src="https://github.com/user-attachments/assets/b0f8028e-cbbd-48ff-9e89-a40bda31792b" />
+
+With the texture set, enable "Use Texture Reference" and fill in `0x09000000`.
+
+<img width="263" height="401" alt="image" src="https://github.com/user-attachments/assets/01e462a0-f628-4d6c-8d82-05035caa3346" />
+
+The mouth's Flipbook Properties should now be enabled, which you can reach by scrolling down the same Material tab. Just like for the eyes flipbook, upload your mouth texture files and assign values for both "Array" and "Individual":
+
+<img width="521" height="287" alt="image" src="https://github.com/user-attachments/assets/2f442d63-c096-4c48-bb4c-547a47dc1a4c" />
+
+Once this is finished, go back to Fast64 Global Settings and change the game from "OoT" back to "MM".
 
 # Implementing the Model
 To replace a target model (human Link in this mod's case) with the exported model, a separate .C file needs to be set up. In this mod's case, [jackie_code.c](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_code.c) was set up.
@@ -76,7 +120,6 @@ To properly implement the exported custom model, this file needs to do the follo
 3. Adjusting miscellaneous in-game characteristics (For Adult Link Model Modding)
 
 Before proceeding with this, it is important to include the right header files, like [this](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_code.c#L28-L34). By default, `modding.h`, `global.h`, and `ultra64.h` should be set. Afterward, the `.h` file of the exported model files should also be included. In my case, this was `gJackieSkel.h`.
-
 
 ```c
 // Default Header Files
@@ -394,7 +437,131 @@ RECOMP_HOOK("Player_Init") void on_Player_Init(Actor* thisx, PlayState* play) {
 This function replaces all of Link's DLs. 
 
 ### Flipbooks for Eyes and Mouth
-(explain flipbooks here)
+With the eyes and mouth flipbooks set up, you can use them in your model in the game.
+
+The names of the usable flipbook textures should appear based on how you named each uploaded eye and mouth texture in the flipbook. For instance, Jackie's eyes and mouth textures are named like this in [`gJackieSkel.h`](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/gJackieSkel.h#L37-L48).
+
+```c
+extern u64 gJackieMouthClosed[];
+extern u64 gJackieMouthHalf[];
+extern u64 gJackieMouthOpen[];
+extern u64 gJackieMouthSmile[];
+extern u64 gJackieEyesOpenTex[];
+extern u64 gJackieEyesHalfTex[];
+extern u64 gJackieEyesClosedTex[];
+extern u64 gJackieEyesRollLeftTex[];
+extern u64 gJackieEyesRollRightTex[];
+extern u64 gJackieEyesShockTex[];
+extern u64 gJackieEyesRollDownTex[];
+extern u64 gJackieEyesShutTex[];
+```
+
+These textures are to be used in the main code to set up the eyes and mouth flipbooks.
+
+In your main code, you should set up your eyes flipbook like [this](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_code.c#L65-L100) (ignore the ponytail part).
+
+```c
+extern TexturePtr sPlayerEyesTextures[PLAYER_EYES_MAX];     // Eyes
+
+// ...
+
+// Eyes Texture Variables
+// Default Head
+// Note the same names from gJackieSkel.h
+extern u64 gJackieEyesOpenTex[];
+extern u64 gJackieEyesHalfTex[];
+extern u64 gJackieEyesClosedTex[];
+extern u64 gJackieEyesRollLeftTex[];
+extern u64 gJackieEyesRollRightTex[];
+extern u64 gJackieEyesShockTex[];
+extern u64 gJackieEyesRollDownTex[];    // gLinkAdultEyesUnk1Tex 
+extern u64 gJackieEyesShutTex[];        // gLinkAdultEyesUnk2Tex
+
+// ...
+
+// Eyes Flipbook for Jackie
+// Default Head
+void* sEyeTextures[PLAYER_EYES_MAX] = {
+    gJackieEyesOpenTex,
+    gJackieEyesHalfTex,
+    gJackieEyesClosedTex,
+    gJackieEyesRollLeftTex,
+    gJackieEyesRollRightTex,
+    gJackieEyesShockTex,
+    gJackieEyesRollDownTex,
+    gJackieEyesShutTex,
+};
+```
+
+`sPlayerEyesTextures` is Link's eyes flipbook, which will be replaced with `sEyeTextures`, which is currently Jackie's eye flipbook.
+
+The same thing must be done for the mouth flipbook like [this](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_code.c#L114-L134).
+
+```c
+extern TexturePtr sPlayerMouthTextures[PLAYER_MOUTH_MAX];   // Mouth
+
+// ...
+
+// Mouth Texture Variables
+// Default
+extern u64 gJackieMouthClosed[];    // gLinkAdultMouth1Tex
+extern u64 gJackieMouthHalf[];      // gLinkAdultMouth2Tex
+extern u64 gJackieMouthOpen[];      // gLinkAdultMouth3Tex
+extern u64 gJackieMouthSmile[];     // gLinkAdultMouth4Tex
+
+// ...
+
+// Mouth Flipbook for Jackie
+// Default
+void* sMouthTextures[PLAYER_MOUTH_MAX] = {
+    gJackieMouthClosed,
+    gJackieMouthHalf,
+    gJackieMouthOpen,
+    gJackieMouthSmile,
+};
+```
+
+`sPlayerMouthTextures` is Link's mouth flipbook, which will be replaced with `sMouthTextures`, which is currently Jackie's mouth flipbook.
+
+To avoid an error, the eyes and mouth flipbooks need to be reapplied in this code like [this](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_code.c#L144-L198).
+
+After this is complete, you can fully replace `sPlayerEyesTextures` and `sPlayerMouthTextures` like [this](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_code.c#L487-L517).
+
+```c
+// Hook Player_Update: Apply new eyes and mouth flipbooks to Jackie
+// Credit: MelonSpeedruns
+RECOMP_HOOK("Player_DrawImpl") void on_Player_DrawImpl(PlayState* play, void** skeleton, Vec3s* jointTable, s32 dListCount, s32 lod,
+                     PlayerTransformation playerForm, s32 boots, s32 face, OverrideLimbDrawFlex overrideLimbDraw,
+                     PostLimbDrawFlex postLimbDraw, Actor* actor) {
+    Player* player = GET_PLAYER(play);
+
+    switch (playerForm) {
+        case PLAYER_FORM_HUMAN:
+            for (int i = 0; i < PLAYER_MOUTH_MAX; i++) {
+                sPlayerMouthTextures[i] = sMouthTextures[i];
+            }
+            for (int i = 0; i < PLAYER_EYES_MAX; i++) {
+                sPlayerEyesTextures[i] = sEyeTextures[i];
+            }
+            break;
+        case PLAYER_FORM_ZORA:
+            for (int i = 0; i < PLAYER_MOUTH_MAX; i++) {
+                sPlayerMouthTextures[i] = sZoraMouthTextures[i];
+            }
+            for (int i = 0; i < PLAYER_EYES_MAX; i++) {
+                sPlayerEyesTextures[i] = sZoraEyesTextures[i];
+            }
+        case PLAYER_FORM_GORON:
+            for (int i = 0; i < PLAYER_EYES_MAX; i++) {
+                sPlayerEyesTextures[i] = sGoronEyesTextures[i];
+            }
+        default:
+            break;
+    }
+}
+```
+
+With this set up, the eyes and mouth textures should now be fully replaced.
 
 ## Misc. In-Game Characteristics (Adult Link Model Modding)
 Note: This section is primarily concerned with modding human Link with a model meant to replace Adult Link from OoT (i.e. my Jackie model). If your mod is clearly for Young Link, then this part can be disregarded.
