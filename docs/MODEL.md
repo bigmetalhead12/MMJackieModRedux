@@ -896,7 +896,7 @@ Press "Import DL" and you should get your elegy statue of choice. After this, ed
 
 Once your statue is prepared, fill in the "Filename" with how you want to name your statue and then export it. This should give you the `.h` and `.c` files. In my case, I named it `gJackieElegy` and got `gJackieElegy.h` and `gJackieElegy.c`. Drag the files into your mod directory's `src` directory.
  
-<img width="614" height="529" alt="image" src="https://github.com/user-attachments/assets/de3491f8-be64-4265-8ecc-bf6c65d83f3f" />
+<img width="613" height="524" alt="image" src="https://github.com/user-attachments/assets/4689bc53-2706-4581-ab22-f4d51b953a65" />
 
 Once this is complete, create a new `.c` file where you will be replacing your targeted elegy statue with your own. In my case, I set up [`Jackie_elegy.c`](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_elegy.c). Be sure to include the right header files also.
 
