@@ -320,6 +320,28 @@ EZTR_MSG_CALLBACK(jackie_bank_reward3) {
     }
 }
 
+// Trading Post Part-Timer
+EZTR_MSG_CALLBACK(jackie_parttimer1) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "Heyyy! I stole that Rupee from a" EZTR_CC_NEWLINE \
+            "crow! Don't go stealing it, dude!" EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_parttimer2) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "" EZTR_CC_SFX "|69|6CMiss, I just work here part-time," EZTR_CC_NEWLINE \
+            "so I don't really know this stuff." EZTR_CC_EVENT "" EZTR_CC_END "");
+    }
+}
+
 // Lottery
 EZTR_MSG_CALLBACK(jackie_lottery_no_money) {
     // Get player for form
@@ -899,11 +921,12 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "" EZTR_CC_SFX "|69|52Oh! Who's the lucky man?" EZTR_CC_NEWLINE "Congratulations." EZTR_CC_EVENT2 "" EZTR_CC_END "",
+            "" EZTR_CC_SFX "|69|52Oh! Who's the lucky man?" EZTR_CC_NEWLINE \
+            "Congratulations." EZTR_CC_EVENT2 "" EZTR_CC_END "",
             NULL
         );
 
-        // Trading Post Part Timer
+        // Trading Post Part-Timer
         EZTR_Basic_ReplaceText(
             0x06DE,
             EZTR_STANDARD_TEXT_BOX_I,
@@ -913,8 +936,9 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "Heyyy! I stole that Rupee from a" EZTR_CC_NEWLINE "crow! Don't go stealing it, dude!" EZTR_CC_END "",
-            NULL
+            "Heyyy! I stole that Rupee from a" EZTR_CC_NEWLINE \
+            "crow! Don't go stealing it, man!" EZTR_CC_END "",
+            jackie_parttimer1
         );
         EZTR_Basic_ReplaceText(
             0x06C8,
@@ -925,8 +949,9 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             EZTR_NO_VALUE,
             true,
-            "" EZTR_CC_SFX "|69|6CMiss, I just work here part-time," EZTR_CC_NEWLINE "so I don't really know this stuff." EZTR_CC_EVENT "" EZTR_CC_END "",
-            NULL
+            "" EZTR_CC_SFX "|69|6CMan, I just work here part-time," EZTR_CC_NEWLINE \
+            "so I don't really know this stuff." EZTR_CC_EVENT "" EZTR_CC_END "",
+            jackie_parttimer2
         );
 
         // Honey and Darling
