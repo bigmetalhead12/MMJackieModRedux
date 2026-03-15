@@ -1,3 +1,5 @@
+<img src="docs/img/jackie_banner_.png" alt="A screenshot">
+
 # Majora's Mask Recomp: Jackie Quilt Mod Redux
 
 This mod replaces Link (human form) with my custom model of Jackie Quilt, a character from Eternal Return.
