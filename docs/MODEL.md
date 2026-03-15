@@ -868,3 +868,125 @@ RECOMP_HOOK ("Player_PostLimbDrawGameplay") void on_PostLimbDrawGameplay(PlaySta
 Please keep in mind, however, that you may need to adjust your macro values `MOVEARROWX`, `MOVEARROWY`, and `MOVEARROWZ` based on how your first person arms and bow look in the game while you are aiming with the bow in first person. There is a ton of trial and error involved in this step, so be warned.
 
 If there is any other cleaner method of fixing the position of the drawn arrow and arms in first person, let me know.
+
+## Bonus: Elegy Statue
+If you wish to replace the elegy statue with your own, you will need to have the following tools:
+
+* Blender 4.0+ (3.X or lower will most likely not work)
+* Fast64 MM Branch (same as above)
+* Decompiled Majora's Mask
+
+This document will assume you have immediate access to all three.
+
+Open up Blender and have Fast 64 MM enabled. With the Fast64 Global Setting's game set to "MM", set the decomp path to your directory containing a decompiled Majora's Mask.
+
+<img width="204" height="239" alt="image" src="https://github.com/user-attachments/assets/473dceb8-eece-4d90-aa2e-ef11d74acafa" />
+
+Afterward, you're gonna have to import the Elegy statue DL from your decompiled Majora's Mask. Based on the elegy statue you want to change, you will have to select your DL from this list of DLs:
+* gElegyShellHumanDL (for both Human and Fierce Deity Links)
+* gElegyShellGoronDL
+* gElegyShellZoraDL
+* gElegyShellDekuDL
+
+Scroll down in your OoT/MM tab menu down to where it says "Import DL". For DL, fill it in with your DL of choice. For Object, fill in "gameplay_keep".
+
+<img width="259" height="167" alt="image" src="https://github.com/user-attachments/assets/35f93415-81fa-4081-9af6-bae224c88787" />
+
+Press "Import DL" and you should get your elegy statue of choice. After this, edit the statue however you want. Be sure to convert the textures to F3D format. Use the imported statue's textures' settings as reference if you need to.
+
+Once your statue is prepared, fill in the "Filename" with how you want to name your statue and then export it. This should give you the `.h` and `.c` files. In my case, I named it `gJackieElegy` and got `gJackieElegy.h` and `gJackieElegy.c`. Drag the files into your mod directory's `src` directory.
+ 
+<img width="613" height="524" alt="image" src="https://github.com/user-attachments/assets/4689bc53-2706-4581-ab22-f4d51b953a65" />
+
+Once this is complete, create a new `.c` file where you will be replacing your targeted elegy statue with your own. In my case, I set up [`Jackie_elegy.c`](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_elegy.c). Be sure to include the right header files also.
+
+```c
+// Default Header Files
+#include "modding.h"
+#include "global.h"
+#include "ultra64.h"
+
+// Model Header Files
+#include "gJackieElegy.h"    // My model's generated .h file from Fast64
+
+// Elegy header file
+#include "overlays/actors/ovl_En_Torch2/z_en_torch2.h"    // Include this header file. It's the struct for the elegy statue
+
+// Elegy Statue forms (added for clarity's sake)
+#define HUMAN_FORM  0
+#define GORON_FORM  1
+#define ZORA_FORM   2
+#define DEKU_FORM   3
+#define FD_FORM     4        // Same as human form
+```
+
+The function that actually spawns the elegy statue is `EnTorch2_Draw()`. I didn't want to `RECOMP_PATCH` the function, however. So, I took an alternative approach with `RECOMP_HOOK` and `RECOMP_HOOK_RETURN`.
+
+I `RECOMP_HOOK`ed `EnTorch2_Draw()` to take the current frame's alpha value of the statue (since the statue spawns by slowly becoming solid). While doing this, I also apply a `0` alpha value to the original elegy statue. This part of the [code](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_elegy.c#L38-L56) is where this is executed:
+
+```c
+static EnTorch2* gEnTorch2 = NULL;         // To store current elegy statue
+static PlayState* gEnTorch2Play = NULL;    // To store current playstate
+static u8 actualAlpha = 0;                 // To store actual alpha value of statue in current frame
+
+// Make the original Human Elegy Statue invisible
+// Note: human statue is used in-game for human link and FD link
+RECOMP_HOOK("EnTorch2_Draw") void before_EnTorch2_Draw(Actor* thisx, PlayState* play) {
+    // Save current statue actor and playstate
+    gEnTorch2 = (EnTorch2*)thisx;
+    gEnTorch2Play = play;
+
+    EnTorch2* this = (EnTorch2*)thisx;
+
+    // Check if statue is from human/Fierce Deity
+    if (this->actor.params == HUMAN_FORM || this->actor.params == FD_FORM) {
+        actualAlpha = this->alpha;      // Save the current actual alpha value for Human Elegy Statue
+        this->alpha = 0;                // Make Human Elegy Statue completely invisible
+    }
+}
+```
+
+The new alpha value of `0` is then used to draw the original elegy statue (if the player is currently human or FD Link).
+
+Afterward, I `RECOMP_HOOK_RETURN`ed `EnTorch2_Draw()` to point to the new statue and draw it in with `Gfx_Draw...` functions while applying the current frame's actual alpha value. This part of the [code](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/Jackie_elegy.c#L60-L95) is where this is done.
+
+```c
+// Apply the current actual alpha value of Human Elegy Statue to Jackie's Elegy Statue
+RECOMP_HOOK_RETURN("EnTorch2_Draw") void after_EnTorch2_Draw(void) {
+    // Check if all pointers are not NULL
+    if (gEnTorch2 == NULL || gEnTorch2Play == NULL) {
+        return;
+    }
+
+    // Point to current statue and playstate
+    EnTorch2* this = gEnTorch2;         // statue
+    PlayState* play = gEnTorch2Play;    // playstate
+
+    // Check if statue is from human/Fierce Deity
+    if (this->actor.params == HUMAN_FORM || this->actor.params == FD_FORM) {
+        // Re-apply current actual alpha value to current statue
+        this->alpha = actualAlpha;      
+
+        // Point to Jackie statue
+        Gfx* gfx = gElegyShellHumanDL_mesh;
+
+        // Draw statue
+        OPEN_DISPS(play->state.gfxCtx);     // Open current playstate's graphics context
+
+        if (this->alpha == 255) {           // When statue is fully visible (alpha is max value 255)...
+            Scene_SetRenderModeXlu(play, 0, 0x01);
+            gDPSetEnvColor(POLY_OPA_DISP++, 255, 255, 255, 255);
+            Gfx_DrawDListOpa(play, gfx);    // Draw statue
+        } 
+        else {                              // When statue is still fading in (alpha is rising to 255)...
+            Scene_SetRenderModeXlu(play, 1, 0x02);
+            gDPSetEnvColor(POLY_XLU_DISP++, 255, 255, 255, this->alpha);
+            Gfx_DrawDListXlu(play, gfx);    // Draw statue
+        }
+
+        CLOSE_DISPS(play->state.gfxCtx);    // Close game context
+    }
+}
+```
+
+So technically, the original statue is actually in the game. However, it is invisible while the new statue also gets draw at that position.
