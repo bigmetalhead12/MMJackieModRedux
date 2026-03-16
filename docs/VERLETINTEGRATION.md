@@ -47,7 +47,34 @@ A target object has at least one **point**. A point needs to be either *pinned* 
 
 A target object's **bone** refers to a set of two points. Bones are designed to always maintain the initially-set distance between its two assigned points (basically the length of the bone). Essentially, the bone constrains two points to maintain their distance from each other. This constraint is what causes bones of an object to move bsaed on real-time physics, especially when one of its point is pinned. For example, if one point in a given bone is pinned while the other is not, and the force of gravity is being applied to the bone, the bone will be hanging from its pinned point while the other, unpinned point will be hanging below the pinned point.
 
--add illustration here-
+Here is an example of how I set up my ponytail model for verlet integration.
+
+<img width="564" height="440" alt="image" src="https://github.com/user-attachments/assets/2f1b4ffa-9128-4d72-b669-fb1759bdeff8" />
+
+In this model, the ponytail's skeleton in Blender is called `gPonytailSkel`. In this skeleton, the limb starts from `gPonytailRootLimb`, goes to `gPonytailLimb1`, and then ends at gPonytailLimb5`.
+
+In this mod, I set up a verlet integration environment, where I made matching verlet integration **points** based on the ponytail skeleton (which is called `PhysLimb` in the code):
+
+```
+gPonytailRootLimb => PhysLimb ponytailRootLimb     (pinned)
+gPonytailLimb1    => PhysLimb ponytailLimb1        (pinned)
+gPonytailLimb2    => PhysLimb ponytailLimb2        (unpinned)
+gPonytailLimb3    => PhysLimb ponytailLimb3        (unpinned)
+gPonytailLimb4    => PhysLimb ponytailLimb4        (unpinned)
+gPonytailLimb5    => PhysLimb ponytailLimb5        (unpinned)
+```
+
+I set up verlet integration **bones** to be between **points** (which is called `PhysBone` in the code):
+
+```
+PhysBone ponytailRootLimbLimb1     (Between RootLimb and Limb1)
+PhysBone ponytailLimb1Limb2        (Between Limb1 and Limb2)
+PhysBone ponytailLimb2Limb3        (Between Limb2 and Limb3)
+PhysBone ponytailLimb3Limb4        (Between Limb3 and Limb4)
+PhysBone ponytailLimb4Limb5        (Between Limb4 and Limb5)
+```
+
+
 
 ## Making the Ponytail Model (3D Modeling)
 So, in my case, I want to create a ponytail that has real-time physics. Using Blender, I created the model (separate from the main player model) along with a unique skeleton for it. When doing this, I made sure to meet the following requirements for my model:
