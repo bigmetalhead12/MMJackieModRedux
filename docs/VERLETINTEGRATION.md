@@ -199,4 +199,33 @@ Using Proxy's Custom Actor API, I set up the Ponytail actor that would fit with 
 | `Ponytail_Draw` | Every in-game frame | Render the ponytail model's mesh |
 | `Ponytail_Destroy` | When ponytail actor is removed | Get rid of ponytail |
 
+To properly register the ponytail as an actor, a profile was set for the ponytail in [code](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/z_ponytail.c#L79-L90):
+
+```c
+// Sets profile for ponytail before registering it as actor
+ActorProfile Ponytail_Profile = {
+    ACTOR_ID_MAX,
+    ACTORCAT_ITEMACTION,
+    FLAGS,
+    GAMEPLAY_KEEP,
+    sizeof(Ponytail),
+    Ponytail_Init,
+    Ponytail_Destroy,
+    Ponytail_Update,
+    Ponytail_Draw,
+};
+```
+
+Afterward, the profile is registered as an actor through this [code](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/z_ponytail.c#L92-L97):
+
+```c
+s16 CUSTOM_ACTOR_PONYTAIL = ACTOR_ID_MAX;
+
+// Register ponytail as custom actor
+RECOMP_CALLBACK("*", recomp_on_init) void Ponytail_OnRecompInit() {
+    CUSTOM_ACTOR_PONYTAIL = CustomActor_Register(&Ponytail_Profile);
+}
+```
+
+
 
