@@ -185,3 +185,17 @@ PhysBone ponytailLimb3Limb4        (Between Limb3 and Limb4)
 PhysBone ponytailLimb4Limb5        (Between Limb4 and Limb5)
 ```
 
+`ponytailRootLimb` and `ponytailLimb1` are pinned, so those points and `ponytailRootLimbLimb1` won't be affected by physics and will be following Jackie's head movement.
+
+Meanwhile, the rest of the points and the rest of the bones in the ponytail would be affected by motion such as gravity and players' velocity.
+
+## Using the Custom Actor
+Using Proxy's Custom Actor API, I set up the Ponytail actor that would fit with Majora's Mask's actor system. There are four lifecycle functions to keep track of when using this API's custom actor system:
+
+| Function | When it Runs | Purpose |
+| :--- | :----: | ---: |
+| Row 1, Col 1 | Row 1, Col 2 | Row 1, Col 3 |
+| Row 2, Col 1 | Row 2, Col 2 | Row 2, Col 3 |
+| Row 3, Col 1 | Row 3, Col 2 | Row 3, Col 3 |
+| Row 4, Col 1 | Row 4, Col 2 | Row 4, Col 3 |
+| Row 5, Col 1 | Row 5, Col 2 | Row 5, Col 3 |
