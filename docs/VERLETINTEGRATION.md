@@ -193,7 +193,7 @@ Meanwhile, the rest of the points and the rest of the bones in the ponytail woul
 Using Proxy's Custom Actor API, I set up the Ponytail actor that would fit with Majora's Mask's actor system. There are four lifecycle functions to keep track of when using this API's custom actor system, which has been implemented in [`z_ponytail.c`](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/z_ponytail.c#L49-L56).
 
 | Function | When it Runs | Purpose |
-| :--- | :----: | ---: |
+| :--- | :--- | :--- |
 | `Ponytail_Init` | Once when the ponytail model spawns | Set up ponytail's skeleton and initialize phys limbs and bones (position and rotation) |
 | `Ponytail_Update` | Every in-game frame | Remove ponytail model if player transforms from human to any other form |
 | `Ponytail_Draw` | Every in-game frame | Render the ponytail model's mesh |
