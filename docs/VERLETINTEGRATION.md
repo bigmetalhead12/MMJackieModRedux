@@ -190,7 +190,10 @@ PhysBone ponytailLimb4Limb5        (Between Limb4 and Limb5)
 Meanwhile, the rest of the points and the rest of the bones in the ponytail would be affected by motion such as gravity and players' velocity.
 
 ## Using the Custom Actor
-Using Proxy's Custom Actor API, I set up the Ponytail actor that would fit with Majora's Mask's actor system. There are four lifecycle functions to keep track of when using this API's custom actor system, which has been implemented in [`z_ponytail.c`](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/z_ponytail.c#L49-L56).
+Using Proxy's Custom Actor API, I set up the Ponytail actor that would fit with Majora's Mask's actor system.
+
+### Registering the Ponytail as an Actor
+There are four lifecycle functions to keep track of when using this API's custom actor system, which has been implemented in [`z_ponytail.c`](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/z_ponytail.c#L49-L56).
 
 | Function | When it Runs | Purpose |
 | :--- | :--- | :--- |
@@ -227,5 +230,50 @@ RECOMP_CALLBACK("*", recomp_on_init) void Ponytail_OnRecompInit() {
 }
 ```
 
+### Initializing the Ponytail
+With the ponytail actor set, it's drawn into the game by `RECOMP_HOOK`ing to `Player_init` like [this](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/z_ponytail.c#L104-L113):
 
+```c
+Ponytail* gPlayerPonytail = NULL;
+PlayState* gPlayStatePonytail = NULL;
 
+RECOMP_HOOK("Player_Init") void on_player_init(Actor* thisx, PlayState* play) {
+    if (recomp_get_config_u32("change_hairstyle") && gPlayerPonytail == NULL) {
+        Actor_SpawnAsChildAndCutscene(&play->actorCtx, play, CUSTOM_ACTOR_PONYTAIL, 
+                                    -367.0f, 0.0f, -245.0f, 0, 0x8000, 0, 0, 0, 
+                                    0, 0);
+    }
+}
+```
+
+The ponytail is properly initialized through the [`Ponytail_Init`](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/z_ponytail.c#L167-L210) function.
+
+Several tasks are done in this function. First, the ponytail's limbs' position values are directly copied from [`gPonytailSkel.c`](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/gPonytailSkel.c#L252-L257). These position values are then copied into the `PhysLimbs`. Second, the ponytail's `skelAnime` is set up, which would have its own `jointTable`. The `jointTable` has the rotation values of every limb in the skeleton; meaning, the ponytail's `jointTable` is to be manipulated to handle the ponytail points' real-time rotation every frame. Third, [`Verlet_InitPhysPlayer`](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/verlet_physics.c#L30-L34) is run to take note of Jackie's current rotation and velocity in the map. Finally, [`Ponytail_SetDefaultBodyPartsPos`](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/z_ponytail.c#L115-L165) is run to initialize the ponytail's verlet integration.
+
+### Destroying the Ponytail
+The ponytail is destroyed using the following implementation of [`Ponytail_destroy`](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/z_ponytail.c#L218-L220).
+
+### Updating the Ponytail
+Every frame, the ponytail's limbs' rotations and positions are updated based on Jackie and verlet intergration.
+
+When updating, it is important to know the location and rotation value of Jackie's head limb. This information is found by `RECOMP_HOOK`ing `Player_PostLimbDrawGameplay`, which was done through [this method](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/z_ponytail.c#L233-L252). In this method, I pointed to `PLAYER_LIMB_HEAD` when that limb is being drawn in `Player_PostLimbDrawGameplay` and grab its rotation and position values.
+
+At this part of the code, I also set up [`Ponytail_UpdateBodyPartsPos`](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/z_ponytail.c#L322-L383), which calculates the position values of every limb in the ponytail skeleton in the frame
+
+With these position values in mind, [`Ponytail_RotateJoints`](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/z_ponytail.c#L322C6-L383) rotates each limb in the ponytail skeleton to match the calculated position values of every limb. 
+
+Finally, I defined [`Ponytail_update`](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/z_ponytail.c#L386-L396) so that it removes the ponytail's mesh whenever the player transforms from human to non-human form.
+
+### Drawing the Ponytail
+The draw functions run these verlet integration-related functions to draw the ponytail properly. This involves calculating the net force applied to the ponytail based on Jackie's current position and movement and using them to calculate the rotation values for every limb.
+
+This is done through `RECOMP_HOOK`ing `Player_Draw` with the following [implementation](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/z_ponytail.c#L404-L424):
+
+Finally, [`Ponytail_Draw`](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/z_ponytail.c#L427-L452) is implemented. It is also set up so that the ponytail blinks the same way as Jackie's model does when she gets damaged or jinxed. When using the function (`func_80122868`) that allows this, however, other random actors in the map also start blinking the same way as Jackie does. To prevent this behavior, the following code snippet is applied:
+
+```c
+// Reset fog to scene's default values after drawing so that other actors don't get affected
+if (player->invincibilityTimer > 0 || gSaveContext.jinxTimer != 0) {
+    POLY_OPA_DISP = Play_SetFog(play, POLY_OPA_DISP);
+}
+```
