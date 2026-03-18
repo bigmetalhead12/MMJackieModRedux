@@ -8,7 +8,7 @@ Before jumping into this project, I had to get used to three things:
 
 * Verlet Integration
 * Blender
-* [ProxySaw's CustomActor Library](https://thunderstore.io/c/zelda-64-recompiled/p/ProxyMM/CustomActor/)
+* [ProxySaw's CustomActor API Library](https://thunderstore.io/c/zelda-64-recompiled/p/ProxyMM/CustomActor/)
 
 ## Verlet Integration
 To implement real-time physics to Jackie's ponytail model, I used the Verlet Integration.
@@ -24,7 +24,7 @@ The physics itself is easy to design. The challenge is implementing this system 
 ## Blender
 If you are used to creating custom player models for Majora's Mask, then there isn't too much else to know about Blender for this project.
 
-## ProxySaw's CustomAPI Library
+## ProxySaw's CustomActor API Library
 ProxySaw developed a really useful library that allows people to add their own actors into Majora's Mask Recomp. It is used as a foundation for this mod.
 
 You can download the library [here](https://thunderstore.io/c/zelda-64-recompiled/p/ProxyMM/CustomActor/). If you're curious, you can view the source code [here](https://github.com/garrettjoecox/ProxyMM_RecompMods/tree/main/packages/CustomActor)
@@ -136,8 +136,6 @@ The ponytail itself should always have the force applied to its bones. This forc
 When Jackie moves, however, her velocity needs to be applied directly to the Verlet Integration calculation. This way, the limbs would know that even when there is no acceleration based on movement, the player is still moving and the ponytail limbs should not set down.
 
 And after these calculations are done, the bone's length will ensure that the points in their respective bones are moved to respect the original set length of each bone.
-
--Diagram here
 
 So, the parameters are as follows:
 * Previous Position of the Target Object's limb
