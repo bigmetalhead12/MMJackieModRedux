@@ -1,4 +1,4 @@
-<img src="docs/img/jackie_banner.png" alt="A screenshot">
+<img width="4800" height="3400" alt="jackie_banner" src="https://github.com/user-attachments/assets/7bd406e5-9f79-499a-bc3a-4219f9f938cb" />
 
 # Majora's Mask Recomp: Jackie Quilt Mod Redux
 
