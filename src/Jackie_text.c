@@ -27,6 +27,7 @@ RECOMP_IMPORT("*", u32 recomp_get_config_u32(const char* key));
 RECOMP_HOOK("func_80AE7F34") void on_func_80AE7F34(EnStopheishi* this, PlayState* play) {
     if (recomp_get_config_u32("alternative_text")) {
         SET_WEEKEVENTREG(WEEKEVENTREG_12_20);   // Sets event to already having talked to guard as human
+        this->unk_265 = 1;                      // Prevents guard from blocking Jackie after her sword gets stolen
     }
 }
 
