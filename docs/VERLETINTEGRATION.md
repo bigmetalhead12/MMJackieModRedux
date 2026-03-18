@@ -8,7 +8,7 @@ Before jumping into this project, I had to get used to three things:
 
 * Verlet Integration
 * Blender
-* [ProxySaw's CustomAPI Library](https://thunderstore.io/c/zelda-64-recompiled/p/ProxyMM/CustomActor/)
+* [ProxySaw's CustomActor Library](https://thunderstore.io/c/zelda-64-recompiled/p/ProxyMM/CustomActor/)
 
 ## Verlet Integration
 To implement real-time physics to Jackie's ponytail model, I used the Verlet Integration.
