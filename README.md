@@ -1,4 +1,3 @@
-<img src="docs/img/jackie_banner.png" alt="A screenshot">
 
 # Majora's Mask Recomp: Jackie Quilt Mod Redux
 
