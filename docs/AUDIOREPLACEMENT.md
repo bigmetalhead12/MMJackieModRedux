@@ -4,8 +4,8 @@ I want to give big thanks to [Magemods](https://github.com/magemods) for his [MM
 
 ## Introduction
 In this doc, I describe my process for changing Human Link's voice to Jackie's voice. There are actually two versions of the Audio API you can use:
-1.  Magemods' [Original MM Audio API](https://github.com/magemods/mm-audio-api)
-2.  [Ben](https://github.com/B3n-17)'s [Updated MM Audio API](https://thunderstore.io/c/zelda-64-recompiled/p/MAA/Audio_API/)
+a.  Magemods' [Original MM Audio API](https://github.com/magemods/mm-audio-api)
+b.  [Ben](https://github.com/B3n-17)'s [Updated MM Audio API](https://thunderstore.io/c/zelda-64-recompiled/p/MAA/Audio_API/)
 
 There is a reason two versions of the API exists. Although Magemods developed the original audio API, he never completed the API to his liking and released it on thunderstore before going absent. After his prolonged absence, Ben picked up where Magemods left off and continued the project.
 
