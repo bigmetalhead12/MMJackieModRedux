@@ -895,7 +895,7 @@ Scroll down in your OoT/MM tab menu down to where it says "Import DL". For DL, f
 
 Press "Import DL" and you should get your elegy statue of choice. After this, edit the statue however you want. Be sure to convert the textures to F3D format. Use the imported statue's textures' settings as reference if you need to.
 
-Once your statue is prepared, fill in the "Filename" with how you want to name your statue and then export it. This should give you the `.h` and `.c` files. In my case, I named it `gJackieElegy` and got `gJackieElegy.h` and `gJackieElegy.c`. Drag the files into your mod directory's `src` directory.
+Once your statue is prepared, fill in the "Filename" with how you want to name your statue and then export it. This should give you the `.h` and `.c` files. In my case, I named it `gJackieElegy` and got [`gJackieElegy.h`](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/gJackieElegy.h) and [`gJackieElegy.c`](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/src/gJackieElegy.c). Drag the files into your mod directory's `src` directory.
  
 <img width="613" height="524" alt="image" src="https://github.com/user-attachments/assets/4689bc53-2706-4581-ab22-f4d51b953a65" />
 
