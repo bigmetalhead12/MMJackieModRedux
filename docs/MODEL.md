@@ -17,6 +17,7 @@ The two parts of model modding are:
 Before modding MM models, you only need:
 1. [Custom MM-branch Fast64](https://github.com/Yanis002/fast64/tree/mm_dev)
 2. Blender 3.2+
+*  (Optional) Decompiled Majora's Mask
 
 # Exporting Model
 ## Basics
