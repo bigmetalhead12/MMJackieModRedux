@@ -9,7 +9,7 @@ In this doc, I describe my process for changing Human Link's voice to Jackie's v
 
 There is a reason two versions of the API exists. Although Magemods developed the original audio API, he never completed the API to his liking and released it on thunderstore before going absent. After his prolonged absence, Ben picked up where Magemods left off and continued the project.
 
-In this project, I specifically used Magemod's original API. The pro of this approach is that my audio replacement mod **can work with either of the two APIs** loaded in the mod folder of MM Recomp (meaning, even just having Magemod's original Audio API files in MM:Recomp's mod folder would make this Jackie mod fully functional). However, the con of this approach is that this project does not fully utilize the new features Ben implemented in his version of the audio API. For this reason, my method, although fully functional with honestly no noticeable drawbacks, may be more inconvenient than it should be.
+In this project, I specifically used Magemod's original API. The pro of this approach is that my audio replacement mod **can work with either of the two APIs** loaded in the mod folder of MM Recomp (meaning, even just having Magemod's original Audio API files in MM:Recomp's mod folder would make this Jackie mod fully functional). However, the con of this approach is that this project does not fully utilize the new features Ben implemented in his version of the audio API. For this reason, my method, although fully functional with honestly no noticeable drawbacks, may be more inconvenient to implement than it should be.
 
 # Prerequisites
 Before modding the audio, you would need...
