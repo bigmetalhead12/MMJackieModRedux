@@ -42,7 +42,7 @@ First, you have to create a `.WAV` file of your audio clip. When doing this, be 
 
 Here is an example of my exporting settings for my first attack audio clip that I used to replace the audio clip ID `28`.
 
-<img width="369" height="317" alt="image" src="https://github.com/user-attachments/assets/a7a99fd8-bc09-4553-81c7-acae5276948c" />
+<img width="369" height="317" alt="image" src="https://github.com/user-attachments/assets/0f2885fc-7a40-473f-8455-1d71d1b8395a" />
 
 Once this is done, create `.RAW` files out of your `.WAV` files. When doing this, you have to use ffmpeg.
 
