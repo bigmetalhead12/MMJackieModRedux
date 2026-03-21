@@ -30,7 +30,7 @@ This section includes the explanation of how this mod was constructed. I divided
 
 This mod contains the following components: 
 * [Model Modding](docs/MODEL.md)
-* Audio (voice) replacement
+* [Audio (voice) replacement](https://github.com/bigmetalhead12/MMJackieModRedux/blob/main/docs/AUDIOREPLACEMENT.md)
 * [Text Replacement](docs/TEXTREPLACEMENT.md)
 * [Real-Time Physics (for ponytail)](docs/VERLETINTEGRATION.md)
 
