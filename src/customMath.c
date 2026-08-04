@@ -205,7 +205,11 @@ void CustomMath_Vec3f_Rotate(Vec3f* src, Vec3s* rotAngle, Vec3f* dest) {
 }
 
 void CustomMath_Vec3f_InverseRotate(Vec3f* src, Vec3s* rotAngle, Vec3f* dest) {
-    CustomMath_Vec3f_RotateByZ(src, -rotAngle->x, dest);
-    CustomMath_Vec3f_RotateByY(dest, -rotAngle->y, dest);
-    CustomMath_Vec3f_RotateByX(dest, -rotAngle->z, dest);
+    Vec3f tempZ = { 0.0f, 0.0f, 0.0f };
+    Vec3f tempY = { 0.0f, 0.0f, 0.0f };
+
+    // Reverse the forward X -> Y -> Z operation.
+    CustomMath_Vec3f_RotateByZ(src, -rotAngle->z, &tempZ);
+    CustomMath_Vec3f_RotateByY(&tempZ,-rotAngle->y,&tempY);
+    CustomMath_Vec3f_RotateByX(&tempY, -rotAngle->x, dest);
 }

@@ -283,7 +283,7 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
             // Set previous values for current gPhysLimb
             Math_Vec3f_Copy(&gPhysLimbs[i]->prev_pos, &gPhysLimbs[i]->curr_pos);    // Previous Position
             Math_Vec3f_Copy(&gPhysLimbs[i]->prev_vel, &gPhysLimbs[i]->curr_vel);    // Previous Velocity
-
+            
             // Find current global position of current limb based on offset from parent limb's position
             Vec3f transformVec3f = {0.f, 0.f, 0.f};
             Vec3s rotatedOffset = { 0, 0, 0};
@@ -323,6 +323,10 @@ void Ponytail_RotateJoints(Ponytail* this, PhysBone* gPhysBones[]) {
     // Keep track of all limbs' rotation for subsequent limbs' rotations
     Vec3s offset_rotation = { (s16)0, (s16)0, (s16)0 };
 
+    // Parent rotation inherited by the first simulated bone
+    Vec3s root_rotation = { 0, 0, 0 };
+    Math_Vec3s_Copy(&root_rotation, &this->skelAnime.jointTable[PONYTAIL_ROOT_ROT]);
+
     // Go through every bone
     for (int i = (int)PONYTAIL_BONE_ROOT_LIMB1; i < (int)PONYTAIL_BONE_MAX; i++) {
         // Skip to next bone if both limbs in current bone are pinned
@@ -338,7 +342,11 @@ void Ponytail_RotateJoints(Ponytail* this, PhysBone* gPhysBones[]) {
                 // Transform direction into local space by removing actor rot & model offset
                 Vec3s actorRotWithOffset = {0, 0, 0};
                 Math_Vec3s_Copy(&actorRotWithOffset, &this->actor.shape.rot);
+
                 CustomMath_Vec3f_InverseRotate(&bone_direction, &actorRotWithOffset, &bone_direction);
+                CustomMath_Vec3f_InverseRotate(&bone_direction, &root_rotation, &bone_direction);
+
+                CustomMath_Vec3f_RotateByY(&bone_direction, (s16)32768, &bone_direction);
 
                 // Now compute pitch/roll from the local-space direction
                 Vec3f origin = {0, 0, 0};
@@ -360,7 +368,11 @@ void Ponytail_RotateJoints(Ponytail* this, PhysBone* gPhysBones[]) {
                 // Transform direction into local space by removing actor rot & model offset
                 Vec3s actorRotWithOffset = {0, 0, 0};
                 Math_Vec3s_Copy(&actorRotWithOffset, &this->actor.shape.rot);
+
                 CustomMath_Vec3f_InverseRotate(&bone_direction, &actorRotWithOffset, &bone_direction);
+                CustomMath_Vec3f_InverseRotate(&bone_direction, &root_rotation, &bone_direction);
+
+                CustomMath_Vec3f_RotateByY(&bone_direction, (s16)32768, &bone_direction);
 
                 // Now compute pitch/roll from the local-space direction
                 Vec3f origin = {0, 0, 0};
