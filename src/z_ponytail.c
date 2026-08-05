@@ -226,8 +226,8 @@ Ponytail Update
 =================
 */
 
-Vec3f head_globalPos = { (f32)0, (f32)0, (f32)0 };  // Global position of player's head limb
-Vec3s head_rotate = {0, 0, 0};                      // Rotation value for player's head (with parent limbs' rotations included)
+Vec3f head_globalPos = { (f32)0, (f32)0, (f32)0 };      // Global position of player's head limb
+Vec3s head_rotate = {0, 0, 0};                          // Rotation value for player's head (with parent limbs' rotations included)
 
 // Get player head limb's position and rotation values from matrix
 RECOMP_HOOK("Player_PostLimbDrawGameplay") void Ponytail_on_Player_PostLimbDrawGameplay(PlayState* play, s32 limbIndex, Gfx** dList1, Gfx** dList2, Vec3s* rot, Actor* actor) {
@@ -253,28 +253,35 @@ RECOMP_HOOK("Player_PostLimbDrawGameplay") void Ponytail_on_Player_PostLimbDrawG
 
 
 void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_force, StandardLimb* gLimbs[], PhysLimb* gPhysLimbs[], PhysBone* gPhysBones[]) {
-    // Set Ponytail's previous position
+    // Save Jackie's previous position as ponytail's previous position
     Math_Vec3f_Copy(&this->actor.prevPos, &player->actor.prevPos);
 
-    // Set Ponytail's position and rotations
+    // Move ponytail actor to current positin of Jackie's head
     Math_Vec3f_Copy(&this->actor.world.pos, &head_globalPos);
+
+    // Make ponytail actor face the same general direction as Jackie
     Math_Vec3s_Copy(&this->actor.shape.rot, &player->actor.shape.rot);
-    this->actor.shape.rot.y += -32768;
-    Math_Vec3s_Copy(&this->actor.world.rot, &player->actor.shape.rot);
+    this->actor.shape.rot.y += -32768;  // -32768 is 180 degree turn because ponytail model faces opposite direction by default
 
     // Set Root limb's bodyPartsPos
     Math_Vec3f_Copy(&this->bodyPartsPos[PONYTAIL_BODYPART_ROOT], &head_globalPos);
     Math_Vec3f_Copy(&gPhysLimbs[PONYTAIL_BODYPART_ROOT]->curr_pos, &this->actor.world.pos); // Rotation needs to be applied
 
-    // jointTable Root Position
+    // Set ponytail actor's jointTable Root Position
     Vec3s newRootJointPos = { 0, 0, 0};
     Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_POS], &newRootJointPos);
     
-    // jointTable Root rotation
+    // Set ponytail actor's jointTable Root rotation
     Vec3s newRootJointRot = { 0, 0, 0};
     newRootJointRot.x = 32768 + head_rotate.z;
     newRootJointRot.y = -16384 + head_rotate.y - this->actor.shape.rot.y;
     newRootJointRot.z = 0;
+    // Special case for when Jackie is locked on to enemy to accomodate for weird head limb positions
+    if (player->stateFlags3 & PLAYER_STATE3_HOSTILE_LOCK_ON) {
+        newRootJointRot.x = newRootJointRot.x - player->headLimbRot.x - player->upperLimbRot.x;
+        newRootJointRot.z = head_rotate.x;
+    }
+
     Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_ROT], &newRootJointRot);
 
     // BodyPartsPos Rest of the limbs
@@ -285,10 +292,19 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
             Math_Vec3f_Copy(&gPhysLimbs[i]->prev_vel, &gPhysLimbs[i]->curr_vel);    // Previous Velocity
             
             // Find current global position of current limb based on offset from parent limb's position
-            Vec3f transformVec3f = {0.f, 0.f, 0.f};
-            Vec3s rotatedOffset = { 0, 0, 0};
-            CustomMath_Vec3s_Rotate(&gPhysLimbs[i]->default_jointPos, &this->actor.shape.rot, &rotatedOffset);
-            CustomMath_Vec3s_Scale_ToVec3f(&rotatedOffset, this->actor.scale.x, &transformVec3f);
+            Vec3f transformVec3f = { 0.0f, 0.0f, 0.0f };
+            Vec3s pinnedLimbRot = {newRootJointRot.x, 0, newRootJointRot.z };  // Special rotation for pinned limb
+            Vec3s rootRotatedOffset = { 0, 0, 0 };      // Temp variable that stores combined rotation of ponytail pinned limb's position and Jackie's head rotation
+            Vec3s worldRotatedOffset = { 0, 0, 0 };     // Temp variable that stores Ponytail pinned limb's combined rotation and Jackie's current rotation relative to world
+
+            // Take pinned ponytail pinned limb's offset and rotate it based on ponytail's current rotation
+            CustomMath_Vec3s_Rotate(&gPhysLimbs[i]->default_jointPos, &pinnedLimbRot, &rootRotatedOffset);
+
+            // Take combined rotation of ponytail pinned limb and apply Jackie's world-facing direction afterward
+            CustomMath_Vec3s_Rotate(&rootRotatedOffset, &this->actor.shape.rot, &worldRotatedOffset);
+
+            // Scale total combined rotation down to actor's current scale value
+            CustomMath_Vec3s_Scale_ToVec3f(&worldRotatedOffset, this->actor.scale.x, &transformVec3f);
 
             // Set Current values for current gPhysLimb
             Math_Vec3f_Sum(&this->bodyPartsPos[i-1], &transformVec3f, &this->bodyPartsPos[i]);
