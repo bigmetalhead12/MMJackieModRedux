@@ -294,8 +294,8 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
             // Find current global position of current limb based on offset from parent limb's position
             Vec3f transformVec3f = { 0.0f, 0.0f, 0.0f };
             Vec3s pinnedLimbRot = {newRootJointRot.x, 0, newRootJointRot.z };  // Special rotation for pinned limb
-            Vec3s rootRotatedOffset = { 0, 0, 0 };      // Temp variable that stores combined rotation of ponytail pinned limb's position and Jackie's head rotation
-            Vec3s worldRotatedOffset = { 0, 0, 0 };     // Temp variable that stores Ponytail pinned limb's combined rotation and Jackie's current rotation relative to world
+            Vec3s rootRotatedOffset = { 0, 0, 0 };
+            Vec3s worldRotatedOffset = { 0, 0, 0 }; 
 
             // Take pinned ponytail pinned limb's offset and rotate it based on ponytail's current rotation
             CustomMath_Vec3s_Rotate(&gPhysLimbs[i]->default_jointPos, &pinnedLimbRot, &rootRotatedOffset);
