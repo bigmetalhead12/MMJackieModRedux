@@ -301,7 +301,7 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
             CustomMath_Vec3s_Rotate(&gPhysLimbs[i]->default_jointPos, &pinnedLimbRot, &rootRotatedOffset);
 
             // Take combined rotation of ponytail pinned limb and apply Jackie's world-facing direction afterward
-            CustomMath_Vec3s_Rotate(&rootRotatedOffset, &this->actor.shape.rot, &worldRotatedOffset);
+            CustomMath_Vec3s_Rotate(&rootRotatedOffset, &player->actor.shape.rot, &worldRotatedOffset);
 
             // Scale total combined rotation down to actor's current scale value
             CustomMath_Vec3s_Scale_ToVec3f(&worldRotatedOffset, this->actor.scale.x, &transformVec3f);

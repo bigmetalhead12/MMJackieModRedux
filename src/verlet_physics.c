@@ -123,7 +123,7 @@ void Verlet_BoneConstraint(PhysBone* target_bone) {
     
     // If target bone's both limbs are unpinned, percent is divided by 2
     if (target_bone->limb_a->pinned == 0 && target_bone->limb_b->pinned == 0) {
-        percent = percent/1.f;
+        percent = percent/2.f;
         Math_Vec3f_ScaleAndStore(&direction_vec, percent, &offset);
         //Math_Vec3f_Diff(&target_bone->limb_a->curr_pos, &offset, &target_bone->limb_a->curr_pos);
         Math_Vec3f_Sum(&target_bone->limb_b->curr_pos, &offset, &target_bone->limb_b->curr_pos);
