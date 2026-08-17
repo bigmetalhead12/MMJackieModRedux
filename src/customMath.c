@@ -65,6 +65,61 @@ s16 CustomMath_Vec3f_Roll(Vec3f* a, Vec3f* b) {
 
 /*
 =================
+Dot Product
+=================
+*/
+
+f32 CustomMath_Vec3f_Dot(Vec3f* a, Vec3f* b) {
+    return (a->x * b->x) +
+           (a->y * b->y) +
+           (a->z * b->z);
+}
+
+
+/*
+=================
+Finding Closest Point in Line Segment
+=================
+*/
+
+f32 CustomMath_Clamp(f32 val, f32 min, f32 max) {
+    if (val < min) {
+        return min;
+    }
+    else if (val > max) {
+        return max;
+    }
+    else {
+        return val;
+    }
+}
+
+// Find point from line segment closest to target point
+void CustomMath_Vec3f_ClosestPoint(Vec3f* src, Vec3f* pointA, Vec3f* pointB, Vec3f* dest) {
+    // Line segment between point A and point B
+    Vec3f segment = { (pointB->x - pointA->x), (pointB->y - pointA->y), (pointB->z - pointA->z) };
+
+    // Source vec3f point's offset from point A
+    Vec3f center_offset_from_a = { (src->x - pointA->x), (src->y - pointA->y), (src->z - pointA->z) };
+
+    // Length of segment squared
+    f32 segment_length_squared = (segment.x * segment.x) + (segment.y * segment.y) + (segment.z * segment.z);
+
+    // Scalar value
+    f32 t = ((center_offset_from_a.x * segment.x) + (center_offset_from_a.y * segment.y) + (center_offset_from_a.z * segment.z))/segment_length_squared;
+
+    // Clamp
+    t = CustomMath_Clamp(t, 0.0f, 1.0f);
+
+    // Calculate closest point with clamp
+    Vec3f closest_point = { (pointA->x + (segment.x * t)), (pointA->y + (segment.y * t)), (pointA->z + (segment.z * t)) };
+
+    Math_Vec3f_Copy(dest, &closest_point);
+}
+
+
+/*
+=================
 Vec3s (s16) math operations 
 =================
 */

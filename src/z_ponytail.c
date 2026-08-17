@@ -31,6 +31,7 @@ DESC:
 #include "z_ponytail.h"
 #include "verlet_physics.h"
 #include "proxymm_custom_actor.h"
+#include "physics_collision.h"
 #include "math.h"
 #include "customMath.h"
 
@@ -96,6 +97,7 @@ RECOMP_CALLBACK("*", recomp_on_init) void Ponytail_OnRecompInit() {
     CUSTOM_ACTOR_PONYTAIL = CustomActor_Register(&Ponytail_Profile);
 }
 
+
 /*
 =================
 Player Init
@@ -104,7 +106,7 @@ Player Init
 Ponytail* gPlayerPonytail = NULL;
 PlayState* gPlayStatePonytail = NULL;
 
-RECOMP_HOOK("Player_Init") void on_player_init(Actor* thisx, PlayState* play) {
+RECOMP_HOOK("Player_Init") void Ponytail_on_player_init(Actor* thisx, PlayState* play) {
     if (recomp_get_config_u32("change_hairstyle") && gPlayerPonytail == NULL) {
         Actor_SpawnAsChildAndCutscene(&play->actorCtx, play, CUSTOM_ACTOR_PONYTAIL, 
                                     -367.0f, 0.0f, -245.0f, 0, 0x8000, 0, 0, 0, 
@@ -150,11 +152,11 @@ void Ponytail_SetDefaultBodyPartsPos(Ponytail* this, Player* player, StandardLim
 
         // If limb shouldn't have any verlet physics, pin it
         if (i == (int)PONYTAIL_BODYPART_LIMB1) {
-            Verlet_InitLimb(gPhysLimbs[i], this->bodyPartsPos[i], playerVelocity, (LIMB_MASS), PINNED);
+            Verlet_InitLimb(gPhysLimbs[i], this->bodyPartsPos[i], playerVelocity, (LIMB_MASS*(i)), PINNED);
         }
         else {
             Vec3f no_velocity = {(f32)0, (f32)0, (f32)0};
-            Verlet_InitLimb(gPhysLimbs[i], this->bodyPartsPos[i], no_velocity, (LIMB_MASS), NOT_PINNED);
+            Verlet_InitLimb(gPhysLimbs[i], this->bodyPartsPos[i], no_velocity, (LIMB_MASS*(i)), NOT_PINNED);
         }
     }
 
@@ -169,6 +171,8 @@ void Ponytail_Init(Actor* thisx, PlayState* play) {
         Player* player = GET_PLAYER(play);
         Ponytail* this = (Ponytail*)thisx;
         this->actor.room = -1;
+        this->needsReset = 1;
+        this->hideInFirstPerson = 0;
 
         gPlayerPonytail = this;
         gPlayStatePonytail = play;
@@ -228,6 +232,28 @@ Ponytail Update
 
 Vec3f head_globalPos = { (f32)0, (f32)0, (f32)0 };      // Global position of player's head limb
 Vec3s head_rotate = {0, 0, 0};                          // Rotation value for player's head (with parent limbs' rotations included)
+Vec3f torso_pt_globalPos = { (f32)0, (f32)0, (f32)0 };      // Global position of player's torso limb
+Vec3s torso_pt_rotate = {0, 0, 0};                          // Rotation value for player's torso (with parent limbs' rotations included)
+Vec3f ponytailAttach_globalPos = { 0.0f, 0.0f, 0.0f };
+
+Vec3f headLimb_offsetPos = { (f32)0, (f32)2.49, (f32)0.04 };
+Vec3f torsoLimb_offsetPos = { (f32)0, (f32)0, (f32)0 };
+
+PhysSphereCollider neckSphereCollider = {
+    { 0.0f, 0.0f, 0.0f },
+    3.f
+};
+
+PhysSphereCollider headSphereCollider = {
+    { 0.0f, 0.0f, 0.0f },
+    6.f
+};
+
+PhysSphereCollider torsoPTSphereCollider = {
+    { 0.0f, 0.0f, 0.0f },
+    0.f
+};
+
 
 // Get player head limb's position and rotation values from matrix
 RECOMP_HOOK("Player_PostLimbDrawGameplay") void Ponytail_on_Player_PostLimbDrawGameplay(PlayState* play, s32 limbIndex, Gfx** dList1, Gfx** dList2, Vec3s* rot, Actor* actor) {
@@ -249,6 +275,25 @@ RECOMP_HOOK("Player_PostLimbDrawGameplay") void Ponytail_on_Player_PostLimbDrawG
         Matrix_Pop();
         CLOSE_DISPS(play->state.gfxCtx);
     }
+
+    if (limbIndex == PLAYER_LIMB_TORSO) {
+        // Get matrix of torso limb
+        OPEN_DISPS(play->state.gfxCtx);
+        Matrix_Push(); 
+        MtxF* mtx = Matrix_GetCurrent();
+
+        // Get global position
+        torso_pt_globalPos.x = mtx->xw;
+        torso_pt_globalPos.y = mtx->yw;
+        torso_pt_globalPos.z = mtx->zw;
+
+        // Get rotation values
+        Matrix_MtxFToYXZRot(mtx, &torso_pt_rotate, 1);
+
+        // Close matrix
+        Matrix_Pop();
+        CLOSE_DISPS(play->state.gfxCtx);
+    }
 }
 
 
@@ -256,8 +301,45 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
     // Save Jackie's previous position as ponytail's previous position
     Math_Vec3f_Copy(&this->actor.prevPos, &player->actor.prevPos);
 
-    // Move ponytail actor to current positin of Jackie's head
+    // Rebase all Verlet positions after entering a new map
+    if (this->needsReset) {
+        Vec3f anchorDelta = { 0.0f, 0.0f, 0.0f };
+
+        Math_Vec3f_Diff(&head_globalPos, &gPhysLimbs[PONYTAIL_BODYPART_ROOT]->curr_pos, &anchorDelta);
+
+        for (int i = PONYTAIL_BODYPART_ROOT; i < PONYTAIL_BODYPART_MAX; i++) {
+            Math_Vec3f_Sum(&gPhysLimbs[i]->curr_pos, &anchorDelta, &gPhysLimbs[i]->curr_pos);
+            Math_Vec3f_Sum(&gPhysLimbs[i]->prev_pos, &anchorDelta, &gPhysLimbs[i]->prev_pos);
+
+            gPhysLimbs[i]->curr_vel.x = 0.0f;
+            gPhysLimbs[i]->curr_vel.y = 0.0f;
+            gPhysLimbs[i]->curr_vel.z = 0.0f;
+
+            gPhysLimbs[i]->prev_vel.x = 0.0f;
+            gPhysLimbs[i]->prev_vel.y = 0.0f;
+            gPhysLimbs[i]->prev_vel.z = 0.0f;
+        }
+
+        this->needsReset = 0;
+    }
+
+
+    // Move ponytail actor to current position of Jackie's head
     Math_Vec3f_Copy(&this->actor.world.pos, &head_globalPos);
+
+    // Set center of head collider to head limb
+    Math_Vec3f_Copy(&neckSphereCollider.center, &head_globalPos);
+
+    Vec3f headLimb_offsetRot = {0.f, 0.f, 0.f};
+    CustomMath_Vec3f_RotateByX(&headLimb_offsetPos, head_rotate.x, &headLimb_offsetPos);
+    CustomMath_Vec3f_RotateByY(&headLimb_offsetRot, head_rotate.y, &headLimb_offsetRot);
+    CustomMath_Vec3f_RotateByZ(&headLimb_offsetRot, head_rotate.z, &headLimb_offsetRot);
+
+    // Position head sphere at head_globalPos + rotated offset
+    Math_Vec3f_Sum(&head_globalPos, &headLimb_offsetRot, &headSphereCollider.center);
+
+    // Position torso sphere at torso_globalPos + rotated offset
+    Math_Vec3f_Sum(&torso_pt_globalPos, &torsoLimb_offsetPos, &torsoPTSphereCollider.center);
 
     // Make ponytail actor face the same general direction as Jackie
     Math_Vec3s_Copy(&this->actor.shape.rot, &player->actor.shape.rot);
@@ -276,10 +358,52 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
     newRootJointRot.x = 32768 + head_rotate.z;
     newRootJointRot.y = -16384 + head_rotate.y - this->actor.shape.rot.y;
     newRootJointRot.z = 0;
+
     // Special case for when Jackie is locked on to enemy to accomodate for weird head limb positions
     if (player->stateFlags3 & PLAYER_STATE3_HOSTILE_LOCK_ON) {
-        newRootJointRot.x = newRootJointRot.x - player->headLimbRot.x - player->upperLimbRot.x;
+        Vec3s normalRootJointRot = newRootJointRot;
+
+        // Apply existing Z-targeting rotation correction
+        if (player->headLimbRot.x > 0) {
+            newRootJointRot.x -= player->headLimbRot.x;
+        }
         newRootJointRot.z = head_rotate.x;
+        
+        // Calculate how much the corrected rotation would shift the pinned limb
+        // Used to move ponytail root so that it is properly attached to the same
+        // area as back of jackie's head
+        Vec3s normalPinnedRot = { normalRootJointRot.x, 0, normalRootJointRot.z };
+        Vec3s correctedPinnedRot = {newRootJointRot.x, 0, newRootJointRot.z};
+
+        Vec3s normalRootOffset = { 0, 0, 0 };
+        Vec3s correctedRootOffset = { 0, 0, 0 };
+
+        Vec3s normalWorldOffset = { 0, 0, 0 };
+        Vec3s correctedWorldOffset = { 0, 0, 0 };
+
+        Vec3f normalWorldOffsetF = { 0.0f, 0.0f, 0.0f };
+        Vec3f correctedWorldOffsetF = { 0.0f, 0.0f, 0.0f };
+
+        Vec3f rootPositionCorrection = { 0.0f, 0.0f, 0.0f };
+
+
+        // Calculate pinned limb's position using normal root rotation
+        CustomMath_Vec3s_Rotate(&gPhysLimbs[PONYTAIL_BODYPART_LIMB1]->default_jointPos, &normalPinnedRot, &normalRootOffset);
+        CustomMath_Vec3s_Rotate(&normalRootOffset, &player->actor.shape.rot, &normalWorldOffset);
+        CustomMath_Vec3s_Scale_ToVec3f(&normalWorldOffset, this->actor.scale.x, &normalWorldOffsetF);
+
+        // Calculate pinned limb's position using the corrected root rotation
+        CustomMath_Vec3s_Rotate(&gPhysLimbs[PONYTAIL_BODYPART_LIMB1]->default_jointPos, &correctedPinnedRot, &correctedRootOffset);
+        CustomMath_Vec3s_Rotate(&correctedRootOffset, &player->actor.shape.rot, &correctedWorldOffset);
+        CustomMath_Vec3s_Scale_ToVec3f(&correctedWorldOffset, this->actor.scale.x, &correctedWorldOffsetF);
+
+        // Find the root position adjustment needed to preserve the attachment point
+        Math_Vec3f_Diff(&normalWorldOffsetF, &correctedWorldOffsetF, &rootPositionCorrection);
+
+        // Apply the position correction to the ponytail root
+        Math_Vec3f_Sum(&this->actor.world.pos, &rootPositionCorrection, &this->actor.world.pos);
+        Math_Vec3f_Copy(&this->bodyPartsPos[PONYTAIL_BODYPART_ROOT], &this->actor.world.pos);
+        Math_Vec3f_Copy(&gPhysLimbs[PONYTAIL_BODYPART_ROOT]->curr_pos, &this->actor.world.pos);
     }
 
     Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_ROT], &newRootJointRot);
@@ -310,6 +434,8 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
             Math_Vec3f_Sum(&this->bodyPartsPos[i-1], &transformVec3f, &this->bodyPartsPos[i]);
             Math_Vec3f_Copy(&gPhysLimbs[i]->curr_pos, &this->bodyPartsPos[i]);      // Current position
             Math_Vec3f_Copy(&gPhysLimbs[i]->curr_vel, &player->actor.velocity);     // Current Velocity
+
+        
         }
         else {
             // Apply Verlet Integration
@@ -320,18 +446,32 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
             if (linkOnGround) {
                 player_vel.y = 0.f;
             }
-
+            
             Verlet_LimbUpdatePos(gPhysLimbs[i], &apply_force, &player_vel);
         }
     }
 
     // Bone update
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 10; i++) {
         for (int i = 0; i < (int)PONYTAIL_BONE_MAX; i++) {
             Verlet_BoneConstraint(gPhysBones[i]);
         }
+        for (int i = PONYTAIL_BONE_LIMB1_LIMB2; i < PONYTAIL_BONE_MAX; i++) {
+            PhysCol_SphereCollider(gPhysBones[i]->limb_b, &neckSphereCollider);
+            PhysCol_SphereCollider(gPhysBones[i]->limb_b, &headSphereCollider);
+            PhysCol_SphereCollider(gPhysBones[i]->limb_b, &torsoPTSphereCollider);
+        }
     }
 
+    /*
+    for (int i = PONYTAIL_BONE_LIMB1_LIMB2; i < PONYTAIL_BONE_MAX; i++) {
+        if (PhysCol_boneIsColliding(gPhysBones[i], &neckSphereCollider)) {
+            recomp_printf("bone[%d]:\t x: %f\t, y: %f\t, z: %f\t, curr_vel.x: %f\t, curr_vel.y: %f\t, curr_vel.z: %f\n", i, \
+            gPhysBones[i]->limb_b->curr_pos.x, gPhysBones[i]->limb_b->curr_pos.y, gPhysBones[i]->limb_b->curr_pos.z, \
+            gPhysBones[i]->limb_b->curr_vel.x, gPhysBones[i]->limb_b->curr_vel.y, gPhysBones[i]->limb_b->curr_vel.z);
+        }
+        
+    }*/
 }
 
 
@@ -415,6 +555,16 @@ void Ponytail_Update(Actor* thisx, PlayState* play) {
     Player* player = GET_PLAYER(play);
     Ponytail* this = (Ponytail*)thisx;
 
+    // Hide ponytail while aiming with bow/hookshot in first person
+    // PLAYER_STATE1_100000 indicates first person mode with bow/hookshot (transition to first person + actual first person)
+    // PLAYER_STATE3_40 indicates the state where camera is transitioning from regular third person to first person with bow/hookshot
+    if (player->transformation == PLAYER_FORM_HUMAN && this != NULL && (player->stateFlags1 & PLAYER_STATE1_100000) && !(player->stateFlags3 & PLAYER_STATE3_40)) {
+        this->hideInFirstPerson = 1;
+    }
+    else {
+        this->hideInFirstPerson = 0;
+    }
+
     // Remove Ponytail when player transforms from human to non-human
     if (player->transformation != PLAYER_FORM_HUMAN && gPlayerPonytail != NULL && player->actor.draw == NULL && (player->stateFlags2 & PLAYER_STATE2_20000000)) {
         Actor_Kill(&this->actor);
@@ -426,38 +576,41 @@ void Ponytail_Update(Actor* thisx, PlayState* play) {
 
 /*
 =================
-Player Draw
+Ponytail Draw
 =================
 */
-RECOMP_HOOK_RETURN ("Player_Draw") void return_Skirt_Player_Draw(void) {
+RECOMP_HOOK_RETURN("Player_Draw") void return_Skirt_Player_Draw(void) {
     if (!recomp_get_config_u32("change_hairstyle") || gPlayerPonytail == NULL || gPlayStatePonytail == NULL) {
         return;
     }
     
     Player* player = GET_PLAYER(gPlayStatePonytail);
-    if (recomp_get_config_u32("change_hairstyle") && gPlayerPonytail != NULL && player->transformation == PLAYER_FORM_HUMAN && player->actor.draw != NULL && !(player->stateFlags2 & PLAYER_STATE2_20000000)) {
+    PlayState* play = gPlayStatePonytail;
+    
+    if (recomp_get_config_u32("change_hairstyle") && player->transformation == PLAYER_FORM_HUMAN && player->actor.draw != NULL && !(player->stateFlags2 & PLAYER_STATE2_20000000)) {
         Ponytail* this = gPlayerPonytail;
 
+        // Don't draw ponytail while in first person view with bow or hookshot
+        if (this->hideInFirstPerson) {
+            this->needsReset = 1;
+            return;
+        }
+
         // Calculate Force
-        Vec3f net_force = { (f32)0, (f32)0, (f32)0 };    // Gravity + movement
+        Vec3f net_force = { 0.f, 0.f, 0.f };
         Verlet_UpdatePhysPlayerVelocity(&gJackiePhysPlayer, player);
         Verlet_CalcNetForce(&gJackiePhysPlayer, (f32)GRAVITY, &net_force);
 
-        // Update Ponytail Limbs' positions based on Verlet Integration
+        // Update Ponytail's positions based on Verlet Integration
         Ponytail_UpdateBodyPartsPos(this, player, net_force, gPonytailLimbs, ponytailPhysLimbs, ponytailPhysBones);
 
-        // Calculate rotations based on ponytail limbs' calculated positions
+        // Calculate rotations based on ponytail's calculated positions
         Ponytail_RotateJoints(this, ponytailPhysBones);
-    }
-}
 
-
-void Ponytail_Draw(Actor* thisx, PlayState* play) {
-    Player* player = GET_PLAYER(play);
-    if (recomp_get_config_u32("change_hairstyle") && player->transformation == PLAYER_FORM_HUMAN && player->actor.draw != NULL && !(player->stateFlags2 & PLAYER_STATE2_20000000)) {
-        Ponytail* this = (Ponytail*)thisx;
-
+        // Draw Ponytail
         OPEN_DISPS(play->state.gfxCtx);
+        Matrix_SetTranslateRotateYXZ(this->actor.world.pos.x, this->actor.world.pos.y, this->actor.world.pos.z, &this->actor.shape.rot);
+        Matrix_Scale(this->actor.scale.x, this->actor.scale.y, this->actor.scale.z, MTXMODE_APPLY);
         Gfx_SetupDL25_Opa(play->state.gfxCtx);
         func_80122868(play, player);    // Draw blinking effect of ponytail when player gets hit or jinxed
         SkelAnime_DrawFlexOpa(
@@ -477,4 +630,15 @@ void Ponytail_Draw(Actor* thisx, PlayState* play) {
 
         CLOSE_DISPS(play->state.gfxCtx);
     }
+}
+
+
+void Ponytail_Draw(Actor* thisx, PlayState* play) {
+    /*
+        All drawing functionality has been moved to return_Skirt_Player_Draw() due to this function
+        not firing during the Song of Time, Inverted Song of Time, Double Song of Time cutscenes.
+
+        In other words, the ponytail does not get initialized for the frame during these cutscenes,
+        removing them from the game during the cutscene.
+    */
 }

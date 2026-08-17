@@ -37,6 +37,14 @@ s16 CustomMath_Vec3f_Yaw(Vec3f* a, Vec3f* b);
 // Designed to calculate bone z-axis rotations 
 s16 CustomMath_Vec3f_Roll(Vec3f* a, Vec3f* b);
 
+// Find value within line segment based on 0:1 scalar value
+f32 CustomMath_Clamp(f32 val, f32 min, f32 max);
+
+// Dot product
+f32 CustomMath_Vec3f_Dot(Vec3f* a, Vec3f* b);
+
+// Find point from line segment closest to target point
+void CustomMath_Vec3f_ClosestPoint(Vec3f* src, Vec3f* pointA, Vec3f* pointB, Vec3f* dest);
 
 // Vector s16 operations
 void CustomMath_Vec3s_Sum(Vec3s* l, Vec3s* r, Vec3s* dest);

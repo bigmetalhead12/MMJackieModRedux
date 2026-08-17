@@ -43,9 +43,10 @@ void Verlet_UpdatePhysPlayerVelocity(PhysPlayer* target_player, Player* player) 
 // Calculate net force based on gravity and movement acceleration
 void Verlet_CalcNetForce(PhysPlayer* target_player, f32 grav_force, Vec3f* net_force) {
     net_force->y = grav_force;
+    /*
     Vec3f velocity_diff = { (f32)0, (f32)0, (f32)0 };
     Math_Vec3f_Diff(&target_player->curr_vel, &target_player->prev_vel, &velocity_diff);
-    Math_Vec3f_Sum(net_force, &velocity_diff, net_force);
+    Math_Vec3f_Sum(net_force, &velocity_diff, net_force);*/
 }
 
 // Initialize PhysLimb with input position
@@ -125,7 +126,7 @@ void Verlet_BoneConstraint(PhysBone* target_bone) {
     if (target_bone->limb_a->pinned == 0 && target_bone->limb_b->pinned == 0) {
         percent = percent/2.f;
         Math_Vec3f_ScaleAndStore(&direction_vec, percent, &offset);
-        //Math_Vec3f_Diff(&target_bone->limb_a->curr_pos, &offset, &target_bone->limb_a->curr_pos);
+        Math_Vec3f_Diff(&target_bone->limb_a->curr_pos, &offset, &target_bone->limb_a->curr_pos);
         Math_Vec3f_Sum(&target_bone->limb_b->curr_pos, &offset, &target_bone->limb_b->curr_pos);
     }
     else if (target_bone->limb_a->pinned == 1 && target_bone->limb_b->pinned == 0) {

@@ -102,6 +102,8 @@ typedef struct Ponytail {
     Vec3s morphTable[GPONYTAILSKEL_NUM_LIMBS];
     Vec3f bodyPartsPos[PONYTAIL_BODYPART_MAX];
     ColliderJntSph collider;
+    u8 needsReset;
+    u8 hideInFirstPerson;
 } Ponytail;
 
 // Ponytail manipulation based on Verlet Integration
