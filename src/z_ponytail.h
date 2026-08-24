@@ -107,7 +107,7 @@ typedef struct Ponytail {
 } Ponytail;
 
 // Ponytail manipulation based on Verlet Integration
-void Ponytail_RotateJoints(Ponytail* this, PhysBone* gPhysBones[]);
+void Ponytail_RotateJoints(Ponytail* this, PhysBone* gPhysBones[], Player* player);
 void Ponytail_SetDefaultBodyPartsPos(Ponytail* this, Player* player, StandardLimb* gLimbs[], PhysLimb* gPhysLimbs[], PhysBone* gPhysBones[]) ;
 void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_force, StandardLimb* gLimbs[], PhysLimb* gPhysLimbs[], PhysBone* gPhysBones[]);
 #endif

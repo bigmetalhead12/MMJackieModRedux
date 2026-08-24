@@ -12,6 +12,8 @@ by BigMetalHead12
 
 #include "customMath.h"
 
+#include "recomputils.h"
+
 /***********************************************************************
 
 	Custom Math Functions
@@ -26,27 +28,25 @@ Pitch, Yaw, and Roll
 
 // Designed to calculate bone x-axis rotations beyond -90/+90 degrees from origin
 s16 CustomMath_Vec3f_Pitch(Vec3f* b, Vec3f* a) {
-    // If vector b's z position is >= vector a's z position, proceed as is
-    if (b->z >= a->z) {
-        return Math_Atan2S_XY( b->z - a->z, b->y - a->y);
-    }
-    // Else, if b's z position is < a's z position, then apply offset
-    else {
-        s16 low_offset = -32768;    // -180 degrees
-        return Math_Atan2S_XY( b->z - a->z, b->y - a->y);
-    }
+    return Math_Atan2S_XY( b->z - a->z, b->y - a->y);
 }
 
 // Designed to calculate bone y-axis rotations beyond -90/+90 degrees from origin
-s16 CustomMath_Vec3f_Yaw(Vec3f* a, Vec3f* b) {
+s16 CustomMath_Vec3f_Yaw(Vec3f* a, Vec3f* b, Player* player) {
+
     // If vector b's z position is >= vector a's z position, proceed as is
-    if (b->z >= a->z) {
-        return Math_Vec3f_Yaw(a, b);
+    if (b->x >= a->x) {
+        if (b->y >= a->y) {
+            return Math_Vec3f_Yaw(a, b);
+        }
+        return -Math_Vec3f_Yaw(a, b);
     }
     // Else, if b's z position is > a's z position, then apply offset
     else {
-        s16 low_offset = -32768;    // -180 degrees
-        return (low_offset + Math_Vec3f_Yaw(a, b));
+        if (b->y >= a->y) {
+            return Math_Vec3f_Yaw(a, b);
+        }
+        return -Math_Vec3f_Yaw(a, b);
     }
 }
 
@@ -54,18 +54,26 @@ s16 CustomMath_Vec3f_Yaw(Vec3f* a, Vec3f* b) {
 s16 CustomMath_Vec3f_Roll(Vec3f* a, Vec3f* b) {
     f32 x_dist = b->x - a->x;
     f32 y_dist = b->y - a->y;
-    if (y_dist <= 0) {
-        return 32768+Math_Atan2S_XY(y_dist, x_dist);
+    f32 z_dist = b->z - a->z;
+    u16 low_offset = 32768;    // -180 degrees
+    if (z_dist <= 0) {
+        if (b->y > 0) {
+            return (s16)(low_offset - (u16)(Math_Atan2S_XY(y_dist, x_dist)));
+        }
+        return (s16)(low_offset+Math_Atan2S_XY(y_dist, x_dist));
     }
     else {
-        return (Math_Atan2S_XY(y_dist, x_dist));
+        if (b->y > 0) {
+            return (s16)(low_offset - (u16)(Math_Atan2S_XY(y_dist, x_dist)));
+        }
+        return (s16)(low_offset+Math_Atan2S_XY(y_dist, x_dist));
     }
 }
 
 
 /*
 =================
-Dot Product
+Vec3f Misc Functions
 =================
 */
 
@@ -73,6 +81,22 @@ f32 CustomMath_Vec3f_Dot(Vec3f* a, Vec3f* b) {
     return (a->x * b->x) +
            (a->y * b->y) +
            (a->z * b->z);
+}
+
+
+void CustomMath_Vec3f_Normalize(Vec3f* src, Vec3f* dest) {
+    f32 length = sqrtf((src->x * src->x) + (src->y * src->y) + (src->z * src->z));
+
+    if (length == 0.0f) {
+        dest->x = 0.0f;
+        dest->y = 0.0f;
+        dest->z = 0.0f;
+        return;
+    }
+
+    dest->x = src->x / length;
+    dest->y = src->y / length;
+    dest->z = src->z / length;
 }
 
 

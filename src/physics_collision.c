@@ -60,81 +60,196 @@ u8 PhysCol_limbIsColliding(PhysLimb* target_limb, PhysSphereCollider* sphere_col
     }
 }
 
+void PhysCol_SphereCollider(PhysBone* target_bone, PhysSphereCollider* sphere_collider) {
+    if (!PhysCol_limbIsColliding(target_bone->limb_b, sphere_collider)) {
+        return;
+    }
+
+    Vec3f s = sphere_collider->center;
+    f32 r = sphere_collider->radius;
+
+    // Determine which point is more outside the sphere
+    f32 prevDist = Math_Vec3f_DistXYZ(&target_bone->limb_b->prev_pos, &s);
+    f32 currDist = Math_Vec3f_DistXYZ(&target_bone->limb_b->curr_pos, &s);
+
+    Vec3f Ro;
+    Vec3f Rd_target;
+
+    if (prevDist >= currDist) {
+        Math_Vec3f_Copy(&Ro, &target_bone->limb_b->prev_pos);
+        Math_Vec3f_Copy(&Rd_target, &target_bone->limb_b->curr_pos);
+    } else {
+        Math_Vec3f_Copy(&Ro, &target_bone->limb_b->curr_pos);
+        Math_Vec3f_Copy(&Rd_target, &target_bone->limb_b->prev_pos);
+    }
+
+    // Ray direction from outer point toward inner point
+    Vec3f nonnormal_Rd = {
+        Rd_target.x - Ro.x,
+        Rd_target.y - Ro.y,
+        Rd_target.z - Ro.z
+    };
+    Vec3f Rd = { 0.0f, 0.0f, 0.0f };
+    CustomMath_Vec3f_Normalize(&nonnormal_Rd, &Rd);
+
+    // Ray-sphere intersection
+    Vec3f s_Ro = {
+        s.x - Ro.x,
+        s.y - Ro.y,
+        s.z - Ro.z
+    };
+
+    f32 t = CustomMath_Vec3f_Dot(&s_Ro, &Rd);
+
+    Vec3f Rdt = { 0.0f, 0.0f, 0.0f };
+    Math_Vec3f_ScaleAndStore(&Rd, t, &Rdt);
+
+    Vec3f p = { 0.0f, 0.0f, 0.0f };
+    Math_Vec3f_Sum(&Ro, &Rdt, &p);
+
+    f32 y = Math_Vec3f_DistXYZ(&s, &p);
+
+    if (y >= r) return;
+
+    f32 x = sqrtf((r * r) - (y * y));
+    f32 t1 = t - x;
+
+    // Find first contact point
+    Vec3f Rd_t1 = { 0.0f, 0.0f, 0.0f };
+    Math_Vec3f_ScaleAndStore(&Rd, t1, &Rd_t1);
+
+    Vec3f first_contact = { 0.0f, 0.0f, 0.0f };
+    Math_Vec3f_Sum(&Ro, &Rd_t1, &first_contact);
+
+    // Push direction: from sphere center through t1
+    Vec3f push_dir = { 0.0f, 0.0f, 0.0f };
+    Vec3f nonnormal_push = {
+        first_contact.x - s.x,
+        first_contact.y - s.y,
+        first_contact.z - s.z
+    };
+    CustomMath_Vec3f_Normalize(&nonnormal_push, &push_dir);
+
+    // Start from sphere surface along push direction
+    Vec3f surface_point = {
+        s.x + push_dir.x * r,
+        s.y + push_dir.y * r,
+        s.z + push_dir.z * r
+    };
+
+    // Step outward until bone segment clears sphere
+    Vec3f limb_a_pos = target_bone->limb_a->curr_pos;
+    f32 d = 0.0f;
+    f32 step = r * 0.05f;
+    Vec3f new_pos = { 0.0f, 0.0f, 0.0f };
+    Vec3f closest = { 0.0f, 0.0f, 0.0f };
+
+    for (int i = 0; i < 100; i++) {
+        new_pos.x = surface_point.x + push_dir.x * d;
+        new_pos.y = surface_point.y + push_dir.y * d;
+        new_pos.z = surface_point.z + push_dir.z * d;
+
+        CustomMath_Vec3f_ClosestPoint(&s, &limb_a_pos, &new_pos, &closest);
+
+        f32 closest_dist = Math_Vec3f_DistXYZ(&closest, &s);
+
+        if (closest_dist >= r) {
+            break;
+        }
+
+        d += step;
+    }
+
+    // Apply new position and kill velocity to prevent oscillation
+    Math_Vec3f_Copy(&target_bone->limb_b->curr_pos, &new_pos);
+    Math_Vec3f_Copy(&target_bone->limb_b->prev_pos, &new_pos);
+}
+
+/*
 void PhysCol_SphereCollider(PhysLimb* target_limb, PhysSphereCollider* sphere_collider) {
     // Check if contact actually happened
     if (!PhysCol_limbIsColliding(target_limb, sphere_collider)) {
         return;
     }
-
-    /*
-    This currently fails to account for when both previous position and current position are 
-    both within sphere collider.
-
-    Basically, it can handle "impact" very well, but it can't handle the resting at all.
-    Find a way to fix this.
-    */
+    
 
     // Calculate the ray-sphere intersection to find where the limb first contacted the sphere collider
     // Good source: https://www.youtube.com/watch?v=HFPlKQGChpE
-    // Goal is to calculate t1 and get the point located there
-    // First, take segment from limb's previous to current position
-    Vec3f limb_direction = { 
-        target_limb->curr_pos.x - target_limb->prev_pos.x,
-        target_limb->curr_pos.y - target_limb->prev_pos.y,
-        target_limb->curr_pos.z - target_limb->prev_pos.z
+    // Origin of the vector from target limb's previous position to current position
+    Vec3f Ro = target_limb->prev_pos;
+
+    // Vector of target limb's previous position to current position
+    Vec3f Rd = { (f32)0, (f32)0, (f32)0 };
+    Vec3f nonnormal_Rd = {
+        target_limb->curr_pos.x - Ro.x,
+        target_limb->curr_pos.y - Ro.y,
+        target_limb->curr_pos.z - Ro.z
+    };
+    CustomMath_Vec3f_Normalize(&nonnormal_Rd, &Rd);
+
+    // Sphere Collider's center and radius
+    Vec3f s = sphere_collider->center;
+    f32 r = sphere_collider->radius;
+
+    // Segment from target limb's previous position to current position
+    Vec3f s_Ro = {
+        s.x - Ro.x,
+        s.y - Ro.y,
+        s.z - Ro.z
     };
 
-    // Then, take segment from limb's previous position to sphere collider's center
-    Vec3f limb_prev_to_sphere = {
-        sphere_collider->center.x - target_limb->prev_pos.x,
-        sphere_collider->center.y - target_limb->prev_pos.y,
-        sphere_collider->center.z - target_limb->prev_pos.z
-    };
+    // Calculate scalar value (t) that can locate point in Rd that is closest to sphere collider center
+    f32 t = CustomMath_Vec3f_Dot(&s_Ro, &Rd);
 
-    // Find time (t)
-    f32 t = CustomMath_Vec3f_Dot(&limb_prev_to_sphere, &limb_direction)/
-            CustomMath_Vec3f_Dot(&limb_direction, &limb_direction);
+    // Closest point (p) between target limb vector and sphere center
+    Vec3f p = { (f32)0, (f32)0, (f32)0 };
+    Vec3f Rdt = { (f32)0, (f32)0, (f32)0 };
 
-    // Find closest point on the ray to sphere center
-    Vec3f closest_point = {
-        target_limb->prev_pos.x + (limb_direction.x * t),
-        target_limb->prev_pos.y + (limb_direction.y * t),
-        target_limb->prev_pos.z + (limb_direction.z * t)
-    };
+    Math_Vec3f_ScaleAndStore(&Rd, t, &Rdt);     // Rd * t
+    Math_Vec3f_Sum(&Ro, &Rdt, &p);
 
-    // Distance from closest point to sphere center
-    f32 closest_dist = Math_Vec3f_DistXYZ(&closest_point, &sphere_collider->center);
+    // Distance (y) between sphere center (s) and closest point (p)
+    f32 y = Math_Vec3f_DistXYZ(&s, &p);
 
-    // If closest point is farther than radius, ray misses sphere
-    if (closest_dist > sphere_collider->radius) {
+    // Distance (x) between closest point (p) and t1 (first contact point in sphere by vector)
+    f32 x = (f32)0;
+    f32 t1 = (f32)0;
+    f32 t2 = (f32)0;
+
+    if (y < r) {
+        x = sqrtf((r*r) - (y*y));
+        t1 = t-x;
+        //t2 = t+x;
+
+        recomp_printf("t1: %f\t", t1);
+    }
+
+    else {
         return;
     }
-    
-    // Distance from closest point back to first sphere intersection
-    f32 intersection_offset = sqrtf(
-        (sphere_collider->radius * sphere_collider->radius) -
-        (closest_dist * closest_dist)
+
+    // Length of actual movement segment from prev_pos to curr_pos
+    f32 segment_length = Math_Vec3f_DistXYZ(
+        &target_limb->prev_pos,
+        &target_limb->curr_pos
     );
 
-    // Length of limb movement vector
-    f32 limb_direction_length = sqrtf(
-        CustomMath_Vec3f_Dot(&limb_direction, &limb_direction)
-    );
+    recomp_printf("segment: %f\n", segment_length);
 
-    // Convert intersection distance into t-space
-    f32 t_offset = intersection_offset / limb_direction_length;
-
-    // First intersection
-    f32 t1 = t - t_offset;
-
-    if (t1 < 0.0f || t1 > 1.0f) {
-        //recomp_printf("ERROR: %f\n", t1);
+    // First contact must lie along the actual prev_pos -> curr_pos segment
+    if (t1 > segment_length) {
         return;
     }
-    //recomp_printf("Not Err: %f\n", t1);
 
-    // Use t1 to assign target limb's new position
-    target_limb->curr_pos.x = target_limb->prev_pos.x + (limb_direction.x * t1);
-    target_limb->curr_pos.y = target_limb->prev_pos.y + (limb_direction.y * t1);
-    target_limb->curr_pos.z = target_limb->prev_pos.z + (limb_direction.z * t1);
+    // Find position of first contact: Ro + (Rd * t1)
+    Vec3f Rd_t1 = { 0.0f, 0.0f, 0.0f };
+    Math_Vec3f_ScaleAndStore(&Rd, t1, &Rd_t1);
+
+    Vec3f first_contact = { 0.0f, 0.0f, 0.0f };
+    Math_Vec3f_Sum(&Ro, &Rd_t1, &first_contact);
+
+    // Move limb to first contact point
+    Math_Vec3f_Copy(&target_limb->curr_pos, &first_contact);
+
 }
+*/

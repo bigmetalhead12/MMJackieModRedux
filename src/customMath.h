@@ -32,7 +32,7 @@ DESC:
 s16 CustomMath_Vec3f_Pitch(Vec3f* b, Vec3f* a);
 
 // Designed to calculate bone y-axis rotations beyond -90/+90 degrees from origin
-s16 CustomMath_Vec3f_Yaw(Vec3f* a, Vec3f* b);
+s16 CustomMath_Vec3f_Yaw(Vec3f* a, Vec3f* b, Player* player);
 
 // Designed to calculate bone z-axis rotations 
 s16 CustomMath_Vec3f_Roll(Vec3f* a, Vec3f* b);
@@ -42,6 +42,9 @@ f32 CustomMath_Clamp(f32 val, f32 min, f32 max);
 
 // Dot product
 f32 CustomMath_Vec3f_Dot(Vec3f* a, Vec3f* b);
+
+// Normalize
+void CustomMath_Vec3f_Normalize(Vec3f* src, Vec3f* dest);
 
 // Find point from line segment closest to target point
 void CustomMath_Vec3f_ClosestPoint(Vec3f* src, Vec3f* pointA, Vec3f* pointB, Vec3f* dest);

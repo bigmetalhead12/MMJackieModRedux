@@ -37,7 +37,8 @@ typedef struct {
 u8 PhysCol_boneIsColliding(PhysBone* target_bone, PhysSphereCollider* sphere_collider);
 u8 PhysCol_limbIsColliding(PhysLimb* target_limb, PhysSphereCollider* sphere_collider);
 
-void PhysCol_SphereCollider(PhysLimb* target_limb, PhysSphereCollider* sphere_collider);
+void PhysCol_SphereCollider(PhysBone* target_bone, PhysSphereCollider* sphere_collider);
+//void PhysCol_SphereCollider(PhysLimb* target_limb, PhysSphereCollider* sphere_collider);
 
 
 #endif

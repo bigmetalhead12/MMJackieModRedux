@@ -76,15 +76,16 @@ void Verlet_LimbUpdatePos(PhysLimb* target_limb, Vec3f* apply_force, Vec3f* appl
         // test segment for adding opposite vel for hanging ponytail limbs
         Vec3f opposing_vel = { (f32)0, (f32)0, (f32)0 };
         Math_Vec3f_ScaleAndStore(apply_vel, -1.f, &opposing_vel);
-        Math_Vec3f_Sum(&new_velocity, &opposing_vel, &new_velocity);
+        Math_Vec3f_Diff(&new_velocity, &opposing_vel, &new_velocity);
         Math_Vec3f_Copy(&target_limb->curr_vel, &new_velocity);
 
         // Save limb's current position 
-        target_limb->prev_pos = target_limb->curr_pos;
+        Math_Vec3f_Copy(&target_limb->prev_pos, &target_limb->curr_pos);
+        //target_limb->prev_pos = target_limb->curr_pos;
 
         // Find acceleration based on force (accel = Force/mass)
         Vec3f accel = { (f32)0, (f32)0, (f32)0 };
-        Math_Vec3f_ScaleAndStore(apply_force, (1/target_limb->mass), &accel);
+        Math_Vec3f_ScaleAndStore(apply_force, (1/(target_limb->mass)), &accel);
 
         // New position with Verlet Integration
         // curr_pos += new_vel + accel * (dt^2) where dt = 1
