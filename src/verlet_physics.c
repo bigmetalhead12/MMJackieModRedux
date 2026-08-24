@@ -81,8 +81,7 @@ void Verlet_LimbUpdatePos(PhysLimb* target_limb, Vec3f* apply_force, Vec3f* appl
 
         // Save limb's current position 
         Math_Vec3f_Copy(&target_limb->prev_pos, &target_limb->curr_pos);
-        //target_limb->prev_pos = target_limb->curr_pos;
-
+        
         // Find acceleration based on force (accel = Force/mass)
         Vec3f accel = { (f32)0, (f32)0, (f32)0 };
         Math_Vec3f_ScaleAndStore(apply_force, (1/(target_limb->mass)), &accel);

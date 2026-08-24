@@ -381,16 +381,11 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
 
             // Find current global position of current limb based on offset from parent limb's position
             Vec3f transformVec3f = { 0.0f, 0.0f, 0.0f };
-            Vec3s pinnedLimbRot = {0, 0, 0 };  // This is empty now. Figure something out what to do with this before removing
             Vec3s rootRotatedOffset = { 0, 0, 0 };
             Vec3s worldRotatedOffset = { 0, 0, 0 }; 
-            // Special case for when Jackie is locked on to enemy to accomodate for weird head limb positions
-            if (player->stateFlags3 & PLAYER_STATE3_HOSTILE_LOCK_ON) {
-                Math_Vec3s_Copy(&pinnedLimbRot, &newRootJointRot);
-            }
 
             // Take pinned ponytail pinned limb's offset and rotate it based on ponytail's current rotation
-            CustomMath_Vec3s_Rotate(&gPhysLimbs[i]->default_jointPos, &pinnedLimbRot, &rootRotatedOffset);
+            CustomMath_Vec3s_Rotate(&gPhysLimbs[i]->default_jointPos, &newRootJointRot, &rootRotatedOffset);
             
             // Take combined rotation of ponytail pinned limb and apply Jackie's world-facing direction afterward
             CustomMath_Vec3s_Rotate(&rootRotatedOffset, &player->actor.shape.rot, &worldRotatedOffset);
@@ -436,6 +431,7 @@ void Ponytail_RotateJoints(Ponytail* this, PhysBone* gPhysBones[], Player* playe
     Vec3s root_rotation = { 0, 0, 0 };
     Math_Vec3s_Copy(&root_rotation, &this->skelAnime.jointTable[PONYTAIL_ROOT_ROT]);
     root_rotation.x = -root_rotation.x;
+    root_rotation.z = -root_rotation.z;
 
     // Go through every bone
     for (int i = (int)PONYTAIL_BONE_ROOT_LIMB1; i < (int)PONYTAIL_BONE_MAX; i++) {
