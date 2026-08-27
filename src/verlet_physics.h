@@ -41,6 +41,7 @@ typedef struct {
     Vec3s   default_jointPos;
     f32     mass;
     u8      pinned;
+    f32     collision_radius;
 } PhysLimb;
 
 typedef struct {
@@ -59,7 +60,7 @@ void Verlet_UpdatePhysPlayerVelocity(PhysPlayer* target_player, Player* player);
 void Verlet_CalcNetForce(PhysPlayer* target_player, f32 grav_force, Vec3f* net_force);
 
 // Initialize PhysLimb with input position
-void Verlet_InitLimb(PhysLimb* target_limb, Vec3f pos, Vec3f vel, f32 limb_mass, u8 pin_status);
+void Verlet_InitLimb(PhysLimb* target_limb, Vec3f pos, Vec3f vel, f32 limb_mass, u8 pin_status, f32 sphere_collider_radius);
 
 // Update position of limb
 void Verlet_LimbUpdatePos(PhysLimb* target_limb, Vec3f* apply_force, Vec3f* apply_vel);

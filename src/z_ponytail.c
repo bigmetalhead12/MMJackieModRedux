@@ -28,6 +28,7 @@ DESC:
 #define PINNED      1
 #define NOT_PINNED  0
 #define COLLISION_FACTOR    10
+#define PONYTAIL_LIMB_COLLIDER_RADIUS  0.3f
 
 #include "z_ponytail.h"
 #include "verlet_physics.h"
@@ -128,7 +129,7 @@ void Ponytail_SetDefaultBodyPartsPos(Ponytail* this, Player* player, StandardLim
     // Velocity only gets assigned to root limb
     // BodyPartsPos keeps track of global XYZ position of each limb
     Math_Vec3f_Copy(&this->bodyPartsPos[PONYTAIL_BODYPART_ROOT], &player->bodyPartsPos[PLAYER_BODYPART_HEAD]);
-    Verlet_InitLimb(gPhysLimbs[PONYTAIL_BODYPART_ROOT], this->actor.world.pos, playerVelocity, LIMB_MASS, PINNED);
+    Verlet_InitLimb(gPhysLimbs[PONYTAIL_BODYPART_ROOT], this->actor.world.pos, playerVelocity, LIMB_MASS, PINNED, PONYTAIL_LIMB_COLLIDER_RADIUS);
 
     // Root limb's jointTable for position
     Vec3s rootPos_Vec3s = {0, 0, 0};
@@ -153,11 +154,11 @@ void Ponytail_SetDefaultBodyPartsPos(Ponytail* this, Player* player, StandardLim
 
         // If limb shouldn't have any verlet physics, pin it
         if (i == (int)PONYTAIL_BODYPART_LIMB1) {
-            Verlet_InitLimb(gPhysLimbs[i], this->bodyPartsPos[i], playerVelocity, (LIMB_MASS*(i)), PINNED);
+            Verlet_InitLimb(gPhysLimbs[i], this->bodyPartsPos[i], playerVelocity, (LIMB_MASS*(i)), PINNED, PONYTAIL_LIMB_COLLIDER_RADIUS);
         }
         else {
             Vec3f no_velocity = {(f32)0, (f32)0, (f32)0};
-            Verlet_InitLimb(gPhysLimbs[i], this->bodyPartsPos[i], no_velocity, (LIMB_MASS*(i)), NOT_PINNED);
+            Verlet_InitLimb(gPhysLimbs[i], this->bodyPartsPos[i], no_velocity, (LIMB_MASS*(i)), NOT_PINNED, PONYTAIL_LIMB_COLLIDER_RADIUS);
         }
     }
 
@@ -242,17 +243,17 @@ Vec3f torsoLimb_offsetPos = { (f32)0, (f32)0, (f32)0 };
 
 PhysSphereCollider neckSphereCollider = {
     { 0.0f, 0.0f, 0.0f },
-    2.f
+    1.f
 };
 
 PhysSphereCollider headSphereCollider = {
     { 0.0f, 0.0f, 0.0f },
-    6.f
+    2.f
 };
 
 PhysSphereCollider torsoPTSphereCollider = {
     { 0.0f, 0.0f, 0.0f },
-    4.f
+    2.f
 };
 
 
@@ -362,12 +363,43 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
 
     // Special case for when Jackie is locked on to enemy to accomodate for weird head limb positions
     if (player->stateFlags3 & PLAYER_STATE3_HOSTILE_LOCK_ON) {
+        // Save the root rotation of ponytail before z-target lock on
         Vec3s normalRootJointRot = newRootJointRot;
 
-        if (player->headLimbRot.x > 0) {
-            newRootJointRot.x -= player->headLimbRot.x;
-        }
+        // During z-targeting lock on, the head rolls sideways to match the combat stance
         newRootJointRot.z = head_rotate.x;
+
+        // Recalculate root position to match the corrected rotation
+        // The "normal" rotation is where the ponytail would attach without correction
+        Vec3s normalPinnedRot = { normalRootJointRot.x, normalRootJointRot.y, normalRootJointRot.z };
+        // The "corrected" rotation is where it should attach after the lock-on adjustment
+        Vec3s correctedPinnedRot = { newRootJointRot.x, newRootJointRot.y, newRootJointRot.z };
+
+        Vec3s normalRootOffset = { 0, 0, 0 };
+        Vec3s correctedRootOffset = { 0, 0, 0 };
+        Vec3s normalWorldOffset = { 0, 0, 0 };
+        Vec3s correctedWorldOffset = { 0, 0, 0 };
+        Vec3f normalWorldOffsetF = { 0.0f, 0.0f, 0.0f };
+        Vec3f correctedWorldOffsetF = { 0.0f, 0.0f, 0.0f };
+        Vec3f rootPositionCorrection = { 0.0f, 0.0f, 0.0f };
+
+        // Calculate where the pinned limb would be with the uncorrected rotation
+        CustomMath_Vec3s_Rotate(&gPhysLimbs[PONYTAIL_BODYPART_LIMB1]->default_jointPos, &normalPinnedRot, &normalRootOffset);
+        CustomMath_Vec3s_Rotate(&normalRootOffset, &player->actor.shape.rot, &normalWorldOffset);
+        CustomMath_Vec3s_Scale_ToVec3f(&normalWorldOffset, this->actor.scale.x, &normalWorldOffsetF);
+
+        // Do the same calculation but with the corrected rotation
+        CustomMath_Vec3s_Rotate(&gPhysLimbs[PONYTAIL_BODYPART_LIMB1]->default_jointPos, &correctedPinnedRot, &correctedRootOffset);
+        CustomMath_Vec3s_Rotate(&correctedRootOffset, &player->actor.shape.rot, &correctedWorldOffset);
+        CustomMath_Vec3s_Scale_ToVec3f(&correctedWorldOffset, this->actor.scale.x, &correctedWorldOffsetF);
+
+        // Difference between the two tells us how far the attachment point shifted due to the rotation correction
+        Math_Vec3f_Diff(&normalWorldOffsetF, &correctedWorldOffsetF, &rootPositionCorrection);
+
+        // Move root position by that difference so the ponytail stays attached to the back of Jackie's head despite rotation change
+        Math_Vec3f_Sum(&this->actor.world.pos, &rootPositionCorrection, &this->actor.world.pos);
+        Math_Vec3f_Copy(&this->bodyPartsPos[PONYTAIL_BODYPART_ROOT], &this->actor.world.pos);
+        Math_Vec3f_Copy(&gPhysLimbs[PONYTAIL_BODYPART_ROOT]->curr_pos, &this->actor.world.pos);
     }
 
     Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_ROT], &newRootJointRot);
@@ -407,19 +439,24 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
         }
     }
 
+    // Collision
+    for (int i = 0; i < (int)PONYTAIL_BODYPART_MAX; i++) {
+        PhysCol_SolveCollision(gPhysLimbs[i], &neckSphereCollider);
+        PhysCol_SolveCollision(gPhysLimbs[i], &headSphereCollider);
+    }
+
     // Bone update
     for (int i = 0; i < COLLISION_FACTOR; i++) {
-        // Collision first
-        for (int j = 0; j < (int)PONYTAIL_BONE_MAX; j++) {
-            PhysCol_SphereCollider(gPhysBones[j], &neckSphereCollider);
-            PhysCol_SphereCollider(gPhysBones[j], &headSphereCollider);
-        }
         // Then fix bones to their preset length
         for (int j = 0; j < (int)PONYTAIL_BONE_MAX; j++) {
             Verlet_BoneConstraint(gPhysBones[j]);
         }
     }
     
+    for (int i = 0; i < (int)PONYTAIL_BODYPART_MAX; i++) {
+        PhysCol_SolveCollision(gPhysLimbs[i], &neckSphereCollider);
+        PhysCol_SolveCollision(gPhysLimbs[i], &headSphereCollider);
+    }
 }
 
 

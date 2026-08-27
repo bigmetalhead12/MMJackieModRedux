@@ -50,7 +50,7 @@ void Verlet_CalcNetForce(PhysPlayer* target_player, f32 grav_force, Vec3f* net_f
 }
 
 // Initialize PhysLimb with input position
-void Verlet_InitLimb(PhysLimb* target_limb, Vec3f pos, Vec3f vel, f32 limb_mass, u8 pin_status) {
+void Verlet_InitLimb(PhysLimb* target_limb, Vec3f pos, Vec3f vel, f32 limb_mass, u8 pin_status, f32 sphere_collider_radius) {
     // Initialize position
     target_limb->curr_pos = pos;
     target_limb->prev_pos = pos;
@@ -64,6 +64,9 @@ void Verlet_InitLimb(PhysLimb* target_limb, Vec3f pos, Vec3f vel, f32 limb_mass,
 
     // Initialize pin status
     target_limb->pinned = pin_status;
+
+    // Initialize the radius for a sphere collider that is to be on the limb
+    target_limb->collision_radius = sphere_collider_radius;
 }
 
 // Update position of limb
