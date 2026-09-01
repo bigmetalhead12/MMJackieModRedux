@@ -31,9 +31,8 @@ s16 CustomMath_Vec3f_Pitch(Vec3f* b, Vec3f* a) {
     return Math_Atan2S_XY( b->z - a->z, b->y - a->y);
 }
 
-// Designed to calculate bone y-axis rotations beyond -90/+90 degrees from origin
+// UNUSED
 s16 CustomMath_Vec3f_Yaw(Vec3f* a, Vec3f* b, Player* player) {
-
     // If vector b's z position is >= vector a's z position, proceed as is
     if (b->x >= a->x) {
         if (b->y >= a->y) {
@@ -48,6 +47,7 @@ s16 CustomMath_Vec3f_Yaw(Vec3f* a, Vec3f* b, Player* player) {
         }
         return -Math_Vec3f_Yaw(a, b);
     }
+        
 }
 
 // Designed to calculate bone z-axis rotations 
@@ -70,27 +70,26 @@ s16 CustomMath_Vec3f_Roll(Vec3f* a, Vec3f* b) {
     }
 }
 
-
 /*
 =================
 Vec3f Misc Functions
 =================
 */
 
+// Dot product between vector a and vector b
 f32 CustomMath_Vec3f_Dot(Vec3f* a, Vec3f* b) {
     return (a->x * b->x) +
            (a->y * b->y) +
            (a->z * b->z);
 }
 
-
+// Normalize given vector
 void CustomMath_Vec3f_Normalize(Vec3f* src, Vec3f* dest) {
-    f32 length = sqrtf((src->x * src->x) + (src->y * src->y) + (src->z * src->z));
+    f32 length = sqrtf(Math3D_Vec3fMagnitudeSq(src));
 
     if (length == 0.0f) {
-        dest->x = 0.0f;
-        dest->y = 0.0f;
-        dest->z = 0.0f;
+        Vec3f zero_vec = { (f32)0, (f32)0, (f32)0 };
+        Math_Vec3f_Copy(dest, &zero_vec);
         return;
     }
 

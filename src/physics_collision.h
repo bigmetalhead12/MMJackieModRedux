@@ -38,6 +38,7 @@ u8 PhysCol_boneIsColliding(PhysBone* target_bone, PhysSphereCollider* sphere_col
 u8 PhysCol_limbIsColliding(PhysLimb* target_limb, PhysSphereCollider* sphere_collider);
 
 void PhysCol_SolveCollision(PhysLimb* limb, PhysSphereCollider* collider);
+void PhysCol_SolveCapsuleFromSpheres(PhysLimb* limb, PhysSphereCollider* sphereA, PhysSphereCollider* sphereB);
 
 
 #endif

@@ -234,24 +234,8 @@ Ponytail Update
 
 Vec3f head_globalPos = { (f32)0, (f32)0, (f32)0 };      // Global position of player's head limb
 Vec3s head_rotate = {0, 0, 0};                          // Rotation value for player's head (with parent limbs' rotations included)
-Vec3f torso_pt_globalPos = { (f32)0, (f32)0, (f32)0 };      // Global position of player's torso limb
-Vec3s torso_pt_rotate = {0, 0, 0};                          // Rotation value for player's torso (with parent limbs' rotations included)
-Vec3f ponytailAttach_globalPos = { 0.0f, 0.0f, 0.0f };
-
-Vec3f headLimb_offsetPos = { (f32)0, (f32)2.49, (f32)0.04 };
-Vec3f torsoLimb_offsetPos = { (f32)0, (f32)0, (f32)0 };
 
 PhysSphereCollider neckSphereCollider = {
-    { 0.0f, 0.0f, 0.0f },
-    1.f
-};
-
-PhysSphereCollider headSphereCollider = {
-    { 0.0f, 0.0f, 0.0f },
-    2.f
-};
-
-PhysSphereCollider torsoPTSphereCollider = {
     { 0.0f, 0.0f, 0.0f },
     2.f
 };
@@ -277,25 +261,6 @@ RECOMP_HOOK("Player_PostLimbDrawGameplay") void Ponytail_on_Player_PostLimbDrawG
         Matrix_Pop();
         CLOSE_DISPS(play->state.gfxCtx);
     }
-
-    if (limbIndex == PLAYER_LIMB_TORSO) {
-        // Get matrix of torso limb
-        OPEN_DISPS(play->state.gfxCtx);
-        Matrix_Push(); 
-        MtxF* mtx = Matrix_GetCurrent();
-
-        // Get global position
-        torso_pt_globalPos.x = mtx->xw;
-        torso_pt_globalPos.y = mtx->yw;
-        torso_pt_globalPos.z = mtx->zw;
-
-        // Get rotation values
-        Matrix_MtxFToYXZRot(mtx, &torso_pt_rotate, 1);
-
-        // Close matrix
-        Matrix_Pop();
-        CLOSE_DISPS(play->state.gfxCtx);
-    }
 }
 
 
@@ -303,45 +268,35 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
     // Save Jackie's previous position as ponytail's previous position
     Math_Vec3f_Copy(&this->actor.prevPos, &player->actor.prevPos);
 
-    // Rebase all Verlet positions after entering a new map
+    // Rebase all limbs' Verlet positions after entering new map to prevent random movements upon entering new map
     if (this->needsReset) {
-        Vec3f anchorDelta = { 0.0f, 0.0f, 0.0f };
-
-        Math_Vec3f_Diff(&head_globalPos, &gPhysLimbs[PONYTAIL_BODYPART_ROOT]->curr_pos, &anchorDelta);
-
-        for (int i = PONYTAIL_BODYPART_ROOT; i < PONYTAIL_BODYPART_MAX; i++) {
-            Math_Vec3f_Sum(&gPhysLimbs[i]->curr_pos, &anchorDelta, &gPhysLimbs[i]->curr_pos);
-            Math_Vec3f_Sum(&gPhysLimbs[i]->prev_pos, &anchorDelta, &gPhysLimbs[i]->prev_pos);
-
-            gPhysLimbs[i]->curr_vel.x = 0.0f;
-            gPhysLimbs[i]->curr_vel.y = 0.0f;
-            gPhysLimbs[i]->curr_vel.z = 0.0f;
-
-            gPhysLimbs[i]->prev_vel.x = 0.0f;
-            gPhysLimbs[i]->prev_vel.y = 0.0f;
-            gPhysLimbs[i]->prev_vel.z = 0.0f;
-        }
-
         this->needsReset = 0;
+
+        // Reset root of ponytail to current head position
+        Math_Vec3f_Copy(&gPhysLimbs[PONYTAIL_BODYPART_ROOT]->curr_pos, &head_globalPos);
+        Math_Vec3f_Copy(&gPhysLimbs[PONYTAIL_BODYPART_ROOT]->prev_pos, &head_globalPos);
+
+        // Reset rest of ponytail limbs to current head position
+        for (int i = 1; i < (int)PONYTAIL_BODYPART_MAX; i++) {
+            Math_Vec3f_Copy(&gPhysLimbs[i]->curr_pos, &head_globalPos);
+            Math_Vec3f_Copy(&gPhysLimbs[i]->prev_pos, &head_globalPos);
+
+            // Clear current and previous velocity values so no movement from previous map is carried over
+            Vec3f zero_velocity = { (f32)0, (f32)0, (f32)0 };
+            Math_Vec3f_Copy(&gPhysLimbs[i]->curr_vel, &zero_velocity);      // current vel
+            Math_Vec3f_Copy(&gPhysLimbs[i]->prev_vel, &zero_velocity);      // previous vel
+        }
+        return;
     }
 
+    // Account for Jackie's size (giant's mask transformation)
+    Math_Vec3f_Copy(&this->actor.scale, &player->actor.scale);
 
     // Move ponytail actor to current position of Jackie's head
     Math_Vec3f_Copy(&this->actor.world.pos, &head_globalPos);
 
     // Set center of head collider to head limb
     Math_Vec3f_Copy(&neckSphereCollider.center, &head_globalPos);
-
-    Vec3f headLimb_offsetRot = {0.f, 0.f, 0.f};
-    CustomMath_Vec3f_RotateByX(&headLimb_offsetPos, head_rotate.x, &headLimb_offsetPos);
-    CustomMath_Vec3f_RotateByY(&headLimb_offsetRot, head_rotate.y, &headLimb_offsetRot);
-    CustomMath_Vec3f_RotateByZ(&headLimb_offsetRot, head_rotate.z, &headLimb_offsetRot);
-
-    // Position head sphere at head_globalPos + rotated offset
-    Math_Vec3f_Sum(&head_globalPos, &headLimb_offsetRot, &headSphereCollider.center);
-
-    // Position torso sphere at torso_globalPos + rotated offset
-    Math_Vec3f_Sum(&torso_pt_globalPos, &torsoLimb_offsetPos, &torsoPTSphereCollider.center);
 
     // Make ponytail actor face the same general direction as Jackie
     Math_Vec3s_Copy(&this->actor.shape.rot, &player->actor.shape.rot);
@@ -361,18 +316,16 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
     newRootJointRot.y = -16384 + head_rotate.y - this->actor.shape.rot.y;
     newRootJointRot.z = head_rotate.x;
 
-    // Special case for when Jackie is locked on to enemy to accomodate for weird head limb positions
+    // Special case for when Jackie is locked on to enemy with z-targeting to accomodate for weird head limb positions
     if (player->stateFlags3 & PLAYER_STATE3_HOSTILE_LOCK_ON) {
         // Save the root rotation of ponytail before z-target lock on
         Vec3s normalRootJointRot = newRootJointRot;
 
-        // During z-targeting lock on, the head rolls sideways to match the combat stance
+        // Match ponytail's roll to the head's pitch during lock-on
         newRootJointRot.z = head_rotate.x;
 
-        // Recalculate root position to match the corrected rotation
-        // The "normal" rotation is where the ponytail would attach without correction
+        // Compare original and correct rotations so that the root position can be shifted to compensate for lock on animation offset
         Vec3s normalPinnedRot = { normalRootJointRot.x, normalRootJointRot.y, normalRootJointRot.z };
-        // The "corrected" rotation is where it should attach after the lock-on adjustment
         Vec3s correctedPinnedRot = { newRootJointRot.x, newRootJointRot.y, newRootJointRot.z };
 
         Vec3s normalRootOffset = { 0, 0, 0 };
@@ -383,25 +336,26 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
         Vec3f correctedWorldOffsetF = { 0.0f, 0.0f, 0.0f };
         Vec3f rootPositionCorrection = { 0.0f, 0.0f, 0.0f };
 
-        // Calculate where the pinned limb would be with the uncorrected rotation
+        // Find where pinned limb would be using the normal root rotation
         CustomMath_Vec3s_Rotate(&gPhysLimbs[PONYTAIL_BODYPART_LIMB1]->default_jointPos, &normalPinnedRot, &normalRootOffset);
         CustomMath_Vec3s_Rotate(&normalRootOffset, &player->actor.shape.rot, &normalWorldOffset);
         CustomMath_Vec3s_Scale_ToVec3f(&normalWorldOffset, this->actor.scale.x, &normalWorldOffsetF);
 
-        // Do the same calculation but with the corrected rotation
+        // Find where pinned limb would be using corrected lock on animation rotation
         CustomMath_Vec3s_Rotate(&gPhysLimbs[PONYTAIL_BODYPART_LIMB1]->default_jointPos, &correctedPinnedRot, &correctedRootOffset);
         CustomMath_Vec3s_Rotate(&correctedRootOffset, &player->actor.shape.rot, &correctedWorldOffset);
         CustomMath_Vec3s_Scale_ToVec3f(&correctedWorldOffset, this->actor.scale.x, &correctedWorldOffsetF);
 
-        // Difference between the two tells us how far the attachment point shifted due to the rotation correction
+        // Use difference between those positions to keep ponytail attached to same place
         Math_Vec3f_Diff(&normalWorldOffsetF, &correctedWorldOffsetF, &rootPositionCorrection);
 
-        // Move root position by that difference so the ponytail stays attached to the back of Jackie's head despite rotation change
+        // Shift ponytail root so that the corrected rotation does not pull ponytail away from Jackie's head
         Math_Vec3f_Sum(&this->actor.world.pos, &rootPositionCorrection, &this->actor.world.pos);
         Math_Vec3f_Copy(&this->bodyPartsPos[PONYTAIL_BODYPART_ROOT], &this->actor.world.pos);
         Math_Vec3f_Copy(&gPhysLimbs[PONYTAIL_BODYPART_ROOT]->curr_pos, &this->actor.world.pos);
     }
 
+    // Apply final root rotation to Jackie's ponytail
     Math_Vec3s_Copy(&this->skelAnime.jointTable[LIMB_ROOT_ROT], &newRootJointRot);
 
     // BodyPartsPos Rest of the limbs
@@ -442,7 +396,6 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
     // Collision
     for (int i = 0; i < (int)PONYTAIL_BODYPART_MAX; i++) {
         PhysCol_SolveCollision(gPhysLimbs[i], &neckSphereCollider);
-        PhysCol_SolveCollision(gPhysLimbs[i], &headSphereCollider);
     }
 
     // Bone update
@@ -455,7 +408,6 @@ void Ponytail_UpdateBodyPartsPos(Ponytail* this, Player* player, Vec3f apply_for
     
     for (int i = 0; i < (int)PONYTAIL_BODYPART_MAX; i++) {
         PhysCol_SolveCollision(gPhysLimbs[i], &neckSphereCollider);
-        PhysCol_SolveCollision(gPhysLimbs[i], &headSphereCollider);
     }
 }
 
@@ -485,18 +437,16 @@ void Ponytail_RotateJoints(Ponytail* this, PhysBone* gPhysBones[], Player* playe
                 // Transform direction into local space by removing actor rot & model offset
                 Vec3s actorRotWithOffset = {0, 0, 0};
                 Math_Vec3s_Copy(&actorRotWithOffset, &this->actor.shape.rot);
-
                 CustomMath_Vec3f_InverseRotate(&bone_direction, &actorRotWithOffset, &bone_direction);
                 CustomMath_Vec3f_InverseRotate(&bone_direction, &root_rotation, &bone_direction);
-
                 CustomMath_Vec3f_RotateByY(&bone_direction, (s16)32768, &bone_direction);
-
+                
                 // Correct x movement
                 // This is ugly, but it's the only hotfix i can think of atm
                 bone_direction.x = -(bone_direction.x);
                 bone_direction.z = -(bone_direction.z);
 
-                // Now compute pitch/roll from the local-space direction
+                // Calculate pitch/roll from the local-space direction
                 Vec3f origin = {0, 0, 0};
                 s16 local_pitch = CustomMath_Vec3f_Pitch(&bone_direction, &origin);
                 s16 local_roll = CustomMath_Vec3f_Roll(&origin, &bone_direction);
@@ -504,7 +454,6 @@ void Ponytail_RotateJoints(Ponytail* this, PhysBone* gPhysBones[], Player* playe
 
                 // Apply pitch and roll to current limb's jointTable
                 this->skelAnime.jointTable[i + 1] = curr_rotate;
-
 
                 // Keep note of offset for next limb
                 CustomMath_Vec3s_Sum(&offset_rotation, &curr_rotate, &offset_rotation);
@@ -520,7 +469,6 @@ void Ponytail_RotateJoints(Ponytail* this, PhysBone* gPhysBones[], Player* playe
 
                 CustomMath_Vec3f_InverseRotate(&bone_direction, &actorRotWithOffset, &bone_direction);
                 CustomMath_Vec3f_InverseRotate(&bone_direction, &root_rotation, &bone_direction);
-
                 CustomMath_Vec3f_RotateByY(&bone_direction, (s16)32768, &bone_direction);
 
                 // Correct x movement
@@ -528,7 +476,7 @@ void Ponytail_RotateJoints(Ponytail* this, PhysBone* gPhysBones[], Player* playe
                 bone_direction.x = -(bone_direction.x);
                 bone_direction.z = -(bone_direction.z);
 
-                // Now compute pitch/roll from the local-space direction
+                // Calculate pitch/roll from the local-space direction
                 Vec3f origin = {0, 0, 0};
                 s16 local_pitch = CustomMath_Vec3f_Pitch(&bone_direction, &origin);
                 s16 local_roll = CustomMath_Vec3f_Roll(&origin, &bone_direction);
@@ -541,8 +489,11 @@ void Ponytail_RotateJoints(Ponytail* this, PhysBone* gPhysBones[], Player* playe
                 // Apply pitch and roll to current limb's jointTable
                 this->skelAnime.jointTable[i + 1] = apply_rot;
 
+                // I genuinely have no idea how this helps, but this is extremely important
+                curr_rotate.y = apply_rot.z;
+
                 // Keep note of offset for next limb
-                CustomMath_Vec3s_Sum(&offset_rotation, &apply_rot, &offset_rotation);
+                Math_Vec3s_Copy(&offset_rotation, &curr_rotate);
             }
         }
     }
