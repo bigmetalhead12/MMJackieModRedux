@@ -38,6 +38,7 @@ This mod contains the following components:
 # What's Missing
 * Fixing some masks' shape on Jackie's face
 * Proper physics when riding on Epona
+* Better collision of the overcoat with the legs
 * Completing documentation
 
 # Acknowledgements and Thanks
