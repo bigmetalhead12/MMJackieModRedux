@@ -1,4 +1,4 @@
-<img width="4800" height="3400" alt="jackie_banner" src="https://github.com/user-attachments/assets/7bd406e5-9f79-499a-bc3a-4219f9f938cb" />
+<img width="4800" height="3400" alt="jackie_banner" src="docs/img/jackie_bannerv2.png" />
 
 # Majora's Mask Recomp: Jackie Quilt Mod Redux
 
@@ -6,7 +6,7 @@ This mod replaces Link (human form) with my custom model of Jackie Quilt, a char
 
 This Jackie model replaces only the player model of Link's human form. The model was designed to be (somewhat) accurate to the OoT/MM model aesthetic. The model also uses the Adult Link skeleton, with none of the animations altered.
 
-The arguably most notable feature of this mod is the selectable, alternative hairstyle: a ponytail hairstyle with **real-time physics**. Along with this feature, the mod also includes the HD texture option, full voice replacement, and minor text replacements.
+This mod also contains a unique element: **real-time physics** for an alternative ponytail hairstyle and Cadet costume. Along with this feature, the mod also includes the HD texture option, full voice replacement, and minor text replacements.
 
 # Installation
 To install this mod, follow the instructions:
@@ -18,6 +18,7 @@ To install this mod, follow the instructions:
 This mod gives you control over which features to activate or deactivate. After installing the NRM file into your Majora's Mask Recomp, you can toggle on/off the following features before starting the game:
 *  **HD Textures** - This toggle lets you select between the *default low-res* textures or *HD textures*.
 *  **Alternative Hairstyle** - This toggle lets you select between the *default hairstyle* or the *ponytail hairstyle*. Keep note that the ponytail hairstyle has real-time physics while the default hairstyle does not.
+*  **Alternative Costume** - This toggle lets you select between the *default costume* or the *Cadet costume*. Keep note that the Cadet costume has real-time physics while the default costume does not. *Also note that because the physics of this costume uses a good amount of resources, this costume's performance may vary based on your PC's hardware.*
 *  **Alternative Text** - This toggle lets you select between the *game's default texts* or the *slightly modified texts*. The slightly modified texts only changed the pronouns, titles, and few lines of text to match Jackie's character.
 
 # Mod Template
@@ -35,7 +36,8 @@ This mod contains the following components:
 * [Real-Time Physics (for ponytail)](docs/VERLETINTEGRATION.md)
 
 # What's Missing
-* Collision and offset fix for ponytail rotations
+* Fixing some masks' shape on Jackie's face
+* Proper physics when riding on Epona
 * Completing documentation
 
 # Acknowledgements and Thanks
@@ -52,6 +54,7 @@ This project could not have been possible without the help of the MM Recomp and 
 - To **Dana the Elf**, for providing a guide on Flipbooks
 - To **PxExYxTxOxN**, for the [guide on creating player models](https://www.youtube.com/watch?v=6Ji_12w5B1M)
 - To **grubbz** and **El Regolante**, for sharing my work in their Discord community's Monthly Art Gallery
+- To **Aquablaze** for extensively beta testing this mod
 - To **Pikuma**, for the [guide on Verlet Integration](https://www.youtube.com/watch?v=-GWTDhOQU6M)
 
 # Feedback
