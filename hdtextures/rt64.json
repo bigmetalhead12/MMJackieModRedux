@@ -58,6 +58,13 @@
             },
             "path": "eyes_shocked.dds"
         },
+		{
+            "hashes": {
+                "rice": "",
+                "rt64": "da0d00b89d3d5653"
+            },
+            "path": "eyes_shut.dds"
+        },
         {
             "hashes": {
                 "rice": "",
@@ -736,6 +743,888 @@
                 "rt64": "4c567d28a6cae6ec"
             },
             "path": "shoe_bot_elegy.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "8ecc143e95efc05c"
+            },
+            "path": "hat_cap_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "0f3eee39b06c73d7"
+            },
+            "path": "hat_column1_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "dadbae0cf2d59a18"
+            },
+            "path": "hat_column2_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "01f3be1320f95532"
+            },
+            "path": "hat_side_strap_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "ce7fb21ae149e5e2"
+            },
+            "path": "hat_side_strap_small_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "5cdd72f61f7766b4"
+            },
+            "path": "hat_side_strap_gold_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "62a1efedd2046375"
+            },
+            "path": "hat_logo_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "bfbc3612c936439e"
+            },
+            "path": "hat_strap1_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "895e994441d690e1"
+            },
+            "path": "hat_strap_gold_holder_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "6f8c7539a0cfa153"
+            },
+            "path": "hat_column_holder_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "460615072ed8aab5"
+            },
+            "path": "back_shoulder_gold_button_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "b6ccc07378cbdff5"
+            },
+            "path": "hat_strap_hook_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "11d63d5b4cdb3f0a"
+            },
+            "path": "hat_side_strap_gold2_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "6c65124f2935692b"
+            },
+            "path": "wrist_cuff_chain_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "ab7a5e34b41c2685"
+            },
+            "path": "hat_cap1_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "c55dd05a5bc68c88"
+            },
+            "path": "hat_cap2_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "c805853477b56a04"
+            },
+            "path": "hat_cap3_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "27c34b51669d8584"
+            },
+            "path": "necklace_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "9916d376c8bc7872"
+            },
+            "path": "necklace_gold_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "2853d44358c664c9"
+            },
+            "path": "torso_front_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "f43fce6c5d60e40d"
+            },
+            "path": "torso_back_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "5b0c13b0226f93c1"
+            },
+            "path": "torso_left_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "ef43c11ce5f4a420"
+            },
+            "path": "torso_right_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "76f4725e0ee8a34d"
+            },
+            "path": "coat_front_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "c2aa9dfb4d7d9e12"
+            },
+            "path": "coat_back_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "47738599b8918188"
+            },
+            "path": "collar_botleft_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "2980d091bc3cae8f"
+            },
+            "path": "collar_botright_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "de65069af924d6db"
+            },
+            "path": "collar_topleft_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "94ae9cfed615a9c1"
+            },
+            "path": "collar_topright_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "727d5aa326f7b340"
+            },
+            "path": "collar_badge_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "65cfb23c4c80ee3c"
+            },
+            "path": "back_shoulder_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "a2bbfd69f4f44905"
+            },
+            "path": "back_shoulder_strap_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "45e59225323b2270"
+            },
+            "path": "back_shoulder_strap_end1_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "a3990c17f1d154db"
+            },
+            "path": "back_shoulder_strap_end2_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "f3b4b3bb68a6d1ee"
+            },
+            "path": "back_shoulder_silver_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "1d374482b276611d"
+            },
+            "path": "back_shoulder_gold_emblem_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "15b5af26aa4aea72"
+            },
+            "path": "lowerarm_back_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "e587059b02313ee3"
+            },
+            "path": "lowerarm_front_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "59770c0a9e3a45e5"
+            },
+            "path": "glove_fingers_top_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "a13b6af5dbc8b7ca"
+            },
+            "path": "glove_thumb_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "8c6f4a221fa69dec"
+            },
+            "path": "glove_thumb2_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "0af5478102248000"
+            },
+            "path": "wrist_cuff_open_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "f3342135928727b1"
+            },
+            "path": "wrist_cuff_closed_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "bc86f6d11a2888de"
+            },
+            "path": "wrist_strap_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "3202a3d9ae909861"
+            },
+            "path": "armband1_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "709ff0b996d58bf7"
+            },
+            "path": "armband2_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "ba396248af3f269c"
+            },
+            "path": "coat_cuff_outside1_left_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "f5640c65adb39c73"
+            },
+            "path": "coat_cuff_outside1_right_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "62db0580f1f58dfa"
+            },
+            "path": "coat_cuff_outside2_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "c6c760e66984edb3"
+            },
+            "path": "coat_cuff_inside1_left_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "42bbea6ee98e9dab"
+            },
+            "path": "coat_cuff_inside1_right_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "073d84a1aeaca8e0"
+            },
+            "path": "coat_cuff_inside2_left_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "f1f6c54aebfe37d6"
+            },
+            "path": "coat_cuff_inside2_right_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "ceed3223e2db5345"
+            },
+            "path": "coat_forearm_front_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "478b0e2dd4729021"
+            },
+            "path": "coat_forearm_back_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "f73510a633927f72"
+            },
+            "path": "coat_shoulder_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "0928db5fb26d9e18"
+            },
+            "path": "coat_cuff_strap1_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "acd27af48e5345fc"
+            },
+            "path": "coat_cuff_strap2_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "b80890d19756f64f"
+            },
+            "path": "coat_cuff_strap3_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "680cec45a5d6c2ec"
+            },
+            "path": "coat_cuff_strap_holder_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "957d7b7716e71e15"
+            },
+            "path": "wrist_cuff_gold_button_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "3f762dd480cf0f80"
+            },
+            "path": "belt_holder_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "c5046225104e90ba"
+            },
+            "path": "belt_buckle_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "7202e903c6fa3ff1"
+            },
+            "path": "belt_buckle_pin_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "7e63ae213b650e85"
+            },
+            "path": "belt_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "01a60c46da41e143"
+            },
+            "path": "belt_logo_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "c2737a95b82d8f1e"
+            },
+            "path": "skirt_front_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "b02ddd8d605efd86"
+            },
+            "path": "skirt_front_left_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "b7277d77e4c3db34"
+            },
+            "path": "skirt_front_right_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "87ec73df84a43fb5"
+            },
+            "path": "skirt_front_right2_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "d5b055f3ddab1cfd"
+            },
+            "path": "skirt_rear_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "09583ed351cd69b3"
+            },
+            "path": "tight_thigh_left_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "3e62e58d25d04a66"
+            },
+            "path": "tight_thigh_right_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "240b5c6667893190"
+            },
+            "path": "tight_lowerleg_front_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "248cada1694b7838"
+            },
+            "path": "tight_lowerleg_back_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "97b873866c5f7883"
+            },
+            "path": "boots_strings_bot_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "7d2ba53cd6c51a4f"
+            },
+            "path": "boots_strings_mid_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "5abd32fb7dd6e261"
+            },
+            "path": "boots_strings_top_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "b3391ff967bb22df"
+            },
+            "path": "boots_bot_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "7d2a0733c1551aea"
+            },
+            "path": "boots_back_bot_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "5403c4555450d947"
+            },
+            "path": "boots_heel_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "bb78f5a223c1b620"
+            },
+            "path": "bootstrap_mid_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "94d9633aa18f3220"
+            },
+            "path": "bootstrap_silver_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "2c568ab4b1c264d8"
+            },
+            "path": "bootstrap_end_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "8bb753032a506113"
+            },
+            "path": "glove_fist_top_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "e454b5cb5947000c"
+            },
+            "path": "glove_fist_front_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "cde3e18782decd0d"
+            },
+            "path": "glove_fist_bot_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "26466e68e8888d85"
+            },
+            "path": "glove_fist_back_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "9c1bd858ddfe6a0f"
+            },
+            "path": "coat_trim_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "ecfc96cbf626401b"
+            },
+            "path": "coat_cuff_trim_back1_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "1ab462b6bf64052a"
+            },
+            "path": "coat_cuff_trim_back3_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "297789ecc52ef078"
+            },
+            "path": "coat_cuff_trim_back3_1_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "878fe4f783171249"
+            },
+            "path": "coat_cuff_trim_front1_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "6b5dd35df812ea3e"
+            },
+            "path": "coat_cuff_trim_front2_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "1212471a39a9db95"
+            },
+            "path": "coat_cuff_trim_front2_1_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "0928db5fb26d9e18"
+            },
+            "path": "coat_cuff_strap1_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "a6c5058945848976"
+            },
+            "path": "coat_cuff_strap2_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "94abd206bc0ad9d8"
+            },
+            "path": "coat_cuff_strap3_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "a1fd2d596307e204"
+            },
+            "path": "coat_cuff_button_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "49338038ad5f6fd5"
+            },
+            "path": "coat_cuff_strap_holder_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "3f77bce1ed449b32"
+            },
+            "path": "wrist_gold_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "189473b829530d64"
+            },
+            "path": "wrist_gold_shade_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "c4650998b829f183"
+            },
+            "path": "wrist_strap_shade_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "be1d41fd0297bbc9"
+            },
+            "path": "wrist_cuff_gold_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "8cabfe10f2a24692"
+            },
+            "path": "wrist_cuff_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "ddcedf114a075166"
+            },
+            "path": "wrist_cuff2_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "72301a59c0c7bfd9"
+            },
+            "path": "glove_finger_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "bb9b6e2ef62950b3"
+            },
+            "path": "glove_white_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "82f1e46dec3ddd81"
+            },
+            "path": "glove_white2_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "eff97141941bc199"
+            },
+            "path": "coat_fold2_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "bc1693a79800f93b"
+            },
+            "path": "belt_strap_holder_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "4d8852643845ceb7"
+            },
+            "path": "belt_strap_gold_end_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "7b0459d080e6b4b3"
+            },
+            "path": "belt_strap_connector_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "47c3c64b4e22dc79"
+            },
+            "path": "belt_strap_connector_inside_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "7b398c6705512c68"
+            },
+            "path": "belt_strap_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "d189436ea591aa22"
+            },
+            "path": "belt_strap_end2_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "fc004f5b59fd7aa1"
+            },
+            "path": "belt_strap_end1_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "4e8b68b98a568485"
+            },
+            "path": "overcoat_beltstrap_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "81bbdf2e39614a8e"
+            },
+            "path": "overcoat_beltstrap_bot_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "cca8691e16f54910"
+            },
+            "path": "overcoat_front_high_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "86bcfaae3e7e44a7"
+            },
+            "path": "overcoat_front_low_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "14daad1a36839648"
+            },
+            "path": "overcoat_back_high_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "b845417896b2db43"
+            },
+            "path": "overcoat_back_low_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "dad345030236092a"
+            },
+            "path": "overcoat_pocket_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "dc582ef7b39151fe"
+            },
+            "path": "belt_strap_side_end2_HD.dds"
+        },
+        {
+            "hashes": {
+                "rice": "",
+                "rt64": "dc582ef7b39151fe"
+            },
+            "path": "belt_strap_HD.dds"
         }
     ]
 }

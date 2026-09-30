@@ -31,6 +31,7 @@ by BigMetalHead12
 #include "ultra64.h"
 
 // Model Header Files
+// Default Costume
 #include "gJackieSkel.h"
 #include "gJackieSkel_hands_closed.h"
 #include "gJackieSkel_hands_bottle.h"
@@ -38,8 +39,19 @@ by BigMetalHead12
 #include "gJackieSkel_fps_bow.h"
 #include "gJackieSkel_fps_hookshot.h"
 #include "gJackieSkel_fps_leftarmhand.h"
-
 #include "gJackiePonytailSkel.h"
+
+// Cadet Costume
+#include "gJackieCadetSkel.h"
+#include "gJackieCadetSkel_hands_closed.h"
+#include "gJackieCadetSkel_hands_bottle.h"
+#include "gJackieCadetSkel_hands_ocarina.h"
+#include "gJackieCadetSkel_fps_bow.h"
+#include "gJackieCadetSkel_fps_hookshot.h"
+#include "gJackieCadetSkel_fps_leftarmhand.h"
+#include "gBeltStrapHookSkel.h"
+#include "gOvercoatSkel.h"
+
 
 // Redead/Gibdo Files for adjusting their grab height on Jackie
 #include "overlays/actors/ovl_En_Rd/z_en_rd.h"
@@ -76,7 +88,7 @@ extern u64 gJackieEyesShockTex[];
 extern u64 gJackieEyesRollDownTex[];    // gLinkAdultEyesUnk1Tex 
 extern u64 gJackieEyesShutTex[];        // gLinkAdultEyesUnk2Tex
 
-// Ponytail Head
+// Default Ponytail Head
 extern u64 gJackiePonytailSkel_eyes_open_LOWRES_rgba16[];
 extern u64 gJackiePonytailSkel_eyes_half_LOWRES_rgba16[];
 extern u64 gJackiePonytailSkel_eyes_closed_LOWRES_rgba16[];
@@ -87,7 +99,7 @@ extern u64 gJackiePonytailSkel_eyes_roll_down_LOWRES_rgba16[];    // gLinkAdultE
 extern u64 gJackiePonytailSkel_eyes_shut_LOWRES_rgba16[];        // gLinkAdultEyesUnk2Tex
 
 // Eyes Flipbook for Jackie
-// Default Head
+// Default Original Head
 void* sEyeTextures[PLAYER_EYES_MAX] = {
     gJackieEyesOpenTex,
     gJackieEyesHalfTex,
@@ -99,7 +111,7 @@ void* sEyeTextures[PLAYER_EYES_MAX] = {
     gJackieEyesShutTex,
 };
 
-// Ponytail Head
+// Default Ponytail Head
 void* sPTEyeTextures[PLAYER_EYES_MAX] = {
     gJackiePonytailSkel_eyes_open_LOWRES_rgba16,
     gJackiePonytailSkel_eyes_half_LOWRES_rgba16,
@@ -264,8 +276,7 @@ extern PlayerAnimationHeader* D_8085BE84[PLAYER_ANIMGROUP_MAX][PLAYER_ANIMTYPE_M
 extern LinkAnimationHeader gPlayerAnim_clink_demo_doorA_link;
 extern LinkAnimationHeader gPlayerAnim_clink_demo_doorB_link;
 
-// DLs
-
+// Default DLs
 Gfx gJackieRightHandHoldingMirrorShieldDL[] = {
     gsSPDisplayList(gJackieSkel_hands_closed_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque),
     gsSPBranchList(gLinkHumanMirrorShieldDL),
@@ -309,6 +320,53 @@ Gfx gJackieRightHandHoldingBowDL[] = {
 
 Gfx gJackieRightHandHoldingHookshotDL[] = {
     gsSPDisplayList(gJackieSkel_hands_closed_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque),
+    gsSPBranchList(gLinkHumanHookshotDL),
+};
+
+// Cadet DLs
+Gfx gJackieCadetRightHandHoldingMirrorShieldDL[] = {
+    gsSPDisplayList(gJackieCadetSkel_hands_closed_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque),
+    gsSPBranchList(gLinkHumanMirrorShieldDL),
+};
+
+Gfx gJackieCadetRightHandHoldingHeroShieldDL[] = {
+    gsSPDisplayList(gJackieCadetSkel_hands_closed_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque),
+    gsSPBranchList(gLinkHumanHerosShieldDL),
+};
+
+Gfx gJackieCadetLeftHandHoldingGildedSwordDL[] = {
+    gsSPDisplayList(gJackieCadetSkel_hands_closed_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque),
+    gsSPDisplayList(gLinkHumanGildedSwordHandleDL),
+    gsSPBranchList(gLinkHumanGildedSwordBladeDL),
+};
+
+Gfx gJackieCadetLeftHandHoldingKokiriSwordDL[] = {
+    gsSPDisplayList(gJackieCadetSkel_hands_closed_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque),
+    gsSPBranchList(gKokiriSwordDL),
+};
+
+Gfx gJackieCadetLeftHandHoldingRazorSwordDL[] = {
+    gsSPDisplayList(gJackieCadetSkel_hands_closed_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque),
+    gsSPBranchList(gRazorSwordDL),
+};
+
+Gfx gJackieCadetLeftHandHoldingGreatFairysSwordDL[] = {
+    gsSPDisplayList(gJackieCadetSkel_hands_closed_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque),
+    gsSPBranchList(gLinkHumanGreatFairysSwordDL),
+};
+
+Gfx gJackieCadetRightHandShoulderAndForearm[] = {
+    gsSPDisplayList(gJackieCadetSkel_fps_bow_bone017_gLinkAdultRightArmLimb_mesh_layer_Opaque),
+    gsSPBranchList(gJackieCadetSkel_fps_bow_bone016_gLinkAdultRightShoulderLimb_mesh_layer_Opaque),
+};
+
+Gfx gJackieCadetRightHandHoldingBowDL[] = {
+    gsSPDisplayList(gJackieCadetSkel_hands_closed_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque),
+    gsSPBranchList(gLinkHumanBowDL),
+};
+
+Gfx gJackieCadetRightHandHoldingHookshotDL[] = {
+    gsSPDisplayList(gJackieCadetSkel_hands_closed_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque),
     gsSPBranchList(gLinkHumanHookshotDL),
 };
 
@@ -376,73 +434,167 @@ RECOMP_HOOK_RETURN ("Player_GetHeight") void return_Player_GetHeight(void) {
 }
 
 extern FlexSkeletonHeader gJackiePTSkel;
-
+extern FlexSkeletonHeader gJackieCadetPTSkel;
 
 // Function to replace Link's model with Jackie's model
 RECOMP_HOOK("Player_Init") void on_Player_Init(Actor* thisx, PlayState* play) {
     Player* player = GET_PLAYER(play);
 
-    gPlayerSkeletons[PLAYER_FORM_HUMAN] = &gJackieSkel;
-
-    // Change body based on hairstyle toggle
-    if (recomp_get_config_u32("change_hairstyle")) {
+    // Change body based on costume and hairstyle toggle
+    // Default costume + default hair
+    if (!recomp_get_config_u32("change_outfit") && !recomp_get_config_u32("change_hairstyle")) {
+        gPlayerSkeletons[PLAYER_FORM_HUMAN] = &gJackieSkel;
+    }
+    // Default costume + ponytail hair
+    if (!recomp_get_config_u32("change_outfit") && recomp_get_config_u32("change_hairstyle")) {
         gPlayerSkeletons[PLAYER_FORM_HUMAN] = &gJackiePTSkel;
+    }
+    // Cadet costume + default hair
+    if (recomp_get_config_u32("change_outfit") && !recomp_get_config_u32("change_hairstyle")) {
+        gPlayerSkeletons[PLAYER_FORM_HUMAN] = &gJackieCadetSkel;
+    }
+    // Cadet costume + ponytail hair
+    if (recomp_get_config_u32("change_outfit") && recomp_get_config_u32("change_hairstyle")) {
+        gPlayerSkeletons[PLAYER_FORM_HUMAN] = &gJackieCadetPTSkel;
     }
     
     // Right Hand DLs
-    gPlayerRightHandOpenDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieSkel_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
-    gPlayerRightHandOpenDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieSkel_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
-    
-    gPlayerRightHandClosedDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieSkel_hands_closed_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
-    gPlayerRightHandClosedDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieSkel_hands_closed_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
-    gPlayerRightHandInstrumentDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieSkel_hands_ocarina_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
-    gPlayerRightHandInstrumentDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieSkel_hands_ocarina_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
-    
-    gPlayerRightHandBowDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieRightHandHoldingBowDL;
-    gPlayerRightHandBowDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieRightHandHoldingBowDL;
+    // Default
+    if (!recomp_get_config_u32("change_outfit")) {
+        gPlayerRightHandOpenDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieSkel_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
+        gPlayerRightHandOpenDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieSkel_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
+        
+        gPlayerRightHandClosedDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieSkel_hands_closed_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
+        gPlayerRightHandClosedDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieSkel_hands_closed_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
+        gPlayerRightHandInstrumentDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieSkel_hands_ocarina_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
+        gPlayerRightHandInstrumentDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieSkel_hands_ocarina_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
+        
+        gPlayerRightHandBowDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieRightHandHoldingBowDL;
+        gPlayerRightHandBowDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieRightHandHoldingBowDL;
 
-    gPlayerRightHandHookshotDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieRightHandHoldingHookshotDL;
-    gPlayerRightHandHookshotDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieRightHandHoldingHookshotDL;
+        gPlayerRightHandHookshotDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieRightHandHoldingHookshotDL;
+        gPlayerRightHandHookshotDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieRightHandHoldingHookshotDL;
+    }
+    // Cadet
+    else if (recomp_get_config_u32("change_outfit")) {
+        gPlayerRightHandOpenDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieCadetSkel_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
+        gPlayerRightHandOpenDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieCadetSkel_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
+        
+        gPlayerRightHandClosedDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieCadetSkel_hands_closed_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
+        gPlayerRightHandClosedDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieCadetSkel_hands_closed_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
+        gPlayerRightHandInstrumentDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieCadetSkel_hands_ocarina_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
+        gPlayerRightHandInstrumentDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieCadetSkel_hands_ocarina_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
+        
+        gPlayerRightHandBowDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieCadetRightHandHoldingBowDL;
+        gPlayerRightHandBowDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieCadetRightHandHoldingBowDL;
+
+        gPlayerRightHandHookshotDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieCadetRightHandHoldingHookshotDL;
+        gPlayerRightHandHookshotDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieCadetRightHandHoldingHookshotDL;
+    }
 
     // Left Hand DLs
-    gPlayerLeftHandOpenDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieSkel_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
-    gPlayerLeftHandOpenDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieSkel_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
-    
-    gPlayerLeftHandClosedDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieSkel_hands_closed_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
-    gPlayerLeftHandClosedDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieSkel_hands_closed_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
-    gPlayerLeftHandOneHandSwordDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieSkel_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
-    gPlayerLeftHandOneHandSwordDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieSkel_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
-    gPlayerLeftHandTwoHandSwordDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieLeftHandHoldingGreatFairysSwordDL;
-    gPlayerLeftHandTwoHandSwordDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieLeftHandHoldingGreatFairysSwordDL;
-    gPlayerLeftHandBottleDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieSkel_hands_bottle_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
-    gPlayerLeftHandBottleDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieSkel_hands_bottle_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
+    // Default
+    if (!recomp_get_config_u32("change_outfit")) {
+        gPlayerLeftHandOpenDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieSkel_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
+        gPlayerLeftHandOpenDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieSkel_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
+        
+        gPlayerLeftHandClosedDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieSkel_hands_closed_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
+        gPlayerLeftHandClosedDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieSkel_hands_closed_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
+        gPlayerLeftHandOneHandSwordDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieSkel_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
+        gPlayerLeftHandOneHandSwordDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieSkel_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
+        gPlayerLeftHandTwoHandSwordDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieLeftHandHoldingGreatFairysSwordDL;
+        gPlayerLeftHandTwoHandSwordDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieLeftHandHoldingGreatFairysSwordDL;
+        gPlayerLeftHandBottleDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieSkel_hands_bottle_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
+        gPlayerLeftHandBottleDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieSkel_hands_bottle_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
+    }
+    // Cadet
+    else if (recomp_get_config_u32("change_outfit")) {
+        gPlayerLeftHandOpenDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieCadetSkel_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
+        gPlayerLeftHandOpenDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieCadetSkel_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
+        
+        gPlayerLeftHandClosedDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieCadetSkel_hands_closed_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
+        gPlayerLeftHandClosedDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieCadetSkel_hands_closed_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
+        gPlayerLeftHandOneHandSwordDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieCadetSkel_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
+        gPlayerLeftHandOneHandSwordDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieCadetSkel_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
+        gPlayerLeftHandTwoHandSwordDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieCadetLeftHandHoldingGreatFairysSwordDL;
+        gPlayerLeftHandTwoHandSwordDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieCadetLeftHandHoldingGreatFairysSwordDL;
+        gPlayerLeftHandBottleDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieCadetSkel_hands_bottle_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
+        gPlayerLeftHandBottleDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieCadetSkel_hands_bottle_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
+    }
 
     // First Person Left Limb DLs
-    sPlayerFirstPersonLeftForearmDLs[PLAYER_FORM_HUMAN] = gJackieSkel_fps_leftarmhand_bone014_gLinkAdultLeftArmLimb_mesh_layer_Opaque;
-    sPlayerFirstPersonLeftHandDLs[PLAYER_FORM_HUMAN] = gJackieSkel_fps_leftarmhand_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
+    // Default
+    if (!recomp_get_config_u32("change_outfit")) {
+        sPlayerFirstPersonLeftForearmDLs[PLAYER_FORM_HUMAN] = gJackieSkel_fps_leftarmhand_bone014_gLinkAdultLeftArmLimb_mesh_layer_Opaque;
+        sPlayerFirstPersonLeftHandDLs[PLAYER_FORM_HUMAN] = gJackieSkel_fps_leftarmhand_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
+    }
+    // Cadet
+    else if (recomp_get_config_u32("change_outfit")) {
+        sPlayerFirstPersonLeftForearmDLs[PLAYER_FORM_HUMAN] = gJackieCadetSkel_fps_leftarmhand_bone014_gLinkAdultLeftArmLimb_mesh_layer_Opaque;
+        sPlayerFirstPersonLeftHandDLs[PLAYER_FORM_HUMAN] = gJackieCadetSkel_fps_leftarmhand_bone015_gLinkAdultLeftHandLimb_mesh_layer_Opaque;
+    }
     
     // First Person Right Limb DLs
-    sPlayerFirstPersonRightShoulderDLs[PLAYER_FORM_HUMAN] = gJackieRightHandShoulderAndForearm;
-    sPlayerFirstPersonRightHandDLs[PLAYER_FORM_HUMAN] = gJackieSkel_fps_bow_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
-    sPlayerFirstPersonRightHandHookshotDLs[PLAYER_FORM_HUMAN] = gJackieSkel_fps_hookshot_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
+    // Default
+    if (!recomp_get_config_u32("change_outfit")) {
+        sPlayerFirstPersonRightShoulderDLs[PLAYER_FORM_HUMAN] = gJackieRightHandShoulderAndForearm;
+        sPlayerFirstPersonRightHandDLs[PLAYER_FORM_HUMAN] = gJackieSkel_fps_bow_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
+        sPlayerFirstPersonRightHandHookshotDLs[PLAYER_FORM_HUMAN] = gJackieSkel_fps_hookshot_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque; 
+    }
+    // Cadet
+    else if (recomp_get_config_u32("change_outfit")) {
+        sPlayerFirstPersonRightShoulderDLs[PLAYER_FORM_HUMAN] = gJackieCadetRightHandShoulderAndForearm;
+        sPlayerFirstPersonRightHandDLs[PLAYER_FORM_HUMAN] = gJackieCadetSkel_fps_bow_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque;
+        sPlayerFirstPersonRightHandHookshotDLs[PLAYER_FORM_HUMAN] = gJackieCadetSkel_fps_hookshot_bone018_gLinkAdultRightHandLimb_mesh_layer_Opaque; 
+    }
     
     // Waist DLs
-    gPlayerWaistDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieSkel_bone001_gLinkAdultWaistLimb_mesh_layer_Opaque;
-    gPlayerWaistDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieSkel_bone001_gLinkAdultWaistLimb_mesh_layer_Opaque;
+    // Default
+    if (!recomp_get_config_u32("change_outfit")) {
+        gPlayerWaistDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieSkel_bone001_gLinkAdultWaistLimb_mesh_layer_Opaque;
+        gPlayerWaistDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieSkel_bone001_gLinkAdultWaistLimb_mesh_layer_Opaque; 
+    }
+    // Cadet
+    else if (recomp_get_config_u32("change_outfit")) {
+        gPlayerWaistDLs[PLAYER_FORM_HUMAN * 2 + 0] = gJackieCadetSkel_bone001_gLinkAdultWaistLimb_mesh_layer_Opaque;
+        gPlayerWaistDLs[PLAYER_FORM_HUMAN * 2 + 1] = gJackieCadetSkel_bone001_gLinkAdultWaistLimb_mesh_layer_Opaque; 
+    }
 
     // Shield DL
-    gPlayerHandHoldingShields[0] = gJackieRightHandHoldingHeroShieldDL;
-    gPlayerHandHoldingShields[1] = gJackieRightHandHoldingHeroShieldDL;
-    gPlayerHandHoldingShields[2] = gJackieRightHandHoldingMirrorShieldDL;
-    gPlayerHandHoldingShields[3] = gJackieRightHandHoldingMirrorShieldDL;
+    // Default
+    if (!recomp_get_config_u32("change_outfit")) {
+        gPlayerHandHoldingShields[0] = gJackieRightHandHoldingHeroShieldDL;
+        gPlayerHandHoldingShields[1] = gJackieRightHandHoldingHeroShieldDL;
+        gPlayerHandHoldingShields[2] = gJackieRightHandHoldingMirrorShieldDL;
+        gPlayerHandHoldingShields[3] = gJackieRightHandHoldingMirrorShieldDL;
+    }
+    // Cadet
+    else if (recomp_get_config_u32("change_outfit")) {
+        gPlayerHandHoldingShields[0] = gJackieCadetRightHandHoldingHeroShieldDL;
+        gPlayerHandHoldingShields[1] = gJackieCadetRightHandHoldingHeroShieldDL;
+        gPlayerHandHoldingShields[2] = gJackieCadetRightHandHoldingMirrorShieldDL;
+        gPlayerHandHoldingShields[3] = gJackieCadetRightHandHoldingMirrorShieldDL;
+    }
 
     // Sword DL
-    D_801C018C[0] = gJackieLeftHandHoldingKokiriSwordDL;
-    D_801C018C[1] = gJackieLeftHandHoldingKokiriSwordDL;
-    D_801C018C[2] = gJackieLeftHandHoldingRazorSwordDL;
-    D_801C018C[3] = gJackieLeftHandHoldingRazorSwordDL;
-    D_801C018C[4] = gJackieLeftHandHoldingGildedSwordDL;
-    D_801C018C[5] = gJackieLeftHandHoldingGildedSwordDL;
+    // Default
+    if (!recomp_get_config_u32("change_outfit")) {
+        D_801C018C[0] = gJackieLeftHandHoldingKokiriSwordDL;
+        D_801C018C[1] = gJackieLeftHandHoldingKokiriSwordDL;
+        D_801C018C[2] = gJackieLeftHandHoldingRazorSwordDL;
+        D_801C018C[3] = gJackieLeftHandHoldingRazorSwordDL;
+        D_801C018C[4] = gJackieLeftHandHoldingGildedSwordDL;
+        D_801C018C[5] = gJackieLeftHandHoldingGildedSwordDL;
+    }
+    // Cadet
+    else if (recomp_get_config_u32("change_outfit")) {
+        D_801C018C[0] = gJackieCadetLeftHandHoldingKokiriSwordDL;
+        D_801C018C[1] = gJackieCadetLeftHandHoldingKokiriSwordDL;
+        D_801C018C[2] = gJackieCadetLeftHandHoldingRazorSwordDL;
+        D_801C018C[3] = gJackieCadetLeftHandHoldingRazorSwordDL;
+        D_801C018C[4] = gJackieCadetLeftHandHoldingGildedSwordDL;
+        D_801C018C[5] = gJackieCadetLeftHandHoldingGildedSwordDL;
+    }
     
 }
 
@@ -466,7 +618,6 @@ RECOMP_HOOK_RETURN("Player_Door_Knob") void replaceDoorAnim_on_return_Player_Doo
 
 // Remove Child Link's chest-opening voice
 // Credit: Neirn
-
 typedef struct AnimSfxEntry {
     /* 0x0 */ u16 sfxId;
     /* 0x2 */ s16 flags; // negative marks the end
@@ -699,5 +850,8 @@ RECOMP_PATCH s32 EnTalkGibud_MoveToIdealGrabPositionAndRotation(EnTalkGibud* thi
 
     return false;
 }
+
+
+
 
 

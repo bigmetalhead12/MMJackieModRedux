@@ -8,14 +8,13 @@ by BigMetalHead12
 2026
 
 DESC:
-    Physics collision system to be used alongside verlet physics designed for 
-    Majora's Mask recomp    
+    Physics collision system to be used alongside verlet physics designed for Majora's Mask recomp    
 
 ========================================================================
 */
 
 // MACROS
-#define MIN_DIST    0.0001f
+#define GREATER_THAN_ZERO    0.0001f
 
 #include "physics_collision.h"
 #include "customMath.h"
@@ -32,96 +31,91 @@ DESC:
 
 ***********************************************************************/
 
-// Check if target bone is colliding with given sphere collider
-u8 PhysCol_boneIsColliding(PhysBone* target_bone, PhysSphereCollider* sphere_collider) {
-    // Check for contact between bone and sphere collider by checking bone's limb b's path from prev point to curr point
-    Vec3f point_in_bone_path = { 0.f, 0.f, 0.f };
-    CustomMath_Vec3f_ClosestPoint(&sphere_collider->center, &target_bone->limb_b->prev_pos, &target_bone->limb_b->curr_pos, &point_in_bone_path);
-    f32 dist_bone_sphere = Math_Vec3f_DistXYZ(&point_in_bone_path, &sphere_collider->center);
-
-    if (dist_bone_sphere <= sphere_collider->radius) {
-        return 1;
-    }
-    else {
-        return 0;
-    }
-
-}
-
-// Check if target limb is colliding with given sphere collider
-u8 PhysCol_limbIsColliding(PhysLimb* target_limb, PhysSphereCollider* sphere_collider) {
-    Vec3f point_in_limb_path = { (f32)0, (f32)0, (f32)0 };
-    CustomMath_Vec3f_ClosestPoint(&sphere_collider->center, &target_limb->prev_pos, &target_limb->curr_pos, &point_in_limb_path);
-    f32 dist_limb_sphere = Math_Vec3f_DistXYZ(&point_in_limb_path, &sphere_collider->center);
-
-    if (dist_limb_sphere <= sphere_collider->radius) {
-        return 1;
-    }
-    else {
-        return 0;
-    }
-}
-
-// Push limb out of a sphere collider in the direction of sphere collider's center to limb's current position inside collider
-void PhysCol_SolveCollision(PhysLimb* limb, PhysSphereCollider* collider) {
-    if (limb->pinned) {
+/**
+ * @brief Push target phys limb out of a sphere collider in the direction of the sphere collider's center to phys
+ *        limb's current position inside the collider.
+ * 
+ * This function finds the direction from the sphere collider's center to the target phys limb's position if said
+ * phys limb is inside the collider. Afterward, the phys limb is pushed out in that direction so that it is on
+ * the surface. 
+ * 
+ * @param targetPhysLimb    Phys limb that is to be pushed out of target collider
+ * @param targetCollider    Collider that the target phys limb needs to be pushed out of
+ */
+void PhysCol_SolveCollision(PhysLimb* targetPhysLimb, PhysSphereCollider* targetCollider) {
+    // If phys limb is pinned, then do not solve collision and leave function.
+    if (targetPhysLimb->pinned) {
         return;
     }
 
-    // Find direction to push limb out of sphere collider (sphere collider center to limb's current position)
-    Vec3f dir = { (f32)0, (f32)0, (f32)0 };
-    Math_Vec3f_Diff(&limb->curr_pos, &collider->center, &dir);
+    // Find direction to push target limb out of target sphere collider (sphere collider center to phys limb's 
+    // current position)
+    Vec3f directionVec = { (f32)0, (f32)0, (f32)0 };
+    Math_Vec3f_Diff(&targetPhysLimb->curr_pos, &targetCollider->center, &directionVec);
 
     // Find minimum distance that should be between limb and collider to make them not collide
-    f32 distSquared = Math3D_Vec3fMagnitudeSq(&dir);
-    f32 minDist = limb->collision_radius + collider->radius;
+    f32 distSquared = Math3D_Vec3fMagnitudeSq(&directionVec);
+    f32 minDist = targetPhysLimb->collision_radius + targetCollider->radius;
     f32 minDistSquared = minDist * minDist;
 
-    // If limb and collider do not overlap, return
-    if (distSquared >= minDistSquared || distSquared < MIN_DIST) {
+    // If limb and collider do not overlap, there is no collision happening. Leave function.
+    if (distSquared >= minDistSquared || distSquared < GREATER_THAN_ZERO) {
         return;
     }
 
-    // Find vector from limb's position to middle point, with length of 1/2 min distance
-    Vec3f toLimb = { (f32)0, (f32)0, (f32)0 };
-    Vec3f dirFromLimbToMiddle = { (f32)0, (f32)0, (f32)0 };
-    Math_Vec3f_Diff(&limb->curr_pos, &collider->center, &toLimb);
-    CustomMath_Vec3f_Normalize(&toLimb, &toLimb);
-    Math_Vec3f_Scale(&toLimb, minDist);
+    // Take direction vector from center of collider to phys limb's position and then scale it down to minimum
+    // distance.
+    CustomMath_Vec3f_Normalize(&directionVec, &directionVec);
+    Math_Vec3f_Scale(&directionVec, minDist);
 
-    // Override current positions so that limb and collider don't collide
-    Vec3f newPos = { (f32)0, (f32)0, (f32)0 };
-    Math_Vec3f_Sum(&collider->center, &toLimb, &newPos);
-    Math_Vec3f_Copy(&limb->curr_pos, &newPos);
+    // Override current positions so that target phys limb and target collider don't collide
+    Vec3f newPos = {0.f, 0.f, 0.f};
+    Math_Vec3f_Sum(&targetCollider->center, &directionVec, &newPos);
+    Math_Vec3f_Copy(&targetPhysLimb->curr_pos, &newPos);
 }
 
 
 // Push limb out of capsule collider in the direction of capsule's inside to limb's current position inside collider
-void PhysCol_SolveCapsuleFromSpheres(PhysLimb* limb, PhysSphereCollider* sphereA, PhysSphereCollider* sphereB) {
-    // If input limb is pinned, exit function since this limb should not move
-    if (limb->pinned) {
+/**
+ * @brief Push target phys limb out of the capsule collider in the direction of the capsule's inside to the
+ *        phys limb's current position inside the collider.
+ * 
+ * This function finds the direction from the capsule collider's center to the target phys limb's position if said
+ * phys limb is inside the collider. Afterward, the phys limb is pushed out in that direction so that it is on
+ * the surface. 
+ * 
+ * @param physLimb      Target phys limb to be pushed out of collider
+ * @param sphereColA    First endpoint of capsule collider
+ * @param sphereColB    Second endpoint of capsule collider 
+ */
+void PhysCol_SolveCapsuleFromSpheres(PhysLimb* physLimb, PhysSphereCollider* sphereColA, 
+    PhysSphereCollider* sphereColB) {
+    // If phys limb is pinned, then do not solve collision and leave function.
+    if (physLimb->pinned) {
         return;
     }
 
-    // Segment from sphere A center to sphere B center
+    // Calculate line segment from one endpoint of capsule to another.
     Vec3f segment = { 0.0f, 0.0f, 0.0f };
-    Math_Vec3f_Diff(&sphereB->center, &sphereA->center, &segment);
+    Math_Vec3f_Diff(&sphereColB->center, &sphereColA->center, &segment);
     f32 segLengthSq = Math3D_Vec3fMagnitudeSq(&segment);
 
-    // If both sphere centers are basically in identical positions, just fall back to sphere A collision
-    if (segLengthSq < MIN_DIST) {
-        PhysCol_SolveCollision(limb, sphereA);
+    // If both sphere centers are basically in identical positions, just solve this collision as phys limb's
+    // collision with first sphere collider.
+    if (segLengthSq < GREATER_THAN_ZERO) {
+        PhysCol_SolveCollision(physLimb, sphereColA);
         return;
     }
 
-    // Vector from sphere A center to limb
+    // Set up distance from first endpoint to the target phys limb.
     Vec3f sphereToLimb = { 0.0f, 0.0f, 0.0f };
-    Math_Vec3f_Diff(&limb->curr_pos, &sphereA->center, &sphereToLimb);
+    Math_Vec3f_Diff(&physLimb->curr_pos, &sphereColA->center, &sphereToLimb);
 
-    // Find percentage along the segment where point in segment is closest to limb
+    // Find percentage along the segment where point in segment is closest to the phys limb.
     f32 t = CustomMath_Vec3f_Dot(&sphereToLimb, &segment) / segLengthSq;
 
-    // Keep the closest point between sphere A and sphere B
+    // Keep the closest point between sphere A and sphere B, but also keep within the range of the distance
+    // between the two endpoints.
     if (t < 0.0f) {
         t = 0.0f;
     }
@@ -129,15 +123,18 @@ void PhysCol_SolveCapsuleFromSpheres(PhysLimb* limb, PhysSphereCollider* sphereA
         t = 1.0f;
     }
 
-    // Find closest point on center segment using t
-    Vec3f closest = { sphereA->center.x + (segment.x * t), sphereA->center.y + (segment.y * t), sphereA->center.z + (segment.z * t) };
+    // Find the closest point on center segment using t.
+    Vec3f scaledSegment = {0.f, 0.f, 0.f};
+    Vec3f closestPos = {0.f, 0.f, 0.f};
+    Math_Vec3f_ScaleAndStore(&segment, t, &scaledSegment);
+    Math_Vec3f_Sum(&sphereColA->center, &scaledSegment, &closestPos);   // Store closest position in capsule
 
     // Interpolate radius between sphere A and sphere B (in case radius is different for both Sphere A and Sphere B)
-    f32 capsuleRadius = sphereA->radius + ((sphereB->radius - sphereA->radius) * t);
+    f32 capsuleRadius = sphereColA->radius + ((sphereColB->radius - sphereColA->radius) * t);
 
     // Treat this point along the capsule as a temporary sphere center
-    PhysSphereCollider tempSphere = { closest, capsuleRadius };
+    PhysSphereCollider tempSphere = {closestPos, capsuleRadius};
 
-    // Reuse normal sphere collision solver
-    PhysCol_SolveCollision( limb, &tempSphere );
+    // Reuse normal sphere collision solver at this point in the capsule.
+    PhysCol_SolveCollision(physLimb, &tempSphere);
 }

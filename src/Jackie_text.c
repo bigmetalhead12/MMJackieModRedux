@@ -487,6 +487,31 @@ EZTR_MSG_CALLBACK(jackie_keeta2) {
 }
 
 
+// Zora near Pirate's Fortress
+EZTR_MSG_CALLBACK(jackie_zora_near_fort_1) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "Whoa...!" EZTR_CC_NEWLINE \
+            "Oh... For a moment, I thought you" EZTR_CC_NEWLINE \
+            "were a pirate." EZTR_CC_EVENT "" EZTR_CC_END "");
+    }
+}
+EZTR_MSG_CALLBACK(jackie_zora_near_fort_2) {
+    // Get player for form
+    Player* player = GET_PLAYER(play);
+
+    // Jackie (human form)
+    if (player->transformation == PLAYER_FORM_HUMAN) {
+        EZTR_MsgSContent_Sprintf(buf->data.content, "This is the ominous Pirate's" EZTR_CC_NEWLINE \
+            "Fortress. If you hang around too long," EZTR_CC_NEWLINE \
+            "the pirates will see you and get you." EZTR_CC_EVENT2 "" EZTR_CC_END "");
+    }
+}
+
+
 /***********************************************************************
 
 	Message Replacements
@@ -1360,6 +1385,33 @@ EZTR_ON_INIT void replace_msgs() {
             jackie_keeta2
         );
 
+        // Zora near pirate's fortress
+        EZTR_Basic_ReplaceText(
+            0x12FF,
+            EZTR_STANDARD_TEXT_BOX_I,
+            0,
+            EZTR_ICON_NO_ICON,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            true,
+            "Is this your first time at the" EZTR_CC_NEWLINE "ocean? This is the ominous" EZTR_CC_NEWLINE "Pirates' Fortress." EZTR_CC_EVENT "" EZTR_CC_END "",
+            jackie_zora_near_fort_1
+        );
+
+        EZTR_Basic_ReplaceText(
+            0x1300,
+            EZTR_STANDARD_TEXT_BOX_I,
+            0,
+            EZTR_ICON_NO_ICON,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            true,
+            "If you hang around too long, the" EZTR_CC_NEWLINE "pirates will see you and get you." EZTR_CC_EVENT2 "" EZTR_CC_END "",
+            jackie_zora_near_fort_2
+        );
+
         // Gorman Brothers
         EZTR_Basic_ReplaceText(
             0x346F,
@@ -1940,7 +1992,6 @@ EZTR_ON_INIT void replace_msgs() {
             "" EZTR_CC_SFX "|69|2EHow about..." EZTR_CC_NEWLINE "" \
             EZTR_CC_COLOR_ORANGE "Mantis" EZTR_CC_COLOR_DEFAULT "?" EZTR_CC_NEWLINE \
             "That's the name Romani gives you." EZTR_CC_NEWLINE "" EZTR_CC_BOX_BREAK2 \
-            "See, you're wearing green clothes," EZTR_CC_NEWLINE \
             "See, you look kinda ferocious," EZTR_CC_NEWLINE \
             "and you move around in a sneaky" EZTR_CC_NEWLINE \
             "way, so " EZTR_CC_COLOR_ORANGE "Mantis " EZTR_CC_COLOR_DEFAULT "it is!" EZTR_CC_EVENT "" EZTR_CC_END "",
@@ -2163,6 +2214,20 @@ EZTR_ON_INIT void replace_msgs() {
             "|3A|39The reason she beat us is because" EZTR_CC_NEWLINE \
             "you were so feeble! Don't blame" EZTR_CC_NEWLINE \
             "this on me!" EZTR_CC_END "",
+            NULL
+        );
+
+        // Tatl
+        EZTR_Basic_ReplaceText(
+            0x1F5F,
+            EZTR_STANDARD_TEXT_BOX_II,
+            1,
+            EZTR_ICON_NO_ICON,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            true,
+            "" EZTR_CC_SFX "|28|1B" EZTR_CC_COLOR_LIGHTBLUE "Aah!" EZTR_CC_NEWLINE "She's awake!" EZTR_CC_END "",
             NULL
         );
     }

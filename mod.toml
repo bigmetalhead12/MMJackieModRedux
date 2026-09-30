@@ -8,7 +8,7 @@
 id = "jackie_redux_mod"
 
 # Version of this mod.
-version = "1.0.0"
+version = "2.0.0"
 
 # The name that will show up for this mod in the mod menu. This should be human readable.
 display_name = "Jackie Quilt Redux Mod"
@@ -16,11 +16,17 @@ display_name = "Jackie Quilt Redux Mod"
 # The description that will show up when this mod is displayed in the mod menu. This should be human readable.
 description =  """
 A mod that replaces Link with Jackie from Eternal Return.
+
+This mod contains an alternative hair style and Cadet costume that use real-time physics.
+
+NOTE: This mod does not use Neirn's Player Model Manager, so there may be compatibility issues with it if you have it enabled.
+
+WARNING: Performance of Cadet costume may vary based on the quality of your hardware.
 """
 
 # A short description that will show up in this mod's entry in the mod list. This should be human readable and kept short
 # to prevent it from being cut off due to the limited space.
-short_description = "Replaces Link with Jackie'"
+short_description = "Replaces Link with Jackie"
 
 # Authors of this mod.
 authors = [ "Bigmetalhead12" ]
@@ -163,6 +169,127 @@ additional_files = [ "thumb.png",
 						"hdtextures/shoe_strings_top.dds",
 						"hdtextures/shoe_strings_bot.dds",
 						"hdtextures/shoe_bot_elegy.dds",
+						"hdtextures/hat_cap_HD.dds",
+						"hdtextures/hat_column1_HD.dds",
+						"hdtextures/hat_column2_HD.dds",
+						"hdtextures/hat_side_strap_HD.dds",
+						"hdtextures/hat_side_strap_small_HD.dds",
+						"hdtextures/hat_side_strap_gold_HD.dds",
+						"hdtextures/hat_logo_HD.dds",
+						"hdtextures/hat_strap1_HD.dds",
+						"hdtextures/hat_strap_gold_holder_HD.dds",
+						"hdtextures/hat_column_holder_HD.dds",
+						"hdtextures/back_shoulder_gold_button_HD.dds",
+						"hdtextures/hat_strap_hook_HD.dds",
+						"hdtextures/hat_side_strap_gold2_HD.dds",
+						"hdtextures/wrist_cuff_chain_HD.dds",
+						"hdtextures/hat_cap1_HD.dds",
+						"hdtextures/hat_cap2_HD.dds",
+						"hdtextures/hat_cap3_HD.dds",
+						"hdtextures/necklace_HD.dds",
+						"hdtextures/necklace_gold_HD.dds",
+						"hdtextures/torso_left_HD.dds",
+						"hdtextures/torso_right_HD.dds",
+						"hdtextures/coat_front_HD.dds",
+						"hdtextures/coat_back_HD.dds",
+						"hdtextures/collar_botleft_HD.dds",
+						"hdtextures/collar_botright_HD.dds",
+						"hdtextures/collar_topleft_HD.dds",
+						"hdtextures/collar_topright_HD.dds",
+						"hdtextures/collar_badge_HD.dds",
+						"hdtextures/back_shoulder_HD.dds",
+						"hdtextures/back_shoulder_strap_HD.dds",
+						"hdtextures/back_shoulder_strap_end1_HD.dds",
+						"hdtextures/back_shoulder_strap_end2_HD.dds",
+						"hdtextures/back_shoulder_silver_HD.dds",
+						"hdtextures/back_shoulder_gold_emblem_HD.dds",
+						"hdtextures/lowerarm_back_HD.dds",
+						"hdtextures/lowerarm_front_HD.dds",
+						"hdtextures/glove_fingers_top_HD.dds",
+						"hdtextures/glove_thumb_HD.dds",
+						"hdtextures/glove_thumb2_HD.dds",
+						"hdtextures/wrist_cuff_open_HD.dds",
+						"hdtextures/wrist_cuff_closed_HD.dds",
+						"hdtextures/wrist_strap_HD.dds",
+						"hdtextures/armband1_HD.dds",
+						"hdtextures/armband2_HD.dds",
+						"hdtextures/coat_cuff_outside1_left_HD.dds",
+						"hdtextures/coat_cuff_outside1_right_HD.dds",
+						"hdtextures/coat_cuff_outside2_HD.dds",
+						"hdtextures/coat_cuff_inside1_left_HD.dds",
+						"hdtextures/coat_cuff_inside1_right_HD.dds",
+						"hdtextures/coat_cuff_inside2_left_HD.dds",
+						"hdtextures/coat_cuff_inside2_right_HD.dds",
+						"hdtextures/coat_forearm_front_HD.dds",
+						"hdtextures/coat_forearm_back_HD.dds",
+						"hdtextures/coat_shoulder_HD.dds",
+						"hdtextures/coat_cuff_strap1_HD.dds",
+						"hdtextures/coat_cuff_strap2_HD.dds",
+						"hdtextures/coat_cuff_strap3_HD.dds",
+						"hdtextures/coat_cuff_strap_holder_HD.dds",
+						"hdtextures/wrist_cuff_gold_button_HD.dds",
+						"hdtextures/belt_holder_HD.dds",
+						"hdtextures/belt_buckle_HD.dds",
+						"hdtextures/belt_buckle_pin_HD.dds",
+						"hdtextures/belt_HD.dds",
+						"hdtextures/belt_logo_HD.dds",
+						"hdtextures/skirt_front_HD.dds",
+						"hdtextures/skirt_front_left_HD.dds",
+						"hdtextures/skirt_front_right_HD.dds",
+						"hdtextures/skirt_front_right2_HD.dds",
+						"hdtextures/skirt_rear_HD.dds",
+						"hdtextures/tight_thigh_left_HD.dds",
+						"hdtextures/tight_thigh_right_HD.dds",
+						"hdtextures/tight_lowerleg_front_HD.dds",
+						"hdtextures/tight_lowerleg_back_HD.dds",
+						"hdtextures/boots_strings_bot_HD.dds",
+						"hdtextures/boots_strings_mid_HD.dds",
+						"hdtextures/boots_strings_top_HD.dds",
+						"hdtextures/boots_bot_HD.dds",
+						"hdtextures/boots_back_bot_HD.dds",
+						"hdtextures/boots_heel_HD.dds",
+						"hdtextures/bootstrap_mid_HD.dds",
+						"hdtextures/bootstrap_silver_HD.dds",
+						"hdtextures/bootstrap_end_HD.dds",
+						"hdtextures/glove_fist_top_HD.dds",
+						"hdtextures/glove_fist_front_HD.dds",
+						"hdtextures/glove_fist_bot_HD.dds",
+						"hdtextures/glove_fist_back_HD.dds",
+						"hdtextures/coat_trim_HD.dds",
+						"hdtextures/coat_cuff_trim_back1_HD.dds",
+						"hdtextures/coat_cuff_trim_back3_HD.dds",
+						"hdtextures/coat_cuff_trim_back3_1_HD.dds",
+						"hdtextures/coat_cuff_trim_front1_HD.dds",
+						"hdtextures/coat_cuff_trim_front2_HD.dds",
+						"hdtextures/coat_cuff_trim_front2_1_HD.dds",
+						"hdtextures/coat_cuff_button_HD.dds",
+						"hdtextures/wrist_gold_HD.dds",
+						"hdtextures/wrist_gold_shade_HD.dds",
+						"hdtextures/wrist_strap_shade_HD.dds",
+						"hdtextures/wrist_cuff_gold_HD.dds",
+						"hdtextures/wrist_cuff_HD.dds",
+						"hdtextures/wrist_cuff2_HD.dds",
+						"hdtextures/glove_finger_HD.dds",
+						"hdtextures/glove_white_HD.dds",
+						"hdtextures/glove_white2_HD.dds",
+						"hdtextures/coat_fold2_HD.dds",
+						"hdtextures/belt_strap_holder_HD.dds",
+						"hdtextures/belt_strap_gold_end_HD.dds",
+						"hdtextures/belt_strap_connector_HD.dds",
+						"hdtextures/belt_strap_connector_inside_HD.dds",
+						"hdtextures/belt_strap_HD.dds",
+						"hdtextures/belt_strap_end2_HD.dds",
+						"hdtextures/belt_strap_end1_HD.dds",
+						"hdtextures/torso_front_HD.dds",
+						"hdtextures/torso_back_HD.dds",
+						"hdtextures/overcoat_beltstrap_HD.dds",
+						"hdtextures/overcoat_beltstrap_bot_HD.dds",
+						"hdtextures/overcoat_front_high_HD.dds",
+						"hdtextures/overcoat_front_low_HD.dds",
+						"hdtextures/overcoat_back_high_HD.dds",
+						"hdtextures/overcoat_back_low_HD.dds",
+						"hdtextures/overcoat_pocket_HD.dds",
+						"hdtextures/belt_strap_side_end2_HD.dds",
 						"hdtextures/rt64.json",
 						"hdtextures/rt64-low-mip-cache.bin"]
 						
@@ -181,9 +308,23 @@ id = "change_hairstyle"
 name = "Change Hairstyle"
 description = """
 Toggle to change the hairstyle (Default or Ponytail)
+
+Note that the ponytail uses real-time physics, and its performance may vary based on your PC's hardware.
 """
 type = "Enum"
 options = [ "Default", "Ponytail" ]
+default = "Default"
+
+[[manifest.config_options]]
+id = "change_outfit"
+name = "Change Outfit"
+description = """
+Toggle to change the outfit (Default or Cadet)
+
+Note that the Cadet costume uses real-time physics, and its performance may vary based on your PC's hardware.
+"""
+type = "Enum"
+options = [ "Default", "Cadet" ]
 default = "Default"
 
 [[manifest.config_options]]

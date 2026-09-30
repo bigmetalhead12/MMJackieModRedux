@@ -50,25 +50,14 @@ typedef struct {
     f32         bone_length;
 } PhysBone;
 
-// Initialize player velocity and rotation
+
 void Verlet_InitPhysPlayer(PhysPlayer* target_player, Player* player);
-
-// Update player velocity
 void Verlet_UpdatePhysPlayerVelocity(PhysPlayer* target_player, Player* player);
-
-// Calculate net force based on gravity and movement acceleration
 void Verlet_CalcNetForce(PhysPlayer* target_player, f32 grav_force, Vec3f* net_force);
-
-// Initialize PhysLimb with input position
 void Verlet_InitLimb(PhysLimb* target_limb, Vec3f pos, Vec3f vel, f32 limb_mass, u8 pin_status, f32 sphere_collider_radius);
-
-// Update position of limb
 void Verlet_LimbUpdatePos(PhysLimb* target_limb, Vec3f* apply_force, Vec3f* apply_vel);
-
-// Set two PhysLimbs into target PhysBone
+void Verlet_LimbUpdatePosSubstep(PhysLimb* target_limb, Vec3f* apply_force, Vec3f* apply_vel, f32 dt);
 void Verlet_InitBone(PhysBone* target_bone, PhysLimb* limb_a, PhysLimb* limb_b);
-
-// Update bone based on constraint
 void Verlet_BoneConstraint(PhysBone* target_bone);
 
 #endif
