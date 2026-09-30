@@ -8,6 +8,8 @@ This Jackie model replaces only the player model of Link's human form. The model
 
 This mod also contains a unique element: **real-time physics** for an alternative ponytail hairstyle and Cadet costume. Along with this feature, the mod also includes the HD texture option, full voice replacement, and minor text replacements.
 
+[![Watch the demo](https://img.youtube.com/vi/HPN09zgFMZE/hqdefault.jpg)](https://www.youtube.com/watch?v=HPN09zgFMZE)
+
 # Installation
 To install this mod, follow the instructions:
 1. Download the NRM file
