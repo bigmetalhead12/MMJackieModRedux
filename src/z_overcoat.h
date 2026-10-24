@@ -28,6 +28,9 @@ by BigMetalHead12
 // Set up physics object that carries velocity and rotation of overcoat actor
 PhysPlayer gOvercoatPhysPlayer;
 
+// Set up physics object that carries Epona movement for overcoat actor
+PhysEponaMovement gOvercoatEpona;
+
 // StandardLimb of overcoat's model generated through Fast 64 (from gOvercoatSkel)
 extern StandardLimb gOvercoatSkelLimb_000;      // Root
 extern StandardLimb gOvercoatSkelLimb_001;
@@ -1426,16 +1429,26 @@ struct Overcoat;
 
 typedef void (*OvercoatActionFunc)(struct Overcoat*, struct PlayState*);
 
+typedef struct OvercoatRotationSettings {
+    f32 resetAngle; // Degrees relative to torso outward: positive up, negative down
+    s16 defUpperChainLimAngle;
+    s16 defLowerChainLimAngle;
+    s16 currUpperChainLimAngle;
+    s16 currLowerChainLimAngle;
+    u8 numTopBonesWithNoInwardRot;
+} OvercoatRotationSettings;
+
 typedef struct Overcoat {
     Actor actor;
     SkelAnime skelAnime;
     Vec3s jointTable[GOVERCOATSKEL_NUM_LIMBS];
     Vec3s morphTable[GOVERCOATSKEL_NUM_LIMBS];
     Vec3f bodyPartsPos[OVERCOAT_BODYPART_MAX];
-    ColliderJntSph collider;
+    OvercoatRotationSettings rotLimits;
     u8 needsReset;
-    u8 hideInFirstPerson;
+    u8 wasTransformingIntoGiant;
     u8 wasGiant;
+    u8 wasKamaroDancing;
 } Overcoat;
 
 
@@ -1443,7 +1456,7 @@ typedef struct {
     s16 startLimb;   // First PhysLimb in the chain, which is A
     s16 limbCount;   // Number of PhysLimbs in the chain
     s16 startBone;   // First PhysBone used by the chain
-} OvercoatChainInit;
+} OvercoatLimbChain;
 
 
 void Overcoat_Init(Actor* thisx, PlayState* play);
@@ -1456,28 +1469,43 @@ void Overcoat_InitChain(Overcoat* this, Player* player, PhysLimb* gPhysLimbs[], 
     int startLimb, int limbCount, int startBone);
 void Overcoat_SetDefaultBodyPartsPos(Overcoat* this, Player* player, PhysLimb* gPhysLimbs[], 
     PhysBone* gPhysBones[]);
+u8 Overcoat_IsFastRidingOrSpurring(Player* player);
+u8 Overcoat_IsKamaroDancing(Player* player);
+u8 Overcoat_IsInFirstPerson(PlayState* play, Player* player);
+u8 Overcoat_IsRolling(Player* player);
+u8 Overcoat_IsClimbingFromLedge(Player* player);
+u8 Overcoat_IsSpinAttacking(Player* player);
+u8 Overcoat_IsSpinAttackCanceling(Player* player);
+u8 Overcoat_IsEnteringCrouchShield(Player* player);
+void Overcoat_SetDefaultRotLimitsAndReset(Overcoat* this);
+void Overcoat_SetResetAngle(Overcoat* this, f32 reset_angle);
+void Overcoat_SetRotLimitAngles(Overcoat* this, f32 upper_chain_lim, f32 lower_chain_lim);
+void Overcoat_UpdateRotLimitsAndReset(Overcoat* this, Player* player);
 void Overcoat_CaptureLimitAxes(MtxF* mtx);
-void Overcoat_LimitBoneDirection(PhysLimb* parentPhysLimb, PhysLimb* childPhysLimb, 
-    Vec3f* outwardDirVec, u8 limitInward);
-void Overcoat_LimitUpperChains(PhysLimb* gPhysLimbs[], const int chainStarts[], int chainCount);
+void Overcoat_LimitBoneDirection(
+    PhysLimb* parentPhysLimb, PhysLimb* childPhysLimb,
+    Vec3f* outwardDirVec, u8 limitInward, s16 maxUpAngle);
+void Overcoat_ApplyBoneRotationLimit(PhysLimb* parentPhysLimb, PhysLimb* childPhysLimb, 
+    Vec3f* outwardDirVec, u8 limitInward, s16 maxUpwardRotLim);
+void Overcoat_ApplyChainRotationLimits(PhysLimb* gPhysLimbs[], const int chainStarts[],
+    int chainCount, const OvercoatRotationSettings* limits);
 void Overcoat_LimitSidewaysDistance(PhysLimb* physLimbA, PhysLimb* physLimbB, f32 maxDistance);
 bool Overcoat_NormalizeSubstepDirectionVec(Vec3f* targetVec);
 void Overcoat_SetSubstepDirAxes(Vec3f targetForward, Vec3f targetDown, f32 t);
 Vec3f Overcoat_FindClosestPointOnCapsule(Vec3f targetPos, PhysSphereCollider* capsuleColStart, 
     PhysSphereCollider* capsuleColEnd, f32* colRadius);
-f32 Overcoat_GroupContact(Vec3f targetPos, f32 pointRadius,  PhysSphereCollider* torso_collider, 
-    PhysSphereCollider* capsulePairs[][2], int capsuleColCount, Vec3f* contactColCenter, 
-    f32* contactColRadius);
-bool Overcoat_GroupOutside(Vec3f targetPos, f32 pointRadius, PhysSphereCollider* torso_collider, 
-	PhysSphereCollider* capsulePairs[][2], int capsuleColCount);
+f32 Overcoat_GroupContact(Vec3f targetPos, f32 pointRadius, PhysSphereCollider* capsulePairs[][2], 
+    int capsuleColCount, Vec3f* contactColCenter, f32* contactColRadius);
+bool Overcoat_GroupOutside(Vec3f targetPos, f32 pointRadius, PhysSphereCollider* capsulePairs[][2], 
+    int capsuleColCount);
 bool Overcoat_GroupRayExit(Vec3f targetPhysLimbPos, Vec3f physLimbDir, f32 pointRadius,
-    PhysSphereCollider* torso_collider, PhysSphereCollider* capsulePairs[][2], int capsuleColCount,
-    f32 padding, Vec3f* exitPosition);
-void Overcoat_SolveColliderGroup(PhysLimb* physLimb, PhysSphereCollider* torso_collider, 
-	PhysSphereCollider* collider_pairs[][2], int capsuleColCount);
+    PhysSphereCollider* capsulePairs[][2], int capsuleColCount, f32 padding, Vec3f* exitPosition);
+void Overcoat_SolveColliderGroup(PhysLimb* physLimb, PhysSphereCollider* collider_pairs[][2], 
+    int capsuleColCount);
 void Overcoat_SolveMidpointGroup(PhysLimb* physLimb_a, PhysLimb* physLimb_b, 
-	PhysSphereCollider* torso_collider, PhysSphereCollider* collider_pairs[][2], int capsuleColCount);
-void Overcoat_SetResetShape(Overcoat* this, PhysLimb* gPhysLimbs[], const int chains[], int chainCount);
+	PhysSphereCollider* collider_pairs[][2], int capsuleColCount);
+void Overcoat_SetResetShape(Overcoat* this, PhysLimb* gPhysLimbs[], const OvercoatLimbChain chains[], 
+    int chainCount);
 void Overcoat_SolvePhysAtSubSteps(Overcoat* this, Player* player, Vec3f apply_force, PhysLimb* gPhysLimbs[], 
 	PhysBone* gPhysBones[], Vec3f anchorStart[], const int chains[], int chainCount, 
     f32 sidewaysMaxDistance[][9], PhysSphereCollider* capsulePairs[][2], int capsuleCount);
@@ -1485,7 +1513,7 @@ void Overcoat_UpdatePinnedLimb(Overcoat* this, Player* player, PhysLimb* gPhysLi
 void Overcoat_UpdateBodyPartsPos(Overcoat* this, Player* player, Vec3f apply_force, 
     PhysLimb* gPhysLimbs[], PhysBone* gPhysBones[]);
 void Overcoat_RotateFromPinned(Vec3f* direction, Vec3s* rotation);
-void Overcoat_RotateChain(Overcoat* this, PhysBone* gPhysBones[], int rootBoneIdx, 
-    int chainLength);
+void Overcoat_RotateJoints(Overcoat* this, PhysBone* gPhysBones[], Player* player);
+void Overcoat_RotateChain(Overcoat* this, PhysBone* gPhysBones[], int rootBoneIdx, int chainLength);
 
 #endif

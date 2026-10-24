@@ -17,6 +17,7 @@ by BigMetalHead12
 #include "global.h"
 #include "gBeltStrapHookSkel.h"
 #include "verlet_physics.h"
+#include "physics_collision.h"
 
 
 /***********************************************************************
@@ -26,6 +27,9 @@ by BigMetalHead12
 ***********************************************************************/
 // Set up physics object that carries velocity and rotation of belt strap hook actor
 PhysPlayer gBeltStrapHookPhysPlayer;
+
+// Set up physics object that carries Epona movement for belt strap hook actor
+PhysEponaMovement gBeltStrapHookEpona;
 
 // StandardLimb of belt strap hook's model generated through Fast 64 (from gBeltStrapHookSkel)
 extern StandardLimb gBeltStrapHookSkelLimb_000;     // Root
@@ -214,16 +218,33 @@ struct BeltStrapHook;
 
 typedef void (*BeltStrapHookActionFunc)(struct BeltStrapHook*, struct PlayState*);
 
+typedef struct BeltStrapHookRotationSettings {
+    f32 resetAngle; // Degrees relative to torso outward: positive up, negative down
+    s16 defUpperChainLimAngle;
+    s16 defLowerChainLimAngle;
+    s16 currUpperChainLimAngle;
+    s16 currLowerChainLimAngle;
+    u8 numTopBonesWithNoInwardRot;
+} BeltStrapHookRotationSettings;
+
 typedef struct BeltStrapHook {
     Actor actor;
     SkelAnime skelAnime;
     Vec3s jointTable[GBELTSTRAPHOOKSKEL_NUM_LIMBS];
     Vec3s morphTable[GBELTSTRAPHOOKSKEL_NUM_LIMBS];
     Vec3f bodyPartsPos[BELTSTRAPHOOK_BODYPART_MAX];
-    ColliderJntSph collider;
+    BeltStrapHookRotationSettings rotLimits;
     u8 needsReset;
-    u8 hideInFirstPerson;
+    u8 wasTransformingIntoGiant;
+    u8 wasGiant;
+    u8 wasKamaroDancing;
 } BeltStrapHook;
+
+typedef struct BeltStrapHookLimbChain {
+    s16 startLimb;   // First phys limb in the chain, which is pinned
+    s16 limbCount;   // Number of phys limbs, including the pinned limb
+    s16 startBone;   // First phys bone, connecting the root to the pinned limb
+} BeltStrapHookLimbChain;
 
 
 void BeltStrapHook_Init(Actor* thisx, PlayState* play);
@@ -231,17 +252,51 @@ void BeltStrapHook_Destroy(Actor* thisx, PlayState* play);
 void BeltStrapHook_Update(Actor* thisx, PlayState* play);
 void BeltStrapHook_Draw(Actor* thisx, PlayState* play);
 
-void BeltStrapHook_InitChain(BeltStrapHook* this, Player* player, PhysLimb* gPhysLimbs[], int chainStartIdx,
-	int chainEndIdx);
-void BeltStrapHook_InitChainBones(PhysLimb* gPhysLimbs[], PhysBone* gPhysBones[], int chainStartIdx,
-    int chainEndIdx, int boneStartIdx);
-void BeltStrapHook_UpdateChain(BeltStrapHook* this, Player* player, Vec3f* apply_force, 
-    PhysLimb* gPhysLimbs[], int chainStartIdx, int chainEndIdx);
-
-void BeltStrapHook_RotateJoints(BeltStrapHook* this, PhysBone* gPhysBones[], Player* player);
-void BeltStrapHook_SetDefaultBodyPartsPos(BeltStrapHook* this, Player* player, 
-    PhysLimb* gPhysLimbs[], PhysBone* gPhysBones[]) ;
+void BeltStrapHook_InitChain(BeltStrapHook* this, Player* player, PhysLimb* gPhysLimbs[], 
+    PhysBone* gPhysBones[], int startLimb, int limbCount, int startBone);
+void BeltStrapHook_SetDefaultBodyPartsPos(BeltStrapHook* this, Player* player, PhysLimb* gPhysLimbs[], 
+    PhysBone* gPhysBones[]);
+u8 BeltStrapHook_IsKamaroDancing(Player* player);
+u8 BeltStrapHook_IsInFirstPerson(PlayState* play, Player* player);
+void BeltStrapHook_SetDefaultRotLimitsAndReset(BeltStrapHook* this);
+void BeltStrapHook_SetResetAngle(BeltStrapHook* this, f32 reset_angle);
+void BeltStrapHook_SetRotLimitAngles(BeltStrapHook* this, f32 upper_chain_lim, f32 lower_chain_lim);
+void BeltStrapHook_UpdateRotLimitsAndReset(BeltStrapHook* this, Player* player);
+void BeltStrapHook_CaptureLimitAxes(MtxF* mtx);
+void BeltStrapHook_ApplyBoneRotationLimit(PhysLimb* parentPhysLimb, PhysLimb* childPhysLimb, 
+    Vec3f* outwardDirVec, u8 limitInward, s16 maxUpwardRotLim);
+void BeltStrapHook_ApplyChainRotationLimits(PhysLimb* gPhysLimbs[], const BeltStrapHookLimbChain chainStarts[],
+    int chainCount, const BeltStrapHookRotationSettings* limits);
+bool BeltStrapHook_NormalizeSubstepDirectionVec(Vec3f* targetVec);
+Vec3f BeltStrapHook_FindClosestPointOnCapsule(Vec3f targetPos, PhysSphereCollider* capsuleColStart, 
+    PhysSphereCollider* capsuleColEnd, f32* colRadius);
+f32 BeltStrapHook_GroupContact(Vec3f targetPos, f32 pointRadius, PhysSphereCollider* capsulePairs[][2], 
+    int capsuleColCount, Vec3f* contactColCenter, f32* contactColRadius);
+bool BeltStrapHook_GroupOutside(Vec3f targetPos, f32 pointRadius, PhysSphereCollider* capsulePairs[][2], 
+    int capsuleColCount);
+bool BeltStrapHook_GroupRayExit(Vec3f targetPhysLimbPos, Vec3f physLimbDir, f32 pointRadius,
+    PhysSphereCollider* capsulePairs[][2], int capsuleColCount, f32 padding, Vec3f* exitPosition);
+void BeltStrapHook_SolveColliderGroup(PhysLimb* physLimb, PhysSphereCollider* collider_pairs[][2], 
+    int capsuleColCount);
+void BeltStrapHook_SetResetShape(BeltStrapHook* this, PhysLimb* gPhysLimbs[], 
+    const BeltStrapHookLimbChain chains[], int chainCount);
+void BeltStrapHook_RotatePointAroundY(Vec3f* targetPoint, Vec3f* pivotPoint, s16 rotAngle);
+void BeltStrapHook_InterpolatePosWithRot(Vec3f* prevFramePos, Vec3f* currFrameTargetPos,
+	Vec3f* prevFramePivotPoint, Vec3f* currFramePivotPoint, s16 yawRotation, f32 t, 
+	Vec3f* currSubstepNewPos);
+void BeltStrapHook_SetSubstepDirAxes(Vec3f targetForward, Vec3f targetDown, f32 t);
+void BeltStrapHook_UpdateChain(BeltStrapHook* this, Player* player, Vec3f* apply_force, PhysLimb* gPhysLimbs[], 
+	int chainStartIdx, int chainEndIdx);
+void BeltStrapHook_UpdatePinnedLimb(BeltStrapHook* this, Player* player, PhysLimb* gPhysLimbs[], 
+    int pinnedLimbIdx);
+void BeltStrapHook_UpdateColliderRadii(Player* player);
+void BeltStrapHook_SolvePhysAtSubsteps(BeltStrapHook* this, Player* player, Vec3f apply_force, 
+    PhysLimb* gPhysLimbs[], PhysBone* gPhysBones[], Vec3f limbsPrevPos[], 
+    const BeltStrapHookLimbChain chains[], int chainCount, PhysSphereCollider* capsulePairs[][2], 
+    int capsuleCount, int substepCount);
 void BeltStrapHook_UpdateBodyPartsPos(BeltStrapHook* this, Player* player, Vec3f apply_force, 
-    PhysLimb* gPhysLimbs[], PhysBone* gPhysBones[]);
+	PhysLimb* gPhysLimbs[], PhysBone* gPhysBones[]);
+void BeltStrapHook_RotateChain(BeltStrapHook* this, PhysBone* gPhysBones[], int chainStartIdx, int chainEndIdx);
+void BeltStrapHook_RotateJoints(BeltStrapHook* this, PhysBone* gPhysBones[], Player* player);
 
 #endif

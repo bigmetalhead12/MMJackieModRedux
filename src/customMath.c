@@ -55,6 +55,19 @@ Line Segment Functions
 =================
 */
 
+// Clamp a value between the given minimum and maximum.
+f32 CustomMath_Clamp(f32 value, f32 min, f32 max) {
+    if (value < min) {
+        return min;
+    }
+
+    if (value > max) {
+        return max;
+    }
+
+    return value;
+}
+
 // Linearly interpolate between two Vec3f values
 void CustomMath_Vec3f_Lerp(Vec3f* pointA, Vec3f* pointB, f32 t, Vec3f* dest) {
     dest->x = pointA->x + (pointB->x - pointA->x) * t;
@@ -187,4 +200,16 @@ void CustomMath_Vec3f_InverseTransformDirection(MtxF* matrix, Vec3f* worldDir, V
     localDir->x = (matrix->xx * worldDir->x) + (matrix->yx * worldDir->y) + (matrix->zx * worldDir->z);
     localDir->y = (matrix->xy * worldDir->x) + (matrix->yy * worldDir->y) + (matrix->zy * worldDir->z);
     localDir->z = (matrix->xz * worldDir->x) + (matrix->yz * worldDir->y) + (matrix->zz * worldDir->z);
+}
+
+
+/*
+=================
+Degree and Binary Angle Conversion
+=================
+*/
+
+s16 CustomMath_DegreeToBinaryAngle(f32 degrees) {
+    s16 binaryAngle = (s16)(degrees * (32768.f / 180.f));
+    return binaryAngle;
 }

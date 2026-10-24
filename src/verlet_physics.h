@@ -31,6 +31,17 @@ typedef struct {
     Vec3s   rot;
 } PhysPlayer;
 
+// This is patched in to compensate this current codebase's inability to handle Verlet Integration properly
+// in all cases (e.g. Epona movement). Eventual Verlet Physics API should use PhysPlayer more aggressively 
+// instead of relying too much on player actor velocity.
+typedef struct PhysEponaMovement {
+    Vec3f   prev_pos;
+    Vec3f   world_vel;
+    Vec3f   local_vel;
+    u8      was_riding;
+    u8      prev_pos_ready;
+} PhysEponaMovement;
+
 typedef struct {
     Vec3f   curr_pos;
     Vec3f   prev_pos;
@@ -53,6 +64,7 @@ typedef struct {
 
 void Verlet_InitPhysPlayer(PhysPlayer* target_player, Player* player);
 void Verlet_UpdatePhysPlayerVelocity(PhysPlayer* target_player, Player* player);
+void Verlet_UpdatePhysEponaMovement(PhysEponaMovement* movement, Player* player, u8 reset);
 void Verlet_CalcNetForce(PhysPlayer* target_player, f32 grav_force, Vec3f* net_force);
 void Verlet_InitLimb(PhysLimb* target_limb, Vec3f pos, Vec3f vel, f32 limb_mass, u8 pin_status, f32 sphere_collider_radius);
 void Verlet_LimbUpdatePos(PhysLimb* target_limb, Vec3f* apply_force, Vec3f* apply_vel);

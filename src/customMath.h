@@ -33,6 +33,8 @@ f32 CustomMath_Vec3f_Dot(Vec3f* a, Vec3f* b);
 // Normalize
 void CustomMath_Vec3f_Normalize(Vec3f* src, Vec3f* dest);
 
+f32 CustomMath_Clamp(f32 value, f32 min, f32 max);
+
 // Linearly interpolate between two Vec3f values
 void CustomMath_Vec3f_Lerp(Vec3f* pointA, Vec3f* pointB, f32 t, Vec3f* dest);
 
@@ -53,5 +55,7 @@ void CustomMath_Vec3f_Rotate(Vec3f* src, Vec3s* rotAngle, Vec3f* dest);
 
 // Transform Direction
 void CustomMath_Vec3f_InverseTransformDirection(MtxF* matrix, Vec3f* worldDir, Vec3f* localDir);
+
+s16 CustomMath_DegreeToBinaryAngle(f32 degrees);
 
 #endif

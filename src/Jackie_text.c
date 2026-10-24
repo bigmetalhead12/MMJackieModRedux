@@ -1070,6 +1070,50 @@ EZTR_ON_INIT void replace_msgs() {
             "" EZTR_CC_SFX "|69|4BAll right, missy!" EZTR_CC_NEWLINE "The rules are simple..." EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 "Hit as many " EZTR_CC_COLOR_RED "red ones" EZTR_CC_COLOR_DEFAULT " as you can" EZTR_CC_NEWLINE "within the time limit." EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 "If you hit a " EZTR_CC_COLOR_BLUE "blue one" EZTR_CC_COLOR_DEFAULT ", you lose" EZTR_CC_NEWLINE "time, so watch out!" EZTR_CC_NEWLINE "" EZTR_CC_CARRIAGE_RETURN "" EZTR_CC_BOX_BREAK2 "You can use as many arrows as" EZTR_CC_NEWLINE "you'd like. Press " EZTR_CC_BTN_B " to shoot" EZTR_CC_NEWLINE "them." EZTR_CC_EVENT2 "" EZTR_CC_END "",
             NULL
         );
+        EZTR_Basic_ReplaceText(
+            0x2371,
+            EZTR_STANDARD_TEXT_BOX_I,
+            48,
+            EZTR_ICON_NO_ICON,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            true,
+            "Eeesh! You can't aim for the" EZTR_CC_NEWLINE \
+            "targets wearin' somethin' like that" EZTR_CC_NEWLINE \
+            "monstrosity on your head, missy." EZTR_CC_NEWLINE \
+            "Take it off." EZTR_CC_END "",
+            NULL
+        );
+        EZTR_Basic_ReplaceText(
+            0x236F,
+            EZTR_STANDARD_TEXT_BOX_I,
+            48,
+            EZTR_ICON_NO_ICON,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            true,
+            "You can't aim for the targets" EZTR_CC_NEWLINE \
+            "when you're wearin' a mask, missy." EZTR_CC_NEWLINE \
+            "Take it off." EZTR_CC_END "",
+            NULL
+        );
+        EZTR_Basic_ReplaceText(
+            0x03FF,
+            EZTR_STANDARD_TEXT_BOX_I,
+            0,
+            EZTR_ICON_NO_ICON,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            true,
+            "" EZTR_CC_SFX "|69|4BAll right, missy!" EZTR_CC_NEWLINE \
+            "Aim for the " EZTR_CC_COLOR_RED "red ones" EZTR_CC_COLOR_DEFAULT "." EZTR_CC_NEWLINE \
+            "Don't mess up and hit one of" EZTR_CC_NEWLINE \
+            "them " EZTR_CC_COLOR_BLUE "blue ones " EZTR_CC_COLOR_DEFAULT "by mistake!" EZTR_CC_EVENT "" EZTR_CC_END "",
+            NULL
+        );
 
         // Treasure Chest Lady
         EZTR_Basic_ReplaceText(
@@ -1082,6 +1126,19 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             true,
             "" EZTR_CC_SFX "|69|2ACome in! You look like a" EZTR_CC_NEWLINE "competitive one. How about it?" EZTR_CC_NEWLINE "Wanna play?" EZTR_CC_CONTINUE "" EZTR_CC_END "",
+            NULL
+        );
+        
+        EZTR_Basic_ReplaceText(
+            0x2340,
+            EZTR_STANDARD_TEXT_BOX_I,
+            48,
+            EZTR_ICON_NO_ICON,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            true,
+            "Oh, are you a member of Latte," EZTR_CC_NEWLINE "miss? That's great!" EZTR_CC_END "",
             NULL
         );
 
@@ -2228,6 +2285,24 @@ EZTR_ON_INIT void replace_msgs() {
             EZTR_NO_VALUE,
             true,
             "" EZTR_CC_SFX "|28|1B" EZTR_CC_COLOR_LIGHTBLUE "Aah!" EZTR_CC_NEWLINE "She's awake!" EZTR_CC_END "",
+            NULL
+        );
+
+        // Swordsman
+        EZTR_Basic_ReplaceText(
+            0x2742,
+            EZTR_STANDARD_TEXT_BOX_I,
+            0,
+            EZTR_ICON_NO_ICON,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            EZTR_NO_VALUE,
+            true,
+            "Why do you wear a ninja's mask?" EZTR_CC_NEWLINE \
+            "Do you wish to become a ninja" EZTR_CC_NEWLINE \
+            "through my training?" EZTR_CC_NEWLINE "" EZTR_CC_BOX_BREAK2 \
+            "...Something tells me it would be" EZTR_CC_NEWLINE \
+            "best for everyone if you don't..." EZTR_CC_END "",
             NULL
         );
     }
