@@ -731,8 +731,9 @@ u8 Overcoat_IsInFirstPerson(PlayState* play, Player* player) {
  * 
  * This function is used to add a torso collider size during the rolling animation.
  * 
- * This function also resets the overcoat chains if the roll animation ends, which serves as an example
- * for performing resets when an animation ends rather than when an animation begins.
+ * This function also is used to later reset the overcoat chains if the roll animation ends, which 
+ * serves as an example for performing resets when an animation ends rather than when an animation 
+ * begins.
  * 
  * @param player    Player instance
  */
@@ -746,8 +747,9 @@ u8 Overcoat_IsRolling(Player* player) {
 /**
  * @brief Check whether Jackie is currently climbing from ledge.
  * 
- * This function resets the overcoat chains if the roll animation ends, which serves as an example
- * for performing resets when an animation ends rather than when an animation begins.
+ * This function also is used to later reset the overcoat chains if the roll animation ends, which 
+ * serves as an example for performing resets when an animation ends rather than when an animation 
+ * begins.
  * 
  * @param player    Player instance
  */
