@@ -28,9 +28,6 @@ by BigMetalHead12
 // Set up physics object that carries velocity and rotation of overcoat actor
 PhysPlayer gOvercoatPhysPlayer;
 
-// Set up physics object that carries Epona movement for overcoat actor
-PhysEponaMovement gOvercoatEpona;
-
 // StandardLimb of overcoat's model generated through Fast 64 (from gOvercoatSkel)
 extern StandardLimb gOvercoatSkelLimb_000;      // Root
 extern StandardLimb gOvercoatSkelLimb_001;
@@ -1456,6 +1453,8 @@ typedef struct {
     s16 startLimb;   // First PhysLimb in the chain, which is A
     s16 limbCount;   // Number of PhysLimbs in the chain
     s16 startBone;   // First PhysBone used by the chain
+    f32 resetForwardDirScale;   // Outward direction in forward direction of chain, where positive = forward and negative = backward
+    f32 resetLeftDirScale;      // Outward cirection in left direction for chain, where positive = left and negative = right
 } OvercoatLimbChain;
 
 
@@ -1504,6 +1503,7 @@ void Overcoat_SolveColliderGroup(PhysLimb* physLimb, PhysSphereCollider* collide
     int capsuleColCount);
 void Overcoat_SolveMidpointGroup(PhysLimb* physLimb_a, PhysLimb* physLimb_b, 
 	PhysSphereCollider* collider_pairs[][2], int capsuleColCount);
+void Overcoat_ResetChain(Overcoat* this, PhysLimb* gPhysLimbs[], const OvercoatLimbChain* chain);
 void Overcoat_SetResetShape(Overcoat* this, PhysLimb* gPhysLimbs[], const OvercoatLimbChain chains[], 
     int chainCount);
 void Overcoat_SolvePhysAtSubSteps(Overcoat* this, Player* player, Vec3f apply_force, PhysLimb* gPhysLimbs[], 

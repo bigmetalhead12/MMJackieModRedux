@@ -28,9 +28,6 @@ by BigMetalHead12
 // Set up physics object that carries velocity and rotation of ponytail actor
 PhysPlayer gJackiePhysPlayer;
 
-// Set up physics object that carries Epona movement for ponytail actor
-PhysEponaMovement gPonytailEpona;
-
 // StandardLimb of ponytail's model generated through Fast 64
 extern StandardLimb gPonytailSkelLimb_000;
 extern StandardLimb gPonytailSkelLimb_001;
@@ -122,9 +119,11 @@ typedef struct Ponytail {
 } Ponytail;
 
 typedef struct PonytailLimbChain {
-    s16 startLimb;   // First phys limb in the chain, which is pinned
-    s16 limbCount;   // Number of phys limbs, including the pinned limb
-    s16 startBone;   // First phys bone, connecting the root to the pinned limb
+    s16 startLimb;              // First phys limb in the chain, which is pinned
+    s16 limbCount;              // Number of phys limbs, including the pinned limb
+    s16 startBone;              // First phys bone, connecting the root to the pinned limb
+    f32 resetForwardDirScale;   // Outward direction in forward direction of chain, where positive = forward and negative = backward
+    f32 resetLeftDirScale;      // Outward cirection in left direction for chain, where positive = left and negative = right
 } PonytailLimbChain;
 
 
@@ -156,6 +155,7 @@ bool Ponytail_GroupRayExit(Vec3f targetPhysLimbPos, Vec3f physLimbDir, f32 point
     PhysSphereCollider* capsulePairs[][2], int capsuleColCount, f32 padding, Vec3f* exitPosition);
 void Ponytail_SolveColliderGroup(PhysLimb* physLimb, PhysSphereCollider* collider_pairs[][2], 
     int capsuleColCount);
+void Ponytail_ResetChain(Ponytail* this, PhysLimb* gPhysLimbs[], const PonytailLimbChain* chain);
 void Ponytail_SetResetShape(Ponytail* this, PhysLimb* gPhysLimbs[], const PonytailLimbChain chains[], 
     int chainCount);
 void Ponytail_RotatePointAroundY(Vec3f* targetPoint, Vec3f* pivotPoint, s16 rotAngle);

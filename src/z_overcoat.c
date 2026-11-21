@@ -272,29 +272,29 @@ Set up Vertical Cloth Chains
 // limbs in chain, from first pinned phys limb to last unpinned limb), and first phys bone
 // (from root limb to first pinned limb of that chain)
 static const OvercoatLimbChain cloth_chains[OVERCOAT_CHAIN_COUNT] = {
-    {OVERCOAT_BODYPART_LEFTLIMB0_A,   9, OVERCOAT_BONE_ROOT_LEFTLIMB0_A},
-    {OVERCOAT_BODYPART_LEFTLIMB1_A,   9, OVERCOAT_BONE_ROOT_LEFTLIMB1_A},
-    {OVERCOAT_BODYPART_LEFTLIMB2_A,   9, OVERCOAT_BONE_ROOT_LEFTLIMB2_A},
-    {OVERCOAT_BODYPART_LEFTLIMB3_A,   9, OVERCOAT_BONE_ROOT_LEFTLIMB3_A},
-    {OVERCOAT_BODYPART_LEFTLIMB4_A,   9, OVERCOAT_BONE_ROOT_LEFTLIMB4_A},
-    {OVERCOAT_BODYPART_LEFTLIMB5_A,  12, OVERCOAT_BONE_ROOT_LEFTLIMB5_A},
-    {OVERCOAT_BODYPART_LEFTLIMB6_A,   9, OVERCOAT_BONE_ROOT_LEFTLIMB6_A},
-    {OVERCOAT_BODYPART_LEFTLIMB7_A,   9, OVERCOAT_BONE_ROOT_LEFTLIMB7_A},
-    {OVERCOAT_BODYPART_LEFTLIMB8_A,   9, OVERCOAT_BONE_ROOT_LEFTLIMB8_A},
-    {OVERCOAT_BODYPART_LEFTLIMB9_A,   9, OVERCOAT_BONE_ROOT_LEFTLIMB9_A},
+    {OVERCOAT_BODYPART_LEFTLIMB0_A,   9, OVERCOAT_BONE_ROOT_LEFTLIMB0_A,   1.f,  0.f},
+    {OVERCOAT_BODYPART_LEFTLIMB1_A,   9, OVERCOAT_BONE_ROOT_LEFTLIMB1_A,   1.f,  0.f},
+    {OVERCOAT_BODYPART_LEFTLIMB2_A,   9, OVERCOAT_BONE_ROOT_LEFTLIMB2_A,   1.f,  0.f},
+    {OVERCOAT_BODYPART_LEFTLIMB3_A,   9, OVERCOAT_BONE_ROOT_LEFTLIMB3_A,   1.f,  0.f},
+    {OVERCOAT_BODYPART_LEFTLIMB4_A,   9, OVERCOAT_BONE_ROOT_LEFTLIMB4_A,   1.f,  0.f},
+    {OVERCOAT_BODYPART_LEFTLIMB5_A,  12, OVERCOAT_BONE_ROOT_LEFTLIMB5_A,   0.f,  1.f},
+    {OVERCOAT_BODYPART_LEFTLIMB6_A,   9, OVERCOAT_BONE_ROOT_LEFTLIMB6_A,  -1.f,  0.f},
+    {OVERCOAT_BODYPART_LEFTLIMB7_A,   9, OVERCOAT_BONE_ROOT_LEFTLIMB7_A,  -1.f,  0.f},
+    {OVERCOAT_BODYPART_LEFTLIMB8_A,   9, OVERCOAT_BONE_ROOT_LEFTLIMB8_A,  -1.f,  0.f},
+    {OVERCOAT_BODYPART_LEFTLIMB9_A,   9, OVERCOAT_BONE_ROOT_LEFTLIMB9_A,  -1.f,  0.f},
 
-    {OVERCOAT_BODYPART_BACKLIMB_A,    9, OVERCOAT_BONE_ROOT_BACKLIMB_A},
+    {OVERCOAT_BODYPART_BACKLIMB_A,    9, OVERCOAT_BONE_ROOT_BACKLIMB_A,   -1.f,  0.f},
 
-    {OVERCOAT_BODYPART_RIGHTLIMB9_A,  9, OVERCOAT_BONE_ROOT_RIGHTLIMB9_A},
-    {OVERCOAT_BODYPART_RIGHTLIMB8_A,  9, OVERCOAT_BONE_ROOT_RIGHTLIMB8_A},
-    {OVERCOAT_BODYPART_RIGHTLIMB7_A,  9, OVERCOAT_BONE_ROOT_RIGHTLIMB7_A},
-    {OVERCOAT_BODYPART_RIGHTLIMB6_A,  9, OVERCOAT_BONE_ROOT_RIGHTLIMB6_A},
-    {OVERCOAT_BODYPART_RIGHTLIMB5_A, 12, OVERCOAT_BONE_ROOT_RIGHTLIMB5_A},
-    {OVERCOAT_BODYPART_RIGHTLIMB4_A,  9, OVERCOAT_BONE_ROOT_RIGHTLIMB4_A},
-    {OVERCOAT_BODYPART_RIGHTLIMB3_A,  9, OVERCOAT_BONE_ROOT_RIGHTLIMB3_A},
-    {OVERCOAT_BODYPART_RIGHTLIMB2_A,  9, OVERCOAT_BONE_ROOT_RIGHTLIMB2_A},
-    {OVERCOAT_BODYPART_RIGHTLIMB1_A,  9, OVERCOAT_BONE_ROOT_RIGHTLIMB1_A},
-    {OVERCOAT_BODYPART_RIGHTLIMB0_A,  9, OVERCOAT_BONE_ROOT_RIGHTLIMB0_A}
+    {OVERCOAT_BODYPART_RIGHTLIMB9_A,  9, OVERCOAT_BONE_ROOT_RIGHTLIMB9_A, -1.f,  0.f},
+    {OVERCOAT_BODYPART_RIGHTLIMB8_A,  9, OVERCOAT_BONE_ROOT_RIGHTLIMB8_A, -1.f,  0.f},
+    {OVERCOAT_BODYPART_RIGHTLIMB7_A,  9, OVERCOAT_BONE_ROOT_RIGHTLIMB7_A, -1.f,  0.f},
+    {OVERCOAT_BODYPART_RIGHTLIMB6_A,  9, OVERCOAT_BONE_ROOT_RIGHTLIMB6_A, -1.f,  0.f},
+    {OVERCOAT_BODYPART_RIGHTLIMB5_A, 12, OVERCOAT_BONE_ROOT_RIGHTLIMB5_A,  0.f, -1.f},
+    {OVERCOAT_BODYPART_RIGHTLIMB4_A,  9, OVERCOAT_BONE_ROOT_RIGHTLIMB4_A,  1.f,  0.f},
+    {OVERCOAT_BODYPART_RIGHTLIMB3_A,  9, OVERCOAT_BONE_ROOT_RIGHTLIMB3_A,  1.f,  0.f},
+    {OVERCOAT_BODYPART_RIGHTLIMB2_A,  9, OVERCOAT_BONE_ROOT_RIGHTLIMB2_A,  1.f,  0.f},
+    {OVERCOAT_BODYPART_RIGHTLIMB1_A,  9, OVERCOAT_BONE_ROOT_RIGHTLIMB1_A,  1.f,  0.f},
+    {OVERCOAT_BODYPART_RIGHTLIMB0_A,  9, OVERCOAT_BONE_ROOT_RIGHTLIMB0_A,  1.f,  0.f}
 };
 
 
@@ -520,7 +520,7 @@ void Overcoat_InitChain(Overcoat* this, Player* player, PhysLimb* gPhysLimbs[], 
         // LimbA is the pinned phys limb at the top of this cloth chain of phys limbs.
         // Assign Jackie's current velocity and mark this phys limb as pinned.
 		if (physLimbRow == 0) {
-			Verlet_InitLimb(gPhysLimbs[limbIdx], this->bodyPartsPos[limbIdx], player->actor.velocity,
+			Verlet_InitLimb(gPhysLimbs[limbIdx], this->bodyPartsPos[limbIdx], gOvercoatPhysPlayer.curr_vel,
 				limbMass, PINNED, OVERCOAT_LIMB_COLLIDER_RADIUS);
 		}
         // Every other phys limbs below the first row of phys limbs are unpinned and have no velocity
@@ -556,7 +556,7 @@ void Overcoat_InitChain(Overcoat* this, Player* player, PhysLimb* gPhysLimbs[], 
 void Overcoat_SetDefaultBodyPartsPos(Overcoat* this, Player* player, PhysLimb* gPhysLimbs[], 
 	PhysBone* gPhysBones[]) {
     // Set overcoat velocity based on player's velocity
-    Vec3f playerVelocity = player->actor.velocity;
+    Vec3f playerVelocity = gOvercoatPhysPlayer.curr_vel;
 
 	/********************************
      Set up overcoat actor
@@ -1451,7 +1451,6 @@ void Overcoat_Init(Actor* thisx, PlayState* play) {
 
         // Verlet Integration starts here
         Verlet_InitPhysPlayer(&gOvercoatPhysPlayer, player);
-        gOvercoatEpona = (PhysEponaMovement){0};
         Overcoat_SetDefaultBodyPartsPos(this, player, overcoat_PhysLimbs, overcoat_PhysBones);
     }
 }
@@ -2514,6 +2513,162 @@ void Overcoat_SolveMidpointGroup(PhysLimb* physLimb_a, PhysLimb* physLimb_b,
 
 
 /**
+ * @brief Reset specified overcoat's chain of phys limbs based on its assigned reset angle
+ * 
+ * This function resets the specified overcoat's chain of phys limbs at a previously assigned reset 
+ * angle.
+ * 
+ * The following logic is followed to accomplish this:
+ * 
+ *  1. Calculate the downward and outward directions of the input chain's current reset angle
+ * 
+ *  2. For input chain, apply the outward direction to the reset direction.
+ * 
+ *  3. For input chain, use the chain's calculated outward reset direction to find the new world positions 
+ *     of the chain's phys limbs.
+ * 
+ *  4. Remove all the phys limbs' velocity and previous position info.
+ *
+ * @param this          Overcoat actor
+ * @param gPhysLimbs    Phys limbs of overcoat
+ * @param chain         Overcoat chain to reset
+ */
+void Overcoat_ResetChain(Overcoat* this, PhysLimb* gPhysLimbs[], const OvercoatLimbChain* chain) {
+    if (!overcoat_dirAxesReady) {
+        return;
+    }
+
+    // Get overcoat's current actor scale.
+    f32 actorScale = fabsf(this->actor.scale.x);
+
+    // Go through specified overcoat chain of phys limbs and reset it by calculating where each
+    // unpinned phys limb in the chain should be placed in 3D space relative to its parent.
+    int startLimb = chain->startLimb;
+    int limbCount = chain->limbCount;
+
+    /********************************
+     Calculate downward and outward directions of current reset angle
+    ********************************/
+    // Use the currently assigned reset angle.
+    f32 resetAngle = this->rotLimits.resetAngle;
+    s16 resetBinaryAngle = CustomMath_DegreeToBinaryAngle(resetAngle);
+
+    // Calculate how much outward direction and upward direction there is in current reset angle.
+    f32 resetOutwardDirScale = Math_CosS(resetBinaryAngle);
+    f32 resetUpwardDirScale = Math_SinS(resetBinaryAngle);
+
+    // Overcoat's downward direction, taken from Jackie's torso orientation.
+    Vec3f overcoatDownDir = overcoat_downAxis;
+    f32 overcoatDownDirLengthSq = Math3D_Vec3fMagnitudeSq(&overcoatDownDir);
+
+    // If overcoat's down direction is basically just 0 (extremely slightly greater than 0), then
+    // it has an invalid downward direction. Get out of function.
+    if (overcoatDownDirLengthSq <= GREATER_THAN_ZERO) {
+        return;
+    }
+
+    // Normalize the overcoat's downward direction.
+    Math_Vec3f_Scale(&overcoatDownDir, 1.f / sqrtf(overcoatDownDirLengthSq));
+
+    // Determine the input chain's outward direction using its assigned directional scales and
+    // the torso's current directional axes. Keep in mind that these axes describe the
+    // local axes of the torso/overcoat in world space.
+    Vec3f outwardDirection = {0.f, 0.f, 0.f};
+    Vec3f sidewaysDirection = {0.f, 0.f, 0.f};
+
+    // Calculate the forward/backward and left/right contributions to the outward direction.
+    Math_Vec3f_ScaleAndStore(&overcoat_forwardAxis, chain->resetForwardDirScale, &outwardDirection);
+    Math_Vec3f_ScaleAndStore(&overcoat_leftAxis, chain->resetLeftDirScale, &sidewaysDirection);
+
+    // Combine both contributions to find the chain's outward direction.
+    Math_Vec3f_Sum(&outwardDirection, &sidewaysDirection, &outwardDirection);
+
+    // Validate the current outward direction by checking if it's not zero.
+    f32 outwardLengthSq = Math3D_Vec3fMagnitudeSq(&outwardDirection);
+    if (outwardLengthSq <= GREATER_THAN_ZERO) {
+        return;
+    }
+
+    // If valid, normalize the calculated outward direction of the current chain of phys limbs.
+    Math_Vec3f_Scale(&outwardDirection, 1.f / sqrtf(outwardLengthSq));
+
+    /********************************
+     Calculate reset direction of chain in world space
+    ********************************/
+    // With the current chain's outward direction determined, tilt that direction by its
+    // currently assigned reset angle.
+    Vec3f outwardOffset = {0.f, 0.f, 0.f};
+    Vec3f downOffset = {0.f, 0.f, 0.f};
+    Vec3f resetDir = {0.f, 0.f, 0.f};
+
+    // Scale the chain's outward direction based on cosine of reset angle.
+    Math_Vec3f_ScaleAndStore(&outwardDirection, resetOutwardDirScale, &outwardOffset);
+
+    // Scale the chain's downward direction based on sine of reset angle.
+    Math_Vec3f_ScaleAndStore(&overcoatDownDir, resetUpwardDirScale, &downOffset);
+
+    // Subtract the downward component from the outward component.
+    // Positive reset angles point upward and negative reset angles point downward.
+    Math_Vec3f_Diff(&outwardOffset, &downOffset, &resetDir);
+
+    // Validate the current reset direction by checking if it's not zero.
+    f32 resetDirLengthSq = Math3D_Vec3fMagnitudeSq(&resetDir);
+    if (resetDirLengthSq <= GREATER_THAN_ZERO) {
+        return;
+    }
+
+    // If valid, normalize the calculated reset direction of the current chain of phys limbs.
+    Math_Vec3f_Scale(&resetDir, 1.f / sqrtf(resetDirLengthSq));
+
+    /********************************
+     Reset all the phys limbs' position in world space based on reset direction
+    ********************************/
+    // Go through each phys limb in the current chain and reset each limb's world position based on
+    // the calculated reset direction. Start from the first unpinned phys limb; row 0 is the
+    // pinned anchor, so its position is preserved.
+    for (int currLimbInChain = 1; currLimbInChain < limbCount; currLimbInChain++) {
+        // Get the current limb's actual index in the entire gPhysLimbs set.
+        int currLimbIdx = startLimb + currLimbInChain;
+
+        // Get the parent phys limb and current phys limb from gPhysLimbs.
+        PhysLimb* parentPhysLimb = gPhysLimbs[currLimbIdx - 1];
+        PhysLimb* currPhysLimb = gPhysLimbs[currLimbIdx];
+
+        // Get the default offset of current phys limb from parent phys limb.
+        Vec3f defaultJointOffset = {currPhysLimb->default_jointPos.x, currPhysLimb->default_jointPos.y, currPhysLimb->default_jointPos.z};
+
+        // Calculate the length of the default offset and scale it to match the overcoat's size.
+        f32 physBoneLength = sqrtf(Math3D_Vec3fMagnitudeSq(&defaultJointOffset));
+        f32 worldBoneLength = physBoneLength * actorScale;
+
+        // Calculate offset from parent phys limb to current phys limb.
+        Vec3f parentToCurrLimbOffset = {0.f, 0.f, 0.f};
+
+        // Scale the reset direction to the phys bone length.
+        Math_Vec3f_ScaleAndStore(&resetDir, worldBoneLength, &parentToCurrLimbOffset);
+
+        // Apply that offset to the parent phys limb's position in world space.
+        Math_Vec3f_Sum(&parentPhysLimb->curr_pos, &parentToCurrLimbOffset, &currPhysLimb->curr_pos);
+
+        // Store the newly calculated position in bodyPartsPos.
+        this->bodyPartsPos[currLimbIdx] = currPhysLimb->curr_pos;
+    }
+
+    /********************************
+     Reset velocity and prev position of all phys limbs of overcoat chain
+    ********************************/
+    // Clear history only for this chain, including its pinned anchor.
+    for (int currLimbIdx = 0; currLimbIdx < limbCount; currLimbIdx++) {
+        PhysLimb* currLimb = gPhysLimbs[startLimb + currLimbIdx];
+
+        currLimb->prev_pos = currLimb->curr_pos;       // Reset previous position
+        currLimb->curr_vel = (Vec3f){0.f, 0.f, 0.f};   // Reset current velocity
+        currLimb->prev_vel = (Vec3f){0.f, 0.f, 0.f};   // Reset previous velocity
+    }
+}
+
+
+/**
  * @brief Reset the overcoat chains of phys limbs based on its assigned reset angle
  * 
  * This function resets the overcoat's chains of phys limbs at a previously assigned reset angle.
@@ -2545,168 +2700,13 @@ void Overcoat_SetResetShape(Overcoat* this, PhysLimb* gPhysLimbs[], const Overco
         return;
     }
 	
-	// Get overcoat's current actor scale.
-    f32 actorScale = fabsf(this->actor.scale.x);
-
-	/********************************
-     Calculate downward and outward directions of current reset angle
-    ********************************/
-    // Use the current settings unless a specific reset angle was requested.
-    f32 resetAngle = this->rotLimits.resetAngle;
-    s16 resetBinaryAngle = CustomMath_DegreeToBinaryAngle(resetAngle);      // Convert to s16 angle
-
-    // Calculate how much horizontal direction and upward direction there is in current reset angle.
-    f32 resetHorizontalDirScale = Math_CosS(resetBinaryAngle);
-    f32 resetUpwardDirScale  = Math_SinS(resetBinaryAngle);
-
-    // Overcoat's downward direction, taken from Jackie's torso orientation.
-    Vec3f overcoatDownDir = overcoat_downAxis;
-    f32 overcoatDownDirLengthSq = Math3D_Vec3fMagnitudeSq(&overcoatDownDir);
-
-    // If overcoat's down direction is basically just 0 (extremely slightly greater than 0), then
-    // it has an invalid downward direction. Get out of function.
-    if (overcoatDownDirLengthSq <= GREATER_THAN_ZERO) {
-        return;
-    }
-
-    // Normalize the overcoat's downward direciton.
-    Math_Vec3f_Scale(&overcoatDownDir, (1.f / sqrtf(overcoatDownDirLengthSq)));
-
 	/********************************
      Reset each vertical cloth chain
     ********************************/
-	// Go through each overcoat chain of phys limbs and reset each of them by calculating where 
-	// each unpinned phys limb in the chain should be placed in 3D space relative to its parent.
-    for (int currChain = 0; currChain < chainCount; currChain++) {
-        int startLimb = chains[currChain].startLimb;	// Chain's phys limb A (pinned limb)
-        int limbCount = chains[currChain].limbCount;	// Count of phys limbs in current chain
-
-		
-		// ======== Determine "outward direction" of current chain ========
-		
-		// Determine what direction the "outward direction" of current chain would be using the
-		// torso's directional axes found before. Keep in mind that these axes describe the
-		// local axes of the torso/overcoat in world space.
-		// Note that "outward" for chains in the overcoat's front would be forward, chains in the 
-		// left/right would be left/right (respectively), and chains in the back would be backward.
-        Vec3f outwardDirection = {0.f, 0.f, 0.f};
-
-        // Left chain extends to leftward direction of overcoat, which was defined via Jackie's 
-		// torso limb's matrix (mtx) orientation in Overcoat_on_Player_PostLimbDrawGameplay.
-        if (startLimb == OVERCOAT_BODYPART_LEFTLIMB5_A) {
-            Math_Vec3f_Copy(&outwardDirection, &overcoat_leftAxis);
-        }
-		// Right chain extends to rightward direction of overcoat.
-        else if (startLimb == OVERCOAT_BODYPART_RIGHTLIMB5_A) {
-            Math_Vec3f_ScaleAndStore(&overcoat_leftAxis, -1.f, &outwardDirection);
-        }
-        // Front chains extend to forward direction of overcoat.
-		// Basically, left limb 4 (leftmost front chain) to right limb 4 (rightmost front chain)
-        else if ((startLimb >= OVERCOAT_BODYPART_LEFTLIMB0_A &&
-				  startLimb <= OVERCOAT_BODYPART_LEFTLIMB4_A) ||
-				  (startLimb >= OVERCOAT_BODYPART_RIGHTLIMB0_A &&
-				  startLimb <= OVERCOAT_BODYPART_RIGHTLIMB4_A)) {
-			Math_Vec3f_Copy(&outwardDirection, &overcoat_forwardAxis);
-        }
-        // Remaining (back) chains extends to backward direction of overcoat.
-        else {
-            Math_Vec3f_ScaleAndStore(&overcoat_forwardAxis, -1.f, &outwardDirection);
-        }
-
-		// Validate legitimacy of current outward direction by checking if it's not zero.
-        f32 outwardLengthSquared =Math3D_Vec3fMagnitudeSq(&outwardDirection);
-        if (outwardLengthSquared <= GREATER_THAN_ZERO) {
-            continue;
-        }
-
-		// If valid, normalize the calculated outward direction of the current chain of
-		// phys limbs.
-        Math_Vec3f_Scale(&outwardDirection, 1.f / sqrtf(outwardLengthSquared));
-		
-		// ======== Calculate reset direction of chain in world space ========
-		
-		// With the current chain's outward direction determined, now rotate that chain
-		// by its currently assigned reset angle.
-		Vec3f resetHorizontalDir = { 0.f, 0.f, 0.f };	// Horizontal outward reset of chain
-		Vec3f resetDownDir = { 0.f, 0.f, 0.f };			// Vertical reset of chain
-		Vec3f resetDirection = { 0.f, 0.f, 0.f };		// Resulting reset direction of chain
-		
-		// Scale the chain's horizontal outward direction based on cosine of reset angle
-		Math_Vec3f_ScaleAndStore(&outwardDirection, resetHorizontalDirScale, &resetHorizontalDir);
-		
-		// Scale the chain's downward direction based on sine of reset angle.
-		Math_Vec3f_ScaleAndStore(&overcoatDownDir, resetUpwardDirScale, &resetDownDir);
-		
-		// Subtract horizontal outward direction by downward direction of chain
-		// Note that positive reset angles point upward and negative reset angles point downward.
-		Math_Vec3f_Diff(&resetHorizontalDir, &resetDownDir, &resetDirection);
-		
-		// Validate current reset value by checking if it's not zero.
-        f32 resetLengthSquared = Math3D_Vec3fMagnitudeSq(&resetDirection);
-        if (resetLengthSquared <= GREATER_THAN_ZERO) {
-            continue;
-        }
-
-		// If valid, normalize the calculated reset direction of the current chain of
-		// phys limbs.
-        Math_Vec3f_Scale(&resetDirection, (1.f / sqrtf(resetLengthSquared)));
-
-
-		// ====== Reset all the phys limbs' position in world space based on reset direction ======
-		
-        // Go through each phys limb in the current chain and reset each limb's world position
-		// based on the calculated reset direction.
-		// Start from the first UNPINNED phys limb (in this overcoat's case, 0 is the pinned phys
-		// limb, so skip that).
-        for (int currLimbInChain = 1; currLimbInChain < limbCount; currLimbInChain++) {
-			// Get the current limb's actual index in the entire gPhysLimbs set
-            int currLimbIdx = startLimb + currLimbInChain;
-
-			// Get the parent phys limb and current phys limb from gPhysLimbs
-            PhysLimb* parentPhysLimb = gPhysLimbs[currLimbIdx - 1];
-            PhysLimb* currPhysLimb = gPhysLimbs[currLimbIdx];
-			
-			// Commented out for now; may need this for future work involving pinned limb in
-			// middle of chain.
-			/*
-            if (currPhysLimb->pinned) {
-                continue;
-            }*/
-
-			// Get the default offset of current phys limb from parent phys limb and convert it
-			// to Vec3f value (for calculating its length).
-            Vec3f defaultJointOffset = {currPhysLimb->default_jointPos.x, 
-				currPhysLimb->default_jointPos.y, currPhysLimb->default_jointPos.z};
-
-			// Calculate the exact length value of current phys limb's default offset from parent
-			// phys limb.
-            f32 physBoneLength =sqrtf(Math3D_Vec3fMagnitudeSq(&defaultJointOffset));
-            f32 worldBoneLength = physBoneLength * actorScale;		// Scale to match overcoat size
-			
-			// Calculate offset from parent phys limb to current phys limb
-            Vec3f parentToCurrLimbOffset = {0.f, 0.f, 0.f};
-			// Scale the reset direction to the phys bone length. This value should tell how far and in
-			// what direction in the 3D world space the current phys limb should be in from parent phys
-			// limb.
-            Math_Vec3f_ScaleAndStore(&resetDirection, worldBoneLength, &parentToCurrLimbOffset);
-			// Apply that direction value to the parent phys limb's position in world space.
-            Math_Vec3f_Sum(&parentPhysLimb->curr_pos, &parentToCurrLimbOffset, &currPhysLimb->curr_pos);
-
-			// Store that newly calculated current position of current phys limb to bodyPartsPos.
-            this->bodyPartsPos[currLimbIdx] = currPhysLimb->curr_pos;
-        }
-    }
-
-	/********************************
-     Reset velocity and prev position of all phys limbs of overcoat
-    ********************************/
-    // Remove velocity and previous position carried over from before the reset.
-    for (int currLimbIdx = 0; currLimbIdx < OVERCOAT_BODYPART_MAX; currLimbIdx++) {
-        PhysLimb* currLimb = gPhysLimbs[currLimbIdx];
-
-        currLimb->prev_pos = currLimb->curr_pos;		// Reset previous position
-        currLimb->curr_vel = (Vec3f){0.f, 0.f, 0.f};	// Reset current velocity
-        currLimb->prev_vel = (Vec3f){0.f, 0.f, 0.f};	// Reset previous velocity
+    // Go through each overcoat chain of phys limbs and reset each of them by calculating where each 
+    // unpinned phys limb in the chain should be placed in 3D space relative to its parent.
+    for (int currChainIdx = 0; currChainIdx < chainCount; currChainIdx++) {
+        Overcoat_ResetChain(this, gPhysLimbs, &chains[currChainIdx]);
     }
 
     /********************************
@@ -2973,24 +2973,9 @@ void Overcoat_SolvePhysAtSubsteps(Overcoat* this, Player* player, Vec3f apply_fo
 	// and the current frame.
     f32 dt = 1.f / OVERCOAT_SUBSTEPS;
 	
-	// Store Jackie's horizontal movement in current frame so that the overcoat can react to the motion
-    Vec3f opposingVelocity = {0.f, 0.f, 0.f};
-    Math_Vec3f_Copy(&opposingVelocity, &player->actor.velocity);
-
-    // While riding, use movement measured from world positions.
-	// Riding Epona: PLAYER_STATE1_800000
-    if (player->stateFlags1 & PLAYER_STATE1_800000) {
-        opposingVelocity = gOvercoatEpona.world_vel;
-    }
-
-    opposingVelocity.y = 0.f;	// ignore vertical movement
-
-    // Disable the opposing movement while climbing ladder/wall or opening door.
-    // Climbing Wall: PLAYER_STATE1_200000
-    // Opening Door: Player_Action_36
-    if ((player->stateFlags1 & PLAYER_STATE1_200000) || player->actionFunc == Player_Action_36) {
-        opposingVelocity = (Vec3f){0.f, 0.f, 0.f};
-    }
+	// Use measured player world movement for the horizontal response.
+    Vec3f opposingVelocity = gOvercoatPhysPlayer.curr_vel;
+    //opposingVelocity.y = 0.f;
 
 	/********************************
      Save target colliders' state in current frame
@@ -3476,7 +3461,7 @@ void Overcoat_UpdatePinnedLimb(Overcoat* this, Player* player, PhysLimb* gPhysLi
 	// Save the calculated new current position of the actual limb into respective phys limb
 	Math_Vec3f_Copy(&physLimb->curr_pos, &this->bodyPartsPos[pinnedLimbIdx]);
 	// Save current velocity to phys limb also
-	Math_Vec3f_Copy(&physLimb->curr_vel, &player->actor.velocity);
+	Math_Vec3f_Diff(&physLimb->curr_pos, &physLimb->prev_pos, &physLimb->curr_vel);
 }
 
 
@@ -3571,18 +3556,12 @@ void Overcoat_UpdateBodyPartsPos(Overcoat* this, Player* player, Vec3f apply_for
     Math_Vec3f_Copy(&this->actor.prevPos, &player->actor.prevPos);
 
     /********************************
-     Update Epona movement
-    ********************************/
-    // Measure Jackie's world movement while riding Epona.
-    // Restart the movement measurement when the overcoat physics resets.
-    Verlet_UpdatePhysEponaMovement(&gOvercoatEpona, player, this->needsReset);
-
-    /********************************
      Reset phys limbs after map change
     ********************************/
     // Rebase all phys limbs' positions after entering a new map so old physics state does not cause the 
     // overcoat to jump or move unpredictably
     if (this->needsReset) {
+        Verlet_InitPhysPlayer(&gOvercoatPhysPlayer, player);
         this->needsReset = 0;
         overcoat_stepHistoryReady = 0;
 

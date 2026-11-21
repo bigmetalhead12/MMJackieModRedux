@@ -28,9 +28,6 @@ by BigMetalHead12
 // Set up physics object that carries velocity and rotation of belt strap hook actor
 PhysPlayer gBeltStrapHookPhysPlayer;
 
-// Set up physics object that carries Epona movement for belt strap hook actor
-PhysEponaMovement gBeltStrapHookEpona;
-
 // StandardLimb of belt strap hook's model generated through Fast 64 (from gBeltStrapHookSkel)
 extern StandardLimb gBeltStrapHookSkelLimb_000;     // Root
 extern StandardLimb gBeltStrapHookSkelLimb_001;     // First limb of left chain of limbs
@@ -244,6 +241,8 @@ typedef struct BeltStrapHookLimbChain {
     s16 startLimb;   // First phys limb in the chain, which is pinned
     s16 limbCount;   // Number of phys limbs, including the pinned limb
     s16 startBone;   // First phys bone, connecting the root to the pinned limb
+    f32 resetForwardDirScale;   // Outward direction in forward direction of chain, where positive = forward and negative = backward
+    f32 resetLeftDirScale;      // Outward cirection in left direction for chain, where positive = left and negative = right
 } BeltStrapHookLimbChain;
 
 
@@ -278,6 +277,7 @@ bool BeltStrapHook_GroupRayExit(Vec3f targetPhysLimbPos, Vec3f physLimbDir, f32 
     PhysSphereCollider* capsulePairs[][2], int capsuleColCount, f32 padding, Vec3f* exitPosition);
 void BeltStrapHook_SolveColliderGroup(PhysLimb* physLimb, PhysSphereCollider* collider_pairs[][2], 
     int capsuleColCount);
+void BeltStrapHook_ResetChain(BeltStrapHook* this, PhysLimb* gPhysLimbs[], const BeltStrapHookLimbChain* chain);
 void BeltStrapHook_SetResetShape(BeltStrapHook* this, PhysLimb* gPhysLimbs[], 
     const BeltStrapHookLimbChain chains[], int chainCount);
 void BeltStrapHook_RotatePointAroundY(Vec3f* targetPoint, Vec3f* pivotPoint, s16 rotAngle);

@@ -29,9 +29,16 @@ by BigMetalHead12
  * @param player            Player actor to take world velocity and rotation from
  */
 void Verlet_InitPhysPlayer(PhysPlayer* target_player, Player* player) {
-    target_player->curr_vel = player->actor.velocity;
-    target_player->prev_vel = player->actor.velocity;
-    target_player->rot = player->actor.world.rot;
+    // Initialize player's world position
+    target_player->curr_pos = player->actor.world.pos;
+    target_player->prev_pos = player->actor.world.pos;
+
+    // Initialize player's world vector
+    target_player->curr_vel = (Vec3f){0.f, 0.f, 0.f};
+    target_player->prev_vel = (Vec3f){0.f, 0.f, 0.f};
+
+    // Initialize player's rotation in world
+    target_player->rot = player->actor.shape.rot;
 }
 
 
@@ -42,68 +49,16 @@ void Verlet_InitPhysPlayer(PhysPlayer* target_player, Player* player) {
  * @param player            Player actor to take world velocity and rotation from
  */
 void Verlet_UpdatePhysPlayerVelocity(PhysPlayer* target_player, Player* player) {
-    target_player->prev_vel = target_player->curr_vel;
-    target_player->curr_vel = player->actor.velocity;
-    target_player->rot = player->actor.world.rot;
-}
+    // Update player's previous frame data
+    target_player->prev_pos = target_player->curr_pos;      // World position
+    target_player->prev_vel = target_player->curr_vel;      // World velocity
 
+    // Get current frame's data
+    target_player->curr_pos = player->actor.world.pos;      // World position
+    target_player->rot = player->actor.shape.rot;           // World rotation
 
-/**
- * @brief Measure Epona riding movement from the player's world position.
- * 
- * The issue with this function is that technically, the verlet integration codebase should be able to
- * take in movement on Epona without a need of a specialized function like this. Eventual API should
- * rely less on the player's actor's velocity and more purely on position in the world.
- * 
- * This function is slightly reflective of what the actual design of verlet integration API's codebase 
- * should eventually be like in that it relies only on world position changes.
- *
- * @param eponaMovement Epona movement struct that is patched in to accomodate for Epona verlet
- * @param player        Player instance
- * @param reset         Flag that indicates if Epona's verlet integration needs to be reset
- */
-void Verlet_UpdatePhysEponaMovement(PhysEponaMovement* eponaMovement, Player* player, u8 reset) {
-    // PLAYER_STATE1_800000 indicates if the player is riding Epona. Determine if the player is 
-    // riding Epona in this current frame this function was called in.
-    u8 curr_riding = ((player->stateFlags1 & PLAYER_STATE1_800000) != 0);
-
-    // Save current world position of player at this frame.
-    Vec3f currentPos = {0.f, 0.f, 0.f};
-    Math_Vec3f_Copy(&currentPos, &player->actor.world.pos);
-
-    // Discard the previous sample when the physics object resets.
-    if (reset) {
-        eponaMovement->prev_pos_ready = 0;
-    }
-
-    // Only record the velocity when Jackie is actually on Epona.
-    eponaMovement->world_vel = (Vec3f){0.f, 0.f, 0.f};  // Velocity relative to world
-    eponaMovement->local_vel = (Vec3f){0.f, 0.f, 0.f};  // Velocity relative to Jackie & Epona
-
-    // If Jackie's previous position is saved (regardless of whether she's on Epona or not), 
-    // Jackie was on Epona in the previous frame, and Jackie is currently riding on Epona, then 
-    // save Jackie's current world velocity and local velocity while on Epona.
-    if (eponaMovement->prev_pos_ready && eponaMovement->was_riding && curr_riding) {
-        // Measure Jackie's movement while on Epona since the previous frame where this function
-        // was called.
-        Math_Vec3f_Diff(&currentPos, &eponaMovement->prev_pos, &eponaMovement->world_vel);
-
-        // Express the same movement relative to the player's local perspective, which is
-        // found with Jackie's y-rotation (yaw).
-        f32 sinYaw = Math_SinS(player->actor.shape.rot.y);
-        f32 cosYaw = Math_CosS(player->actor.shape.rot.y);
-
-        eponaMovement->local_vel.x = (cosYaw * eponaMovement->world_vel.x) - 
-            (sinYaw * eponaMovement->world_vel.z);
-        eponaMovement->local_vel.y = eponaMovement->world_vel.y;
-        eponaMovement->local_vel.z = (sinYaw * eponaMovement->world_vel.x) + 
-            (cosYaw * eponaMovement->world_vel.z);
-    }
-
-    // Save the current position and riding state for the next frame where this is called.
-    Math_Vec3f_Copy(&eponaMovement->prev_pos, &currentPos);
-    eponaMovement->was_riding = curr_riding;
-    eponaMovement->prev_pos_ready = 1;
+    // Get current world velocity
+    Math_Vec3f_Diff(&target_player->curr_pos, &target_player->prev_pos, &target_player->curr_vel);
 }
 
 

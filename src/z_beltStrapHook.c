@@ -192,8 +192,8 @@ Set up Vertical Cloth Chains
 // limbs in chain, from first pinned phys limb to last unpinned limb), and first phys bone
 // (from root limb to first pinned limb of that chain)
 static const BeltStrapHookLimbChain belt_chains[BELTSTRAPHOOK_CHAIN_COUNT] = {
-    {BELTSTRAPHOOK_BODYPART_LEFTLIMB1, 11, BELTSTRAPHOOK_BONE_ROOT_LEFT_LIMB1},
-    {BELTSTRAPHOOK_BODYPART_RIGHTLIMB1, 11, BELTSTRAPHOOK_BONE_ROOT_RIGHT_LIMB1}
+    {BELTSTRAPHOOK_BODYPART_LEFTLIMB1, 11, BELTSTRAPHOOK_BONE_ROOT_LEFT_LIMB1, -1.f, 0.f},
+    {BELTSTRAPHOOK_BODYPART_RIGHTLIMB1, 11, BELTSTRAPHOOK_BONE_ROOT_RIGHT_LIMB1, -1.f, 0.f}
 };
 
 
@@ -382,7 +382,7 @@ void BeltStrapHook_InitChain(BeltStrapHook* this, Player* player, PhysLimb* gPhy
         // LimbA is the pinned phys limb at the top of this cloth chain of phys limbs.
         // Assign Jackie's current velocity and mark this phys limb as pinned.
 		if (physLimbRow == 0) {
-			Verlet_InitLimb(gPhysLimbs[limbIdx], this->bodyPartsPos[limbIdx], player->actor.velocity,
+			Verlet_InitLimb(gPhysLimbs[limbIdx], this->bodyPartsPos[limbIdx], gBeltStrapHookPhysPlayer.curr_vel,
 				limbMass, PINNED, BELTSTRAPHOOK_LIMB_COLLIDER_RADIUS);
 		}
         // Every other phys limbs below the first row of phys limbs are unpinned and have no velocity
@@ -411,7 +411,7 @@ void BeltStrapHook_InitChain(BeltStrapHook* this, Player* player, PhysLimb* gPhy
 void BeltStrapHook_SetDefaultBodyPartsPos(BeltStrapHook* this, Player* player, PhysLimb* gPhysLimbs[], 
     PhysBone* gPhysBones[]) {
     // Set belt strap hook velocity
-    Vec3f playerVelocity = player->actor.velocity;
+    Vec3f playerVelocity = gBeltStrapHookPhysPlayer.curr_vel;
 
     /********************************
      Set up belt strap hook actor
@@ -1553,49 +1553,49 @@ void BeltStrapHook_SolveColliderGroup(PhysLimb* physLimb, PhysSphereCollider* co
 
 
 /**
- * @brief Reset the belt strap hook chains of phys limbs based on its assigned reset angle
+ * @brief Reset specified belt strap hook chain of phys limbs based on its assigned reset angle
  * 
- * This function resets the belt strap hook's chains of phys limbs at a previously assigned reset angle.
+ * This function resets the specified belt strap hook's chain of phys limbs at a previously assigned reset 
+ * angle.
  * 
  * The following logic is followed to accomplish this:
- *
- *	1. Using the previously assigned reset angle, find the horizontal outward and downward direction
- *	   that the chains need to be going in when reset.
- *
- * 	2. Go through each chain of phys limbs. For each chain, determine the outward direction of the
- *	   chain based on the directional axes of the belt strap hook (based on Jackie's torso limb).
- *
- *	3. For each chain, apply the outward direction to the reset direction.
- *
- *	4. For each chain, use the chain's calculated outward reset direction to find the new world 
- *	   positions of the chain's phys limbs.
- *
- *	5. Remove all the phys limbs' velocity and previous position info.
  * 
- * @param this          Belt Strap Hook actor
+ *  1. Calculate the downward and outward directions of the input chain's current reset angle
+ * 
+ *  2. For input chain, apply the outward direction to the reset direction.
+ * 
+ *  3. For input chain, use the chain's calculated outward reset direction to find the new world positions 
+ *     of the chain's phys limbs.
+ * 
+ *  4. Remove all the phys limbs' velocity and previous position info.
+ * 
+ * @param this          BeltStrapHook actor
  * @param gPhyslimbs    Phys limbs of belt strap hook
- * @param chains        Belt strap hook chains of phys limbs
- * @param chainCount	Number of all chains of belt strap hook
+ * @param chains        BeltStrapHook chain of phys limbs
  */
-void BeltStrapHook_SetResetShape(BeltStrapHook* this, PhysLimb* gPhysLimbs[], 
-    const BeltStrapHookLimbChain chains[], int chainCount) {
-    // Torso-relative directions must be set up for belt strap hook before rebuilding.
+void BeltStrapHook_ResetChain(BeltStrapHook* this, PhysLimb* gPhysLimbs[], 
+    const BeltStrapHookLimbChain* chain) {
     if (!beltStrapHook_dirAxesReady) {
         return;
     }
-	
-	// Get belt strap hook's current actor scale.
+
+    // Get belt strap hook's current actor scale.
     f32 actorScale = fabsf(this->actor.scale.x);
 
-	/********************************
+    // Go through specified belt strap hook chain of phys limbs and reset it by calculating where each 
+    // unpinned phys limb in the chain should be placed in 3D space relative to its parent.
+    int startLimb = chain->startLimb;
+    int limbCount = chain->limbCount;
+    
+    /********************************
      Calculate downward and outward directions of current reset angle
     ********************************/
     // Use the current settings unless a specific reset angle was requested.
     f32 resetAngle = this->rotLimits.resetAngle;
     s16 resetBinaryAngle = CustomMath_DegreeToBinaryAngle(resetAngle);      // Convert to s16 angle
 
-    // Calculate how much horizontal direction and upward direction there is in current reset angle.
-    f32 resetHorizontalDirScale = Math_CosS(resetBinaryAngle);
+    // Calculate how much outward direction and upward direction there is in current reset angle.
+    f32 resetOutwardDirScale = Math_CosS(resetBinaryAngle);
     f32 resetUpwardDirScale  = Math_SinS(resetBinaryAngle);
 
     // Belt strap hook's downward direction, taken from Jackie's torso orientation.
@@ -1611,120 +1611,132 @@ void BeltStrapHook_SetResetShape(BeltStrapHook* this, PhysLimb* gPhysLimbs[],
     // Normalize the belt strap hook's downward direciton.
     Math_Vec3f_Scale(&beltStrapHookDownDir, (1.f / sqrtf(beltStrapHookDownDirLengthSq)));
 
-	/********************************
-     Reset each vertical cloth chain
-    ********************************/
-	// Go through each belt strap hook chain of phys limbs and reset each of them by calculating where 
-	// each unpinned phys limb in the chain should be placed in 3D space relative to its parent.
-    for (int currChain = 0; currChain < chainCount; currChain++) {
-        int startLimb = chains[currChain].startLimb;	// Chain's phys limb A (pinned limb)
-        int limbCount = chains[currChain].limbCount;	// Count of phys limbs in current chain
+    // Determine what direction the "outward direction" of current chain would be using the
+    // torso's directional axes found before. Keep in mind that these axes describe the
+    // local axes of the torso/belt strap hook in world space.
+    // Note that "outward" for chains in the belt strap hook's front would be backward.
+    Vec3f outwardDirection = {0.f, 0.f, 0.f};
+    Vec3f sidewaysDirection = {0.f, 0.f, 0.f};
 
-		
-		// ======== Determine "outward direction" of current chain ========
-		
-		// Determine what direction the "outward direction" of current chain would be using the
-		// torso's directional axes found before. Keep in mind that these axes describe the
-		// local axes of the torso/belt strap hook in world space.
-		// Note that "outward" for chains in the belt strap hook's front would be backward.
-        Vec3f outwardDirection = {0.f, 0.f, 0.f};
-        Math_Vec3f_ScaleAndStore(&beltStrapHook_forwardAxis, -1.f, &outwardDirection);
+    Math_Vec3f_ScaleAndStore(&beltStrapHook_forwardAxis, chain->resetForwardDirScale, &outwardDirection);
+    Math_Vec3f_ScaleAndStore(&beltStrapHook_leftAxis, chain->resetLeftDirScale, &sidewaysDirection);
+    Math_Vec3f_Sum(&outwardDirection, &sidewaysDirection, &outwardDirection);
 
-        // Validate legitimacy of current outward direction by checking if it's not zero.
-        f32 outwardLengthSquared =Math3D_Vec3fMagnitudeSq(&outwardDirection);
-        if (outwardLengthSquared <= GREATER_THAN_ZERO) {
-            continue;
-        }
-
-        // If valid, normalize the calculated outward direction of the current chain of
-		// phys limbs.
-        Math_Vec3f_Scale(&outwardDirection, 1.f / sqrtf(outwardLengthSquared));
-
-		
-		// ======== Calculate reset direction of chain in world space ========
-		
-		// With the current chain's outward direction determined, now rotate that chain
-		// by its currently assigned reset angle.
-		Vec3f resetHorizontalDir = { 0.f, 0.f, 0.f };	// Horizontal outward reset of chain
-		Vec3f resetDownDir = { 0.f, 0.f, 0.f };			// Vertical reset of chain
-		Vec3f resetDirection = { 0.f, 0.f, 0.f };		// Resulting reset direction of chain
-		
-		// Scale the chain's horizontal outward direction based on cosine of reset angle
-		Math_Vec3f_ScaleAndStore(&outwardDirection, resetHorizontalDirScale, &resetHorizontalDir);
-		
-		// Scale the chain's downward direction based on sine of reset angle.
-		Math_Vec3f_ScaleAndStore(&beltStrapHookDownDir, resetUpwardDirScale, &resetDownDir);
-		
-		// Subtract horizontal outward direction by downward direction of chain
-		// Note that positive reset angles point upward and negative reset angles point downward.
-		Math_Vec3f_Diff(&resetHorizontalDir, &resetDownDir, &resetDirection);
-		
-		// Validate current reset value by checking if it's not zero.
-        f32 resetLengthSquared = Math3D_Vec3fMagnitudeSq(&resetDirection);
-        if (resetLengthSquared <= GREATER_THAN_ZERO) {
-            continue;
-        }
-
-		// If valid, normalize the calculated reset direction of the current chain of
-		// phys limbs.
-        Math_Vec3f_Scale(&resetDirection, (1.f / sqrtf(resetLengthSquared)));
-
-
-		// ====== Reset all the phys limbs' position in world space based on reset direction ======
-		
-        // Go through each phys limb in the current chain and reset each limb's world position
-		// based on the calculated reset direction.
-		// Start from the first UNPINNED phys limb (in this belt strap hook's case, 0 is the pinned phys
-		// limb, so skip that).
-        for (int currLimbInChain = 1; currLimbInChain < limbCount; currLimbInChain++) {
-			// Get the current limb's actual index in the entire gPhysLimbs set
-            int currLimbIdx = startLimb + currLimbInChain;
-
-			// Get the parent phys limb and current phys limb from gPhysLimbs
-            PhysLimb* parentPhysLimb = gPhysLimbs[currLimbIdx - 1];
-            PhysLimb* currPhysLimb = gPhysLimbs[currLimbIdx];
-			
-			// Commented out for now; may need this for future work involving pinned limb in
-			// middle of chain.
-			/*
-            if (currPhysLimb->pinned) {
-                continue;
-            }*/
-
-			// Get the default offset of current phys limb from parent phys limb and convert it
-			// to Vec3f value (for calculating its length).
-            Vec3f defaultJointOffset = {currPhysLimb->default_jointPos.x, 
-				currPhysLimb->default_jointPos.y, currPhysLimb->default_jointPos.z};
-
-			// Calculate the exact length value of current phys limb's default offset from parent
-			// phys limb.
-            f32 physBoneLength =sqrtf(Math3D_Vec3fMagnitudeSq(&defaultJointOffset));
-            f32 worldBoneLength = physBoneLength * actorScale;		// Scale to match belt strap hook size
-			
-			// Calculate offset from parent phys limb to current phys limb
-            Vec3f parentToCurrLimbOffset = {0.f, 0.f, 0.f};
-			// Scale the reset direction to the phys bone length. This value should tell how far and in
-			// what direction in the 3D world space the current phys limb should be in from parent phys
-			// limb.
-            Math_Vec3f_ScaleAndStore(&resetDirection, worldBoneLength, &parentToCurrLimbOffset);
-			// Apply that direction value to the parent phys limb's position in world space.
-            Math_Vec3f_Sum(&parentPhysLimb->curr_pos, &parentToCurrLimbOffset, &currPhysLimb->curr_pos);
-
-			// Store that newly calculated current position of current phys limb to bodyPartsPos.
-            this->bodyPartsPos[currLimbIdx] = currPhysLimb->curr_pos;
-        }
+    // Validate legitimacy of current outward direction by checking if it's not zero.
+    f32 outwardLengthSquared = Math3D_Vec3fMagnitudeSq(&outwardDirection);
+    if (outwardLengthSquared <= GREATER_THAN_ZERO) {
+        return;
     }
 
-	/********************************
+    // If valid, normalize the calculated outward direction of the current chain of phys limbs.
+    Math_Vec3f_Scale(&outwardDirection, 1.f / sqrtf(outwardLengthSquared));
+
+    /********************************
+     Calculate reset direction of chain in world space
+    ********************************/
+    // With the current chain's outward direction determined, now rotate that chain by its currently 
+    // assigned reset angle.    
+    Vec3f outwardOffset = {0.f, 0.f, 0.f};
+    Vec3f downOffset = {0.f, 0.f, 0.f};
+    Vec3f resetDir = {0.f, 0.f, 0.f};
+
+    // Scale the chain's outward direction based on cosine of reset angle
+    Math_Vec3f_ScaleAndStore(&outwardDirection, resetOutwardDirScale, &outwardOffset);
+
+    // Scale the chain's downward direction based on sine of reset angle.
+    Math_Vec3f_ScaleAndStore(&beltStrapHookDownDir, resetUpwardDirScale, &downOffset);
+
+    // Subtract horizontal outward direction by downward direction of chain
+    // Note that positive reset angles point upward and negative reset angles point downward.
+    Math_Vec3f_Diff(&outwardOffset, &downOffset, &resetDir);
+
+    // Validate current reset value by checking if it's not zero.
+    f32 resetDirLengthSq = Math3D_Vec3fMagnitudeSq(&resetDir);
+    if (resetDirLengthSq <= GREATER_THAN_ZERO) {
+        return;
+    }
+
+    // If valid, normalize the calculated reset direction of the current chain of phys limbs.
+    Math_Vec3f_Scale(&resetDir, 1.f / sqrtf(resetDirLengthSq));
+
+    /********************************
+     Reset all the phys limbs' position in world space based on reset direction
+    ********************************/
+    // Go through each phys limb in the current chain and reset each limb's world position based on 
+    // the calculated reset direction. Start from the first UNPINNED phys limb (in this belt strap 
+    // hook's case, 0 is the pinned phys limb, so skip that).
+    for (int currLimbInChain = 1; currLimbInChain < limbCount; currLimbInChain++) {
+        // Get the current limb's actual index in the entire gPhysLimbs set
+        int currLimbIdx = startLimb + currLimbInChain;
+
+        // Get the parent phys limb and current phys limb from gPhysLimbs
+        PhysLimb* parentPhysLimb = gPhysLimbs[currLimbIdx - 1];
+        PhysLimb* currPhysLimb = gPhysLimbs[currLimbIdx];
+        
+        // Get the default offset of current phys limb from parent phys limb and convert it
+        // to Vec3f value (for calculating its length).
+        Vec3f defaultJointOffset = {currPhysLimb->default_jointPos.x,  currPhysLimb->default_jointPos.y, 
+            currPhysLimb->default_jointPos.z};
+        
+        // Calculate the exact length value of current phys limb's default offset from parent phys limb.
+        f32 physBoneLength = sqrtf(Math3D_Vec3fMagnitudeSq(&defaultJointOffset));
+        f32 worldBoneLength = physBoneLength * actorScale;		// Scale to match ponytail size
+
+        // Calculate offset from parent phys limb to current phys limb
+        Vec3f parentToCurrLimbOffset = {0.f, 0.f, 0.f};
+
+        // Scale the reset direction to the phys bone length. This value should tell how far and in what 
+        // direction in the 3D world space the current phys limb should be in from parent phys limb.
+        Math_Vec3f_ScaleAndStore(&resetDir, worldBoneLength, &parentToCurrLimbOffset);
+
+        // Apply that direction value to the parent phys limb's position in world space.
+        Math_Vec3f_Sum(&parentPhysLimb->curr_pos, &parentToCurrLimbOffset, &currPhysLimb->curr_pos);
+
+        // Store that newly calculated current position of current phys limb to bodyPartsPos.
+        this->bodyPartsPos[currLimbIdx] = currPhysLimb->curr_pos;
+    }
+
+    /********************************
      Reset velocity and prev position of all phys limbs of belt strap hook
     ********************************/
     // Remove velocity and previous position carried over from before the reset.
-    for (int currLimbIdx = 0; currLimbIdx < BELTSTRAPHOOK_BODYPART_MAX; currLimbIdx++) {
-        PhysLimb* currLimb = gPhysLimbs[currLimbIdx];
+    for (int currLimbIdx = 0; currLimbIdx < limbCount; currLimbIdx++) {
+        PhysLimb* currLimb = gPhysLimbs[startLimb + currLimbIdx];
 
         currLimb->prev_pos = currLimb->curr_pos;		// Reset previous position
         currLimb->curr_vel = (Vec3f){0.f, 0.f, 0.f};	// Reset current velocity
         currLimb->prev_vel = (Vec3f){0.f, 0.f, 0.f};	// Reset previous velocity
+    }
+
+    return;
+}
+
+
+/**
+ * @brief Reset all belt strap hook chains of phys limbs based on their assigned reset angles
+ * 
+ * This function resets all belt strap hook's chains of phys limbs at a previously assigned reset angle by 
+ * using the ResetChain function for the belt strap hook on all chains of physlimbs of belt strap hook.
+ * 
+ * @param this          Belt Strap Hook actor
+ * @param gPhyslimbs    Phys limbs of belt strap hook
+ * @param chains        Belt strap hook chains of phys limbs
+ * @param chainCount	Number of all chains of belt strap hook
+ */
+void BeltStrapHook_SetResetShape(BeltStrapHook* this, PhysLimb* gPhysLimbs[], 
+    const BeltStrapHookLimbChain chains[], int chainCount) {
+    // Torso-relative directions must be set up for belt strap hook before rebuilding.
+    if (!beltStrapHook_dirAxesReady) {
+        return;
+    }
+	
+    /********************************
+     Reset each vertical cloth chain
+    ********************************/
+    // Go through each belt strap hook chain of phys limbs and reset each of them by calculating where each 
+    // unpinned phys limb in the chain should be placed in 3D space relative to its parent.
+    for (int chainIdx = 0; chainIdx < chainCount; chainIdx++) {
+        BeltStrapHook_ResetChain(this, gPhysLimbs, &chains[chainIdx]);
     }
 }
 
@@ -1967,27 +1979,15 @@ void BeltStrapHook_UpdateChain(BeltStrapHook* this, Player* player, Vec3f* apply
 			// Save the calculated new current position of the actual limb into respective phys limb
 			Math_Vec3f_Copy(&physLimb->curr_pos, &this->bodyPartsPos[i]);
 			// Save current velocity to phys limb also
-            Math_Vec3f_Copy(&physLimb->curr_vel, &player->actor.velocity);
+            Math_Vec3f_Diff(&physLimb->curr_pos, &physLimb->prev_pos, &physLimb->curr_vel);
 		}
 		// For rest of unpinned limbs in chain
 		else {
             // Apply Verlet integration using Jackie's horizontal velocity to find the new position of unpinned
 			// phys limb
-            Vec3f player_vel = player->actor.velocity;
+            Vec3f player_vel = gBeltStrapHookPhysPlayer.curr_vel;
             player_vel.y = 0.f;
 
-            // Disable the opposing movement while riding Epona, climbing ladder/wall, or opening door.
-            // Note: Physics for riding Epona was disabled due to some unwanted physics behavior. This may be 
-            //       due to the codebase relying on player->actor.velocity for player's world velocity. This works 
-            //       for most cases EXCEPT when player is riding on Epona, where player->actor.velocity might be 
-            //       saving the player's last frame's world velocity. 
-            // Riding Epona: PLAYER_STATE1_800000
-            // Climbing Wall: PLAYER_STATE1_200000
-            // Opening Door: Player_Action_36
-            if (player->stateFlags1 & (PLAYER_STATE1_800000 | PLAYER_STATE1_200000) ||
-                player->actionFunc == Player_Action_36) {
-                player_vel = (Vec3f){0.f, 0.f, 0.f};
-            }
             Verlet_LimbUpdatePos(physLimb, apply_force, &player_vel);
         }
 	}
@@ -2043,7 +2043,7 @@ void BeltStrapHook_UpdatePinnedLimb(BeltStrapHook* this, Player* player, PhysLim
     // Save the calculated new current position of the actual limb into respective phys limb
     Math_Vec3f_Copy(&physLimb->curr_pos, &this->bodyPartsPos[pinnedLimbIdx]);
     // Save current velocity to phys limb also
-    Math_Vec3f_Copy(&physLimb->curr_vel, &player->actor.velocity);
+    Math_Vec3f_Diff(&physLimb->curr_pos, &physLimb->prev_pos, &physLimb->curr_vel);
 }
 
 
@@ -2148,27 +2148,8 @@ void BeltStrapHook_SolvePhysAtSubsteps(BeltStrapHook* this, Player* player, Vec3
     // Store Jackie's current actor scale as the target scale for this current frame.
     f32 targetScale = fabsf(this->actor.scale.x);
 
-    /********************************
-     Set up opposing movement
-    ********************************/
-    // Store Jackie's horizontal movement in current frame so that the belt strap hook can react to 
-    // the motion.
-    Vec3f opposingVelocity = {0.f, 0.f, 0.f};
-    Math_Vec3f_Copy(&opposingVelocity, &player->actor.velocity);
-
-    // While riding, use movement measured from world positions.
-	// Riding Epona: PLAYER_STATE1_800000
-    if (player->stateFlags1 & PLAYER_STATE1_800000) {
-        Math_Vec3f_Copy(&opposingVelocity, &gBeltStrapHookEpona.world_vel);
-    }
-    opposingVelocity.y = 0.f;   // ignore vertical movement
-
-    // Disable the opposing movement while climbing ladder/wall or opening door.
-    // Climbing Wall: PLAYER_STATE1_200000
-    // Opening Door: Player_Action_36
-    if ((player->stateFlags1 & PLAYER_STATE1_200000) || player->actionFunc == Player_Action_36) {
-        opposingVelocity = (Vec3f){0.f, 0.f, 0.f};
-    }
+    // Use measured player world movement for the horizontal response.
+    Vec3f opposingVelocity = gBeltStrapHookPhysPlayer.curr_vel;
 
     /********************************
      Save target colliders' state in current frame
@@ -2652,20 +2633,15 @@ void BeltStrapHook_UpdateBodyPartsPos(BeltStrapHook* this, Player* player, Vec3f
     // Save Jackie's previous position as belt strap hook's previous position
     Math_Vec3f_Copy(&this->actor.prevPos, &player->actor.prevPos);
 
-    /********************************
-     Update Epona movement
-    ********************************/
-    // Measure Jackie's world movement while riding Epona.
-    // Restart the movement measurement when the belt strap hook physics resets.
-    Verlet_UpdatePhysEponaMovement(&gBeltStrapHookEpona, player, this->needsReset);
-
 	/********************************
      Reset phys limbs after map change
     ********************************/
     // Rebase all phys limbs' positions after entering a new map so old physics state does not cause the 
     // belt strap hook to jump or move unpredictably
     if (this->needsReset) {
+        Verlet_InitPhysPlayer(&gBeltStrapHookPhysPlayer, player);
         this->needsReset = 0;
+        beltStrapHook_stepHistoryReady = 0;
 
         // Reset belt strap hook root directly to player's current torso position
         Math_Vec3f_Copy(&gPhysLimbs[BELTSTRAPHOOK_BODYPART_ROOT]->curr_pos, &torso_globalPos);
