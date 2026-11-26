@@ -58,4 +58,16 @@ void CustomMath_Vec3f_InverseTransformDirection(MtxF* matrix, Vec3f* worldDir, V
 
 s16 CustomMath_DegreeToBinaryAngle(f32 degrees);
 
+
+// Direction manipulation in 3d world space
+
+u8 CustomMath_NormalizeSubstepDirectionVec(Vec3f* targetVec);
+void CustomMath_RotatePointAroundY(Vec3f* targetPoint, Vec3f* pivotPoint, s16 rotAngle);
+void CustomMath_InterpolatePosWithRot(Vec3f* prevFramePos, Vec3f* currFrameTargetPos, 
+    Vec3f* prevFramePivotPoint, Vec3f* currFramePivotPoint, s16 yawRotation, f32 t, Vec3f* currSubstepNewPos);
+u8 CustomMath_CaptureLimitAxes(MtxF* mtx, Vec3f* forwardAxis, Vec3f* leftAxis, Vec3f* downAxis);
+void CustomMath_SetSubstepDirAxes(Vec3f previousFrameForward, Vec3f previousFrameDown, Vec3f targetForward, 
+    Vec3f targetDown, f32 t, Vec3f* forwardAxis, Vec3f* leftAxis, Vec3f* downAxis);
+
+
 #endif

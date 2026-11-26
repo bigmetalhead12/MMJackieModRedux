@@ -261,30 +261,13 @@ void BeltStrapHook_SetDefaultRotLimitsAndReset(BeltStrapHook* this);
 void BeltStrapHook_SetResetAngle(BeltStrapHook* this, f32 reset_angle);
 void BeltStrapHook_SetRotLimitAngles(BeltStrapHook* this, f32 upper_chain_lim, f32 lower_chain_lim);
 void BeltStrapHook_UpdateRotLimitsAndReset(BeltStrapHook* this, Player* player);
-void BeltStrapHook_CaptureLimitAxes(MtxF* mtx);
 void BeltStrapHook_ApplyBoneRotationLimit(PhysLimb* parentPhysLimb, PhysLimb* childPhysLimb, 
     Vec3f* outwardDirVec, u8 limitInward, s16 maxUpwardRotLim);
 void BeltStrapHook_ApplyChainRotationLimits(PhysLimb* gPhysLimbs[], const BeltStrapHookLimbChain chainStarts[],
     int chainCount, const BeltStrapHookRotationSettings* limits);
-bool BeltStrapHook_NormalizeSubstepDirectionVec(Vec3f* targetVec);
-Vec3f BeltStrapHook_FindClosestPointOnCapsule(Vec3f targetPos, PhysSphereCollider* capsuleColStart, 
-    PhysSphereCollider* capsuleColEnd, f32* colRadius);
-f32 BeltStrapHook_GroupContact(Vec3f targetPos, f32 pointRadius, PhysSphereCollider* capsulePairs[][2], 
-    int capsuleColCount, Vec3f* contactColCenter, f32* contactColRadius);
-bool BeltStrapHook_GroupOutside(Vec3f targetPos, f32 pointRadius, PhysSphereCollider* capsulePairs[][2], 
-    int capsuleColCount);
-bool BeltStrapHook_GroupRayExit(Vec3f targetPhysLimbPos, Vec3f physLimbDir, f32 pointRadius,
-    PhysSphereCollider* capsulePairs[][2], int capsuleColCount, f32 padding, Vec3f* exitPosition);
-void BeltStrapHook_SolveColliderGroup(PhysLimb* physLimb, PhysSphereCollider* collider_pairs[][2], 
-    int capsuleColCount);
 void BeltStrapHook_ResetChain(BeltStrapHook* this, PhysLimb* gPhysLimbs[], const BeltStrapHookLimbChain* chain);
 void BeltStrapHook_SetResetShape(BeltStrapHook* this, PhysLimb* gPhysLimbs[], 
     const BeltStrapHookLimbChain chains[], int chainCount);
-void BeltStrapHook_RotatePointAroundY(Vec3f* targetPoint, Vec3f* pivotPoint, s16 rotAngle);
-void BeltStrapHook_InterpolatePosWithRot(Vec3f* prevFramePos, Vec3f* currFrameTargetPos,
-	Vec3f* prevFramePivotPoint, Vec3f* currFramePivotPoint, s16 yawRotation, f32 t, 
-	Vec3f* currSubstepNewPos);
-void BeltStrapHook_SetSubstepDirAxes(Vec3f targetForward, Vec3f targetDown, f32 t);
 void BeltStrapHook_UpdateChain(BeltStrapHook* this, Player* player, Vec3f* apply_force, PhysLimb* gPhysLimbs[], 
 	int chainStartIdx, int chainEndIdx);
 void BeltStrapHook_UpdatePinnedLimb(BeltStrapHook* this, Player* player, PhysLimb* gPhysLimbs[], 

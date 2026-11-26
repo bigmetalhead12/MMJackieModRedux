@@ -40,7 +40,8 @@ Physics-Related Macros
 #define OVERCOAT_NUM_BONES_WITH_NO_INWARD_ROT 3
 #define OVERCOAT_EXIT_SEARCH_STEPS 10
 #define OVERCOAT_SUBSTEPS 3
-#define OVERCOAT_SUBSTEP_COLLIDER_COUNT 8
+#define OVERCOAT_SUBSTEP_COLLIDER_COUNT 8       // # of individual sphere colliders
+#define OVERCOAT_CAPSULE_CAPACITY 10            // Max # of capsule colliders
 #define OVERCOAT_SIDE_BASE_SLACK  0.05f
 #define OVERCOAT_SIDE_ROW_SLACK   0.15f
 
@@ -72,9 +73,6 @@ Collider Macros
 #define TORSO_COLLIDER_DEFAULT_RADIUS 4.0f
 #define TORSO_COLLIDER_SMALL_RADIUS 2.f
 #define ROLL_COLLIDER_DEFAULT_RADIUS 4.5f
-
-// Number of NULL pairs in capsule pairs 
-#define OVERCOAT_RESERVED_COLLIDER_SLOTS 2
 
 
 /*
@@ -252,19 +250,6 @@ static OvercoatPendingReset overcoat_pendingResetRotLimitUpdate = OVERCOAT_PENDI
 
 /*
 =================
-Temp Offsets for Existing Colliders for Specific Anims
-=================
-*/
-
-// Offsets for back thigh and knee colliders during fast-riding and Epnoa spurring anims
-static Vec3f overcoat_fastRideLeftThighOffset = {-550.f, 200.f, -50.f};
-static Vec3f overcoat_fastRideRightThighOffset = {-550.f, 200.f, 50.f};
-static Vec3f overcoat_fastRideLeftLegOffset = {500.f, 800.f, -1000.f};
-static Vec3f overcoat_fastRideRightLegOffset = {500.f, 800.f, 1000.f};
-
-
-/*
-=================
 Set up Vertical Cloth Chains
 =================
 */
@@ -303,47 +288,553 @@ static const OvercoatLimbChain cloth_chains[OVERCOAT_CHAIN_COUNT] = {
 Colliders
 =================
 */
-// Left thigh colliders
-PhysSphereCollider overcoat_leftThighBackCollider = {
-    {0.f, 0.f, 0.f}, 
-    LEFTTHIGH_COLLIDER_DEFAULT_RADIUS
+
+/**
+ * @brief Check if Jackie is riding Epona at fast speed or spurring Epona
+ * 
+ * This function checks Jackie's current animation while riding Epona and checks if any anim related
+ * to riding Epona fast or spurring Epona is currently playing.
+ * 
+ * This function is primarily used to change the leg colliders' positions and sizes based on the
+ * current animation of Jackie while on Epona. Because the adjusted positions and sizes of the colliders
+ * are planned to be the same for both cases (fast riding and spurring), there is only one flag for
+ * both cases.
+ * 
+ * This function is an example of marking the current playing animation with a flag to help codebase
+ * changing the collider's position or radius when certain animation(s) is playing.
+ * 
+ * @param player    Current player instance
+ */
+u8 Overcoat_IsFastRidingOrSpurring(Player* player) {
+    /********************************
+     Detect fast riding
+    ********************************/
+    // If Jackie is not riding on Epona (PLAYER_STATE1_800000), then return 0 (false)
+    if (!(player->stateFlags1 & PLAYER_STATE1_800000)) {
+        return 0;
+    }
+
+    // If Jackie is riding Epona fast, then return 1 (true)
+    if (player->skelAnime.animation == &gPlayerAnim_link_uma_anim_fastrun) {
+        return 1;
+    }
+
+
+    /********************************
+     Detect spurring
+    ********************************/
+    // Check if Jackie is spurring Epona currently.
+    // This flag is mostly important due to the way the upper body's animation pointers work.
+    // Normally, only the next if case would be necessary to catch upper body animations that involves
+    // spurring Epona. However, I think the upper body animation pointer is still pointing at a spurring
+    // animation even when the spurring has ended.
+    // When riding Epona, Player_Action_52, which is the riding action, indicates spurring by setting
+    // player->av1.actionVar1 to 1. However, it is set to 0 when spurring is not occuring. This is the
+    // most accurate way to check if the spurring is occuring or not.
+    if (player->av1.actionVar1 == 0) {
+        return 0;
+    }
+
+    // Jackie is spurring Epona at this point. Check if any of these animations are playing while Jackie
+    // is spurring Epona and return 1 (true) if this is happening.
+    if (player->skelAnimeUpper.animation == &gPlayerAnim_link_uma_anim_walk_muti ||
+        player->skelAnimeUpper.animation == &gPlayerAnim_link_uma_anim_slowrun_muti ||
+        player->skelAnimeUpper.animation == &gPlayerAnim_link_uma_anim_fastrun_muti ||
+        player->skelAnimeUpper.animation == &gPlayerAnim_link_uma_stop_muti) {
+        return 1;
+    }
+
+    // If none of the animations are matches while Jackie is spurring, then return 0 (false)
+    return 0;
+}
+
+
+/**
+ * @brief Check whether Jackie is performing the Kamaro dance.
+ * 
+ * The function is primarily used to change a torso collider's size during the duration of the Kamaro
+ * dance. This function is also used to change the reset and rotation limit of the overcoat chains
+ * during the duration of the Kamaro dance.
+ * 
+ * @param player    Player instance
+ */
+u8 Overcoat_IsKamaroDancing(Player* player) {
+    return (player->skelAnime.animation == &gPlayerAnim_alink_dance_loop);
+}
+
+
+/**
+ * @brief Check whether Jackie is in first person view.
+ * 
+ * There are several different types of first person views.
+ * 
+ *  - PLAYER_STATE1_100000 indicates first person mode for bow/hookshot
+ * 
+ *  - Camera->mode helps indicate first person mode for C-Up
+ * 
+ *  - There is no player state for the transition into regular C-Up first person, so distance between 
+ *    camera and head is also used
+ * 
+ * This function is primarily used to indicate if the overcoat chains need to be reset.
+ * 
+ * @param play      Current playstate
+ * @param player    Player instance
+ */
+u8 Overcoat_IsInFirstPerson(PlayState* play, Player* player) {
+    // Only consider case when Jackie is in human form.
+    if (player->transformation != PLAYER_FORM_HUMAN) {
+        return 0;
+    }
+
+    // Get camera's distance from Jackie's head's position.
+    Camera* camera = GET_ACTIVE_CAM(play);
+    f32 cameraDist = Math_Vec3f_DistXYZ(&play->view.eye, &player->bodyPartsPos[PLAYER_BODYPART_HEAD]);
+
+    // If the camera is beyond the preset max distance between the camera and Jackie's head, then
+    // consider the current state to not be in first person view.
+    // This is done because Camera->mode becomes FIRST_PERSON_VIEW_MODE the moment C-Up is pressed,
+    // even before the camera actually reaches Jackie's head during the camera transition phase.
+    if (cameraDist >= MIN_CAMERA_DISTANCE) {
+        return 0;
+    }
+
+    // At this point, the camera is very close to Jackie's head.
+    // C-Up first person
+    if (camera->mode == FIRST_PERSON_VIEW_MODE) {
+        return 1;
+    }
+
+    // Bow or hookshot first person
+    if (player->stateFlags1 & PLAYER_STATE1_100000) {
+        return 1;
+    }
+
+    return 0;
+}
+
+
+/**
+ * @brief Check whether Jackie is currently rolling.
+ * 
+ * This function is used to add a torso collider size during the rolling animation.
+ * 
+ * This function also is used to later reset the overcoat chains if the roll animation ends, which 
+ * serves as an example for performing resets when an animation ends rather than when an animation 
+ * begins.
+ * 
+ * @param player    Player instance
+ */
+u8 Overcoat_IsRolling(Player* player) {
+    return (player->skelAnime.animation == &gPlayerAnim_link_normal_landing_roll_free || 
+            player->skelAnime.animation == &gPlayerAnim_link_normal_landing_roll ||
+            player->skelAnime.animation == &gPlayerAnim_link_fighter_landing_roll_long);
+}
+
+
+/**
+ * @brief Check whether Jackie is currently climbing from ledge.
+ * 
+ * This function also is used to later reset the overcoat chains if the roll animation ends, which 
+ * serves as an example for performing resets when an animation ends rather than when an animation 
+ * begins.
+ * 
+ * @param player    Player instance
+ */
+u8 Overcoat_IsClimbingFromLedge(Player* player) {
+    return (player->skelAnime.animation == &gPlayerAnim_link_normal_fall_up ||
+            player->skelAnime.animation == &gPlayerAnim_link_normal_fall_up_free);
+}
+
+
+/**
+ * @brief Check whether Jackie is currently doing a forward stab (for both 1h and 2h swords)
+ * 
+ * This function is used to add a torso collider size during the stab animation.
+ * 
+ * @param player    Player instance
+ */
+u8 Overcoat_IsForwardStabbing(Player* player) {
+    static LinkAnimationHeader* const stabAnimations[] = {
+        // One-handed stab and recovery.
+        &gPlayerAnim_link_fighter_pierce_kiru,
+        &gPlayerAnim_link_fighter_pierce_kiru_end,
+        &gPlayerAnim_link_anchor_pierce_kiru_endR,
+
+        // One-handed stab combo and recovery.
+        &gPlayerAnim_link_fighter_pierce_kiru_finsh,
+        &gPlayerAnim_link_fighter_pierce_kiru_finsh_end,
+        &gPlayerAnim_link_anchor_pierce_kiru_finsh_endR,
+
+        // Two-handed stab and recovery.
+        &gPlayerAnim_link_fighter_Lpierce_kiru,
+        &gPlayerAnim_link_fighter_Lpierce_kiru_end,
+        &gPlayerAnim_link_anchor_Lpierce_kiru_endL,
+
+        // Two-handed stab combo and recovery.
+        &gPlayerAnim_link_fighter_Lpierce_kiru_finsh,
+        &gPlayerAnim_link_fighter_Lpierce_kiru_finsh_end,
+        &gPlayerAnim_link_anchor_Lpierce_kiru_finsh_endR
+    };
+
+    int animationCount = sizeof(stabAnimations) / sizeof(stabAnimations[0]);
+
+    for (int i = 0; i < animationCount; i++) {
+        if (player->skelAnime.animation == stabAnimations[i]) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+
+/**
+ * @brief Check whether Jackie is currently doing a spin attack.
+ * 
+ * The function is primarily used to change a torso collider's size during the duration of the Kamaro
+ * dance. This function is also used to change the reset and rotation limit of the overcoat chains 
+ * during the duration of the Kamaro dance.
+ * 
+ * @param player    Player instance
+ */
+u8 Overcoat_IsSpinAttacking(Player* player) {
+    return ((player->skelAnime.animation == &gPlayerAnim_link_fighter_rolling_kiru ||
+             player->skelAnime.animation == &gPlayerAnim_link_fighter_Lrolling_kiru));
+}
+
+
+/**
+ * @brief Check whether Jackie is currently taking off transformation mask.
+ * 
+ * This function resets the overcoat chains at the beginning part of the animation where Jackie
+ * takes off the Giant's Mask, specifically, since the Giant's Mask is not considered a nonhuman-to-
+ * human transformation.
+ * 
+ * @param player    Player instance
+ */
+u8 Overcoat_IsTakingGiantMaskOff(Player* player) {
+    return (player->skelAnime.animation == &gPlayerAnim_cl_maskoff);
+}
+
+
+/**
+ * @brief Check whether Jackie is currently canceling a spin attack and returning to idle.
+ * 
+ * The function is primarily used to change a torso collider's size during the duration of the Kamaro
+ * dance. This function is also used to change the reset and rotation limit of the overcoat chains 
+ * during the duration of the Kamaro dance.
+ * 
+ * @param player    Player instance
+ */
+u8 Overcoat_IsSpinAttackCanceling(Player* player) {
+    return ((player->skelAnime.animation == &gPlayerAnim_link_fighter_power_kiru_wait_end ||
+             player->skelAnime.animation == &gPlayerAnim_link_fighter_Lpower_kiru_wait_end));
+}
+
+// --- Left thigh colliders ---
+// Left thigh back collider (PHYS_COLLIDER_SWITCH_SETTINGS_WHEN)
+// Settings: Default 
+PhysSphereSettings overcoat_leftBackThighDefault = {
+    .localOffset = {0.f, 175.f, -40.f},
+    .tempRadius = LEFTTHIGH_COLLIDER_DEFAULT_RADIUS
 };
-PhysSphereCollider overcoat_leftThighFrontCollider = {
-    {0.f, 0.f, 0.f}, 
-    LEFTTHIGH_FRONT_COLLIDER_DEFAULT_RADIUS
+// Settings: Special case left thigh back collider settings that gets activated instead when riding Epona
+PhysSphereSettings overcoat_leftBackThighRiding = {
+    .localOffset = {-550.f, 200.f, -50.f},
+    .tempRadius = LEFTTHIGH_COLLIDER_FAST_RIDE_RADIUS
+};
+PhysColliderCondition overcoat_fastRidingCondition = {
+    .customCheck = Overcoat_IsFastRidingOrSpurring
+};
+PhysSphereAltSettingsAndCondition overcoat_leftBackThighAlternatives[] = {
+    // Condition pair #1: Custom setting for lefthighbackcollider when fast riding Epona
+    {
+        .settings = &overcoat_leftBackThighRiding,
+        .condition = &overcoat_fastRidingCondition
+    }
+};
+PhysSphereCollider overcoat_leftThighBackCollider = {0};    // Initialize all fields to 0
+
+// Left thigh front collider (PHYS_COLLIDER_DISAPPEAR_WHEN)
+// Settings: Default
+PhysSphereSettings overcoat_leftFrontThighDefault = {
+    .localOffset = {0.f, -100.f, -30.f},
+    .tempRadius = LEFTTHIGH_FRONT_COLLIDER_DEFAULT_RADIUS
+};
+// Setting: On by default, but disappears when fast riding Epona
+PhysSphereAltSettingsAndCondition overcoat_frontThighDisableConditions[] = {
+    // Condition pair #1: Disable during fast riding or spurring Epona
+    // No replacement settings are needed for disappearance.
+    {
+        .settings = NULL,
+        .condition = &overcoat_fastRidingCondition
+    }
+};
+PhysSphereCollider overcoat_leftThighFrontCollider = {0};
+
+
+// --- Right thigh colliders ---
+// Right thigh back collider (PHYS_COLLIDER_SWITCH_SETTINGS_WHEN)
+// Settings: Default
+PhysSphereSettings overcoat_rightBackThighDefault = {
+    .localOffset = {0.f, 175.f, 40.f},
+    .tempRadius = RIGHTTHIGH_COLLIDER_DEFAULT_RADIUS
+};
+// Settings: Special case left thigh back collider settings that gets activated instead when riding Epona
+PhysSphereSettings overcoat_rightBackThighRiding = {
+    .localOffset = {-550.f, 200.f, 50.f},
+    .tempRadius = RIGHTTHIGH_COLLIDER_FAST_RIDE_RADIUS
+};
+PhysSphereAltSettingsAndCondition overcoat_rightBackThighAlternatives[] = {
+    // Condition pair #1: Custom setting for rightthighbackcollider when fast riding Epona
+    {
+        .settings = &overcoat_rightBackThighRiding,
+        .condition = &overcoat_fastRidingCondition
+    }
+};
+PhysSphereCollider overcoat_rightThighBackCollider = {0};
+
+// Right thigh front collider (PHYS_COLLIDER_DISAPPEAR_WHEN)
+// Settings: Default
+PhysSphereSettings overcoat_rightFrontThighDefault = {
+    .localOffset = {0.f, -100.f, 30.f},
+    .tempRadius = RIGHTTHIGH_FRONT_COLLIDER_DEFAULT_RADIUS
+};
+// Uses overcoat_frontThighDisableConditions, defined above.
+PhysSphereCollider overcoat_rightThighFrontCollider = {0};
+
+
+// --- Left leg collider ---
+// Left leg collider (PHYS_COLLIDER_SWITCH_SETTINGS_WHEN)
+// Settings: Default
+PhysSphereSettings overcoat_leftLegDefault = {
+    .localOffset = {0.f, -70.f, 0.f},
+    .tempRadius = LEFTLEG_COLLIDER_DEFAULT_RADIUS
+};
+// Settings: Used during fast riding or spurring Epona
+PhysSphereSettings overcoat_leftLegRiding = {
+    .localOffset = {500.f, 800.f, -1000.f},
+    .tempRadius = LEFTLEG_COLLIDER_FAST_RIDE_RADIUS
+};
+PhysSphereAltSettingsAndCondition overcoat_leftLegAlternatives[] = {
+    // Setting and condition pair #1: Fast riding or spurring Epona
+    {
+        .settings = &overcoat_leftLegRiding,
+        .condition = &overcoat_fastRidingCondition
+    }
+};
+PhysSphereCollider overcoat_leftLegCollider = {0};
+
+
+// --- Right leg collider ---
+// Right leg collider (PHYS_COLLIDER_SWITCH_SETTINGS_WHEN)
+// Settings: Default
+PhysSphereSettings overcoat_rightLegDefault = {
+    .localOffset = {0.f, -70.f, 0.f},
+    .tempRadius = RIGHTLEG_COLLIDER_DEFAULT_RADIUS
+};
+// Settings: Used during fast riding or spurring Epona
+PhysSphereSettings overcoat_rightLegRiding = {
+    .localOffset = {500.f, 800.f, 1000.f},
+    .tempRadius = RIGHTLEG_COLLIDER_FAST_RIDE_RADIUS
+};
+PhysSphereAltSettingsAndCondition overcoat_rightLegAlternatives[] = {
+    // Setting and condition pair #1: Fast riding or spurring Epona
+    {
+        .settings = &overcoat_rightLegRiding,
+        .condition = &overcoat_fastRidingCondition
+    }
+};
+PhysSphereCollider overcoat_rightLegCollider = {0};
+
+
+// --- Torso collider ---
+// Torso collider (PHYS_COLLIDER_SWITCH_SETTINGS_WHEN)
+// Settings: Default
+PhysSphereSettings overcoat_torsoDefault = {
+    .localOffset = {0.f, 0.f, 0.f},
+    .tempRadius = TORSO_COLLIDER_DEFAULT_RADIUS
+};
+// Settings: Smaller torso during Kamaro dancing or spin attacks
+PhysSphereSettings overcoat_torsoSmall = {
+    .localOffset = {0.f, 0.f, 0.f},
+    .tempRadius = TORSO_COLLIDER_SMALL_RADIUS
+};
+PhysColliderCondition overcoat_kamaroCondition = {
+    .customCheck = Overcoat_IsKamaroDancing
+};
+PhysColliderCondition overcoat_spinAttackCondition = {
+    .customCheck = Overcoat_IsSpinAttacking
+};
+PhysSphereAltSettingsAndCondition overcoat_torsoAlternatives[] = {
+    // Setting and condition pair #1: Use small torso settings during Kamaro dancing.
+    {
+        .settings = &overcoat_torsoSmall,
+        .condition = &overcoat_kamaroCondition
+    },
+    // Setting and condition pair #2: Use small torso settings during spin attacks.
+    {
+        .settings = &overcoat_torsoSmall,
+        .condition = &overcoat_spinAttackCondition
+    }
+};
+PhysSphereCollider overcoat_torsoCollider = {0};
+
+
+// --- Extra torso-area collider ---
+// Settings: Used while rolling or performing a forward stab
+// The collider entry has defaultSettings = NULL.
+PhysSphereSettings overcoat_rollSettings = {
+    .localOffset = {-600.f, 0.f, 0.f},
+    .tempRadius = ROLL_COLLIDER_DEFAULT_RADIUS
+};
+PhysColliderCondition overcoat_rollingCondition = {
+    .customCheck = Overcoat_IsRolling
+};
+PhysColliderCondition overcoat_forwardStabCondition = {
+    .customCheck = Overcoat_IsForwardStabbing
+};
+PhysSphereAltSettingsAndCondition overcoat_rollAlternatives[] = {
+    // Setting and condition pair #1: Enable during rolling.
+    {
+        .settings = &overcoat_rollSettings,
+        .condition = &overcoat_rollingCondition
+    },
+    // Setting and condition pair #2: Enable during forward stabbing.
+    {
+        .settings = &overcoat_rollSettings,
+        .condition = &overcoat_forwardStabCondition
+    }
+};
+PhysSphereCollider overcoat_rollCollider = {0};
+
+
+// Keep track of all the colliders in a table
+PhysSphereColliderEntry overcoat_colliderEntries[] = {
+    // Left thigh back collider
+    {
+        .collider = &overcoat_leftThighBackCollider,
+        .limbIndex = PLAYER_LIMB_LEFT_THIGH,
+        .behavior = PHYS_COLLIDER_SWITCH_SETTINGS_WHEN,
+
+        .defaultSettings = &overcoat_leftBackThighDefault,
+        .altSettingsAndConditions = overcoat_leftBackThighAlternatives,
+        .altSettingsAndConditionsCount = sizeof(overcoat_leftBackThighAlternatives)
+            / sizeof(overcoat_leftBackThighAlternatives[0])
+    },
+
+    // Right thigh back collider
+    {
+        .collider = &overcoat_rightThighBackCollider,
+        .limbIndex = PLAYER_LIMB_RIGHT_THIGH,
+        .behavior = PHYS_COLLIDER_SWITCH_SETTINGS_WHEN,
+
+        .defaultSettings = &overcoat_rightBackThighDefault,
+        .altSettingsAndConditions = overcoat_rightBackThighAlternatives,
+        .altSettingsAndConditionsCount = sizeof(overcoat_rightBackThighAlternatives)
+            / sizeof(overcoat_rightBackThighAlternatives[0])
+    },
+
+    // Left thigh front collider
+    {
+        .collider = &overcoat_leftThighFrontCollider,
+        .limbIndex = PLAYER_LIMB_LEFT_THIGH,
+        .behavior = PHYS_COLLIDER_DISAPPEAR_WHEN,
+
+        .defaultSettings = &overcoat_leftFrontThighDefault,
+        .altSettingsAndConditions = overcoat_frontThighDisableConditions,
+        .altSettingsAndConditionsCount = sizeof(overcoat_frontThighDisableConditions)
+            / sizeof(overcoat_frontThighDisableConditions[0])
+    },
+
+    // Right thigh front collider
+    {
+        .collider = &overcoat_rightThighFrontCollider,
+        .limbIndex = PLAYER_LIMB_RIGHT_THIGH,
+        .behavior = PHYS_COLLIDER_DISAPPEAR_WHEN,
+
+        .defaultSettings = &overcoat_rightFrontThighDefault,
+        .altSettingsAndConditions = overcoat_frontThighDisableConditions,
+        .altSettingsAndConditionsCount = sizeof(overcoat_frontThighDisableConditions)
+            / sizeof(overcoat_frontThighDisableConditions[0])
+    },
+
+    // Left leg collider
+    {
+        .collider = &overcoat_leftLegCollider,
+        .limbIndex = PLAYER_LIMB_LEFT_SHIN,
+        .behavior = PHYS_COLLIDER_SWITCH_SETTINGS_WHEN,
+
+        .defaultSettings = &overcoat_leftLegDefault,
+        .altSettingsAndConditions = overcoat_leftLegAlternatives,
+        .altSettingsAndConditionsCount = sizeof(overcoat_leftLegAlternatives)
+            / sizeof(overcoat_leftLegAlternatives[0])
+    },
+
+    // Right leg collider
+    {
+        .collider = &overcoat_rightLegCollider,
+        .limbIndex = PLAYER_LIMB_RIGHT_SHIN,
+        .behavior = PHYS_COLLIDER_SWITCH_SETTINGS_WHEN,
+
+        .defaultSettings = &overcoat_rightLegDefault,
+        .altSettingsAndConditions = overcoat_rightLegAlternatives,
+        .altSettingsAndConditionsCount = sizeof(overcoat_rightLegAlternatives)
+            / sizeof(overcoat_rightLegAlternatives[0])
+    },
+
+    // Torso collider
+    {
+        .collider = &overcoat_torsoCollider,
+        .limbIndex = PLAYER_LIMB_TORSO,
+        .behavior = PHYS_COLLIDER_SWITCH_SETTINGS_WHEN,
+
+        .defaultSettings = &overcoat_torsoDefault,
+        .altSettingsAndConditions = overcoat_torsoAlternatives,
+        .altSettingsAndConditionsCount = sizeof(overcoat_torsoAlternatives)
+            / sizeof(overcoat_torsoAlternatives[0])
+    },
+
+    // Extra torso-area collider for rolling or forward stabbing
+    {
+        .collider = &overcoat_rollCollider,
+        .limbIndex = PLAYER_LIMB_TORSO,
+        .behavior = PHYS_COLLIDER_APPEAR_WHEN,
+
+        .defaultSettings = NULL,
+        .altSettingsAndConditions = overcoat_rollAlternatives,
+        .altSettingsAndConditionsCount = sizeof(overcoat_rollAlternatives)
+            / sizeof(overcoat_rollAlternatives[0])
+    }
 };
 
-// Right thigh colliders
-PhysSphereCollider overcoat_rightThighBackCollider = {
-    {0.f, 0.f, 0.f}, 
-    RIGHTTHIGH_COLLIDER_DEFAULT_RADIUS
-};
-PhysSphereCollider overcoat_rightThighFrontCollider = {
-    {0.f, 0.f, 0.f}, 
-    RIGHTTHIGH_FRONT_COLLIDER_DEFAULT_RADIUS
-};
+// Number of collider entries for overcoat
+int overcoat_colliderEntryCount = sizeof(overcoat_colliderEntries)
+    / sizeof(overcoat_colliderEntries[0]);
 
-// Left leg collider
-PhysSphereCollider overcoat_leftLegCollider = {
-    {0.f, 0.f, 0.f}, 
-    LEFTLEG_COLLIDER_DEFAULT_RADIUS
-};
 
-// Right leg collider
-PhysSphereCollider overcoat_rightLegCollider = {
-    {0.f, 0.f, 0.f}, 
-    RIGHTLEG_COLLIDER_DEFAULT_RADIUS
-};
+// Every capsule connection (constant and situational) that may be used.
+// Connections are active only when both endpoint spheres are enabled.
+static PhysSphereCollider* overcoat_potentialCapsulePairs[][2] = {
+    // Across the thighs.
+    { &overcoat_leftThighBackCollider,  &overcoat_rightThighBackCollider },
+    { &overcoat_leftThighFrontCollider, &overcoat_rightThighFrontCollider },
 
-// Torso colliders
-PhysSphereCollider overcoat_torsoCollider = {
-    {0.f, 0.f, 0.f},
-    TORSO_COLLIDER_DEFAULT_RADIUS
-};
-// Temporary collider only used for rolling or forward stab animation
-PhysSphereCollider overcoat_rollCollider = {
-    {0.f, 0.f, 0.f},
-    ROLL_COLLIDER_DEFAULT_RADIUS
+    // Left thigh to left leg.
+    { &overcoat_leftThighFrontCollider, &overcoat_leftLegCollider },
+    { &overcoat_leftThighBackCollider,  &overcoat_leftLegCollider },
+
+    // Right thigh to right leg.
+    { &overcoat_rightThighFrontCollider, &overcoat_rightLegCollider },
+    { &overcoat_rightThighBackCollider,  &overcoat_rightLegCollider },
+
+    // Diagonal connections.
+    { &overcoat_rightThighFrontCollider, &overcoat_leftLegCollider },
+    { &overcoat_leftThighFrontCollider,  &overcoat_rightLegCollider },
+
+    // Standalone spheres represented by identical capsule endpoints.
+    { &overcoat_torsoCollider, &overcoat_torsoCollider },
+    { &overcoat_rollCollider,  &overcoat_rollCollider }
 };
 
 
@@ -603,249 +1094,6 @@ void Overcoat_SetDefaultBodyPartsPos(Overcoat* this, Player* player, PhysLimb* g
 
 
 /**
- * @brief Check if Jackie is riding Epona at fast speed or spurring Epona
- * 
- * This function checks Jackie's current animation while riding Epona and checks if any anim related
- * to riding Epona fast or spurring Epona is currently playing.
- * 
- * This function is primarily used to change the leg colliders' positions and sizes based on the
- * current animation of Jackie while on Epona. Because the adjusted positions and sizes of the colliders
- * are planned to be the same for both cases (fast riding and spurring), there is only one flag for
- * both cases.
- * 
- * This function is an example of marking the current playing animation with a flag to help codebase
- * changing the collider's position or radius when certain animation(s) is playing.
- * 
- * @param player    Current player instance
- */
-u8 Overcoat_IsFastRidingOrSpurring(Player* player) {
-    /********************************
-     Detect fast riding
-    ********************************/
-    // If Jackie is not riding on Epona (PLAYER_STATE1_800000), then return 0 (false)
-    if (!(player->stateFlags1 & PLAYER_STATE1_800000)) {
-        return 0;
-    }
-
-    // If Jackie is riding Epona fast, then return 1 (true)
-    if (player->skelAnime.animation == &gPlayerAnim_link_uma_anim_fastrun) {
-        return 1;
-    }
-
-
-    /********************************
-     Detect spurring
-    ********************************/
-    // Check if Jackie is spurring Epona currently.
-    // This flag is mostly important due to the way the upper body's animation pointers work.
-    // Normally, only the next if case would be necessary to catch upper body animations that involves
-    // spurring Epona. However, I think the upper body animation pointer is still pointing at a spurring
-    // animation even when the spurring has ended.
-    // When riding Epona, Player_Action_52, which is the riding action, indicates spurring by setting
-    // player->av1.actionVar1 to 1. However, it is set to 0 when spurring is not occuring. This is the
-    // most accurate way to check if the spurring is occuring or not.
-    if (player->av1.actionVar1 == 0) {
-        return 0;
-    }
-
-    // Jackie is spurring Epona at this point. Check if any of these animations are playing while Jackie
-    // is spurring Epona and return 1 (true) if this is happening.
-    if (player->skelAnimeUpper.animation == &gPlayerAnim_link_uma_anim_walk_muti ||
-        player->skelAnimeUpper.animation == &gPlayerAnim_link_uma_anim_slowrun_muti ||
-        player->skelAnimeUpper.animation == &gPlayerAnim_link_uma_anim_fastrun_muti ||
-        player->skelAnimeUpper.animation == &gPlayerAnim_link_uma_stop_muti) {
-        return 1;
-    }
-
-    // If none of the animations are matches while Jackie is spurring, then return 0 (false)
-    return 0;
-}
-
-
-/**
- * @brief Check whether Jackie is performing the Kamaro dance.
- * 
- * The function is primarily used to change a torso collider's size during the duration of the Kamaro
- * dance. This function is also used to change the reset and rotation limit of the overcoat chains
- * during the duration of the Kamaro dance.
- * 
- * @param player    Player instance
- */
-u8 Overcoat_IsKamaroDancing(Player* player) {
-    return (player->skelAnime.animation == &gPlayerAnim_alink_dance_loop);
-}
-
-
-/**
- * @brief Check whether Jackie is in first person view.
- * 
- * There are several different types of first person views.
- * 
- *  - PLAYER_STATE1_100000 indicates first person mode for bow/hookshot
- * 
- *  - Camera->mode helps indicate first person mode for C-Up
- * 
- *  - There is no player state for the transition into regular C-Up first person, so distance between 
- *    camera and head is also used
- * 
- * This function is primarily used to indicate if the overcoat chains need to be reset.
- * 
- * @param play      Current playstate
- * @param player    Player instance
- */
-u8 Overcoat_IsInFirstPerson(PlayState* play, Player* player) {
-    // Only consider case when Jackie is in human form.
-    if (player->transformation != PLAYER_FORM_HUMAN) {
-        return 0;
-    }
-
-    // Get camera's distance from Jackie's head's position.
-    Camera* camera = GET_ACTIVE_CAM(play);
-    f32 cameraDist = Math_Vec3f_DistXYZ(&play->view.eye, &player->bodyPartsPos[PLAYER_BODYPART_HEAD]);
-
-    // If the camera is beyond the preset max distance between the camera and Jackie's head, then
-    // consider the current state to not be in first person view.
-    // This is done because Camera->mode becomes FIRST_PERSON_VIEW_MODE the moment C-Up is pressed,
-    // even before the camera actually reaches Jackie's head during the camera transition phase.
-    if (cameraDist >= MIN_CAMERA_DISTANCE) {
-        return 0;
-    }
-
-    // At this point, the camera is very close to Jackie's head.
-    // C-Up first person
-    if (camera->mode == FIRST_PERSON_VIEW_MODE) {
-        return 1;
-    }
-
-    // Bow or hookshot first person
-    if (player->stateFlags1 & PLAYER_STATE1_100000) {
-        return 1;
-    }
-
-    return 0;
-}
-
-
-/**
- * @brief Check whether Jackie is currently rolling.
- * 
- * This function is used to add a torso collider size during the rolling animation.
- * 
- * This function also is used to later reset the overcoat chains if the roll animation ends, which 
- * serves as an example for performing resets when an animation ends rather than when an animation 
- * begins.
- * 
- * @param player    Player instance
- */
-u8 Overcoat_IsRolling(Player* player) {
-    return (player->skelAnime.animation == &gPlayerAnim_link_normal_landing_roll_free || 
-            player->skelAnime.animation == &gPlayerAnim_link_normal_landing_roll ||
-            player->skelAnime.animation == &gPlayerAnim_link_fighter_landing_roll_long);
-}
-
-
-/**
- * @brief Check whether Jackie is currently climbing from ledge.
- * 
- * This function also is used to later reset the overcoat chains if the roll animation ends, which 
- * serves as an example for performing resets when an animation ends rather than when an animation 
- * begins.
- * 
- * @param player    Player instance
- */
-u8 Overcoat_IsClimbingFromLedge(Player* player) {
-    return (player->skelAnime.animation == &gPlayerAnim_link_normal_fall_up ||
-            player->skelAnime.animation == &gPlayerAnim_link_normal_fall_up_free);
-}
-
-
-/**
- * @brief Check whether Jackie is currently doing a forward stab (for both 1h and 2h swords)
- * 
- * This function is used to add a torso collider size during the stab animation.
- * 
- * @param player    Player instance
- */
-u8 Overcoat_IsForwardStabbing(Player* player) {
-    static LinkAnimationHeader* const stabAnimations[] = {
-        // One-handed stab and recovery.
-        &gPlayerAnim_link_fighter_pierce_kiru,
-        &gPlayerAnim_link_fighter_pierce_kiru_end,
-        &gPlayerAnim_link_anchor_pierce_kiru_endR,
-
-        // One-handed stab combo and recovery.
-        &gPlayerAnim_link_fighter_pierce_kiru_finsh,
-        &gPlayerAnim_link_fighter_pierce_kiru_finsh_end,
-        &gPlayerAnim_link_anchor_pierce_kiru_finsh_endR,
-
-        // Two-handed stab and recovery.
-        &gPlayerAnim_link_fighter_Lpierce_kiru,
-        &gPlayerAnim_link_fighter_Lpierce_kiru_end,
-        &gPlayerAnim_link_anchor_Lpierce_kiru_endL,
-
-        // Two-handed stab combo and recovery.
-        &gPlayerAnim_link_fighter_Lpierce_kiru_finsh,
-        &gPlayerAnim_link_fighter_Lpierce_kiru_finsh_end,
-        &gPlayerAnim_link_anchor_Lpierce_kiru_finsh_endR
-    };
-
-    int animationCount = sizeof(stabAnimations) / sizeof(stabAnimations[0]);
-
-    for (int i = 0; i < animationCount; i++) {
-        if (player->skelAnime.animation == stabAnimations[i]) {
-            return 1;
-        }
-    }
-
-    return 0;
-}
-
-
-/**
- * @brief Check whether Jackie is currently doing a spin attack.
- * 
- * The function is primarily used to change a torso collider's size during the duration of the Kamaro
- * dance. This function is also used to change the reset and rotation limit of the overcoat chains 
- * during the duration of the Kamaro dance.
- * 
- * @param player    Player instance
- */
-u8 Overcoat_IsSpinAttacking(Player* player) {
-    return ((player->skelAnime.animation == &gPlayerAnim_link_fighter_rolling_kiru ||
-             player->skelAnime.animation == &gPlayerAnim_link_fighter_Lrolling_kiru));
-}
-
-
-/**
- * @brief Check whether Jackie is currently taking off transformation mask.
- * 
- * This function resets the overcoat chains at the beginning part of the animation where Jackie
- * takes off the Giant's Mask, specifically, since the Giant's Mask is not considered a nonhuman-to-
- * human transformation.
- * 
- * @param player    Player instance
- */
-u8 Overcoat_IsTakingGiantMaskOff(Player* player) {
-    return (player->skelAnime.animation == &gPlayerAnim_cl_maskoff);
-}
-
-
-/**
- * @brief Check whether Jackie is currently canceling a spin attack and returning to idle.
- * 
- * The function is primarily used to change a torso collider's size during the duration of the Kamaro
- * dance. This function is also used to change the reset and rotation limit of the overcoat chains 
- * during the duration of the Kamaro dance.
- * 
- * @param player    Player instance
- */
-u8 Overcoat_IsSpinAttackCanceling(Player* player) {
-    return ((player->skelAnime.animation == &gPlayerAnim_link_fighter_power_kiru_wait_end ||
-             player->skelAnime.animation == &gPlayerAnim_link_fighter_Lpower_kiru_wait_end));
-}
-
-
-/**
  * @brief Set the default rotational limit for how much upward overcoat's chains of phys limbs can go
  *
  * This function sets the default upward limit for upper and lower overcoat phys limbs in overcoat's 
@@ -1036,6 +1284,9 @@ void Overcoat_Init(Actor* thisx, PlayState* play) {
 
         // Initialize with default reset and rotation angle limits.
         Overcoat_UpdateRotLimitsAndReset(this, player);
+
+        // Initialize settings for every sphere collider entry.
+        PhysCol_InitSphereColliderEntries(overcoat_colliderEntries, overcoat_colliderEntryCount);
 
         // Initialize pointer to overcoat actor and playstate.
         gPlayerOvercoat = this;
@@ -1511,45 +1762,6 @@ Overcoat Update
 */
 
 /**
- * @brief Capture the directional axes of the torso and apply it to the overcoat
- * 
- * More specifically, this function extracts the directional axes of Jackie's torso and assign them to 
- * global variables that carry the directional axes of the overcoat.
- * 
- * @param mtx   Matrix that is currently carrying the positional data of the torso limb
- */
-void Overcoat_CaptureLimitAxes(MtxF* mtx) {
-    // Based on torso axes in matrix: local +Y = forward, local +Z = left.
-    // Convert the matrix values into Vec3f directional axes relative to Jackie's torso limb
-    overcoat_forwardAxis = (Vec3f){mtx->xy, mtx->yy, mtx->zy};
-    overcoat_leftAxis = (Vec3f){mtx->xz, mtx->yz, mtx->zz};
-    overcoat_downAxis = (Vec3f){-mtx->xx, -mtx->yx, -mtx->zx};
-
-    // Calculate the lengths of the direcitonal axes vectors
-    f32 forwardLength = sqrtf(Math3D_Vec3fMagnitudeSq(&overcoat_forwardAxis));
-    f32 leftLength = sqrtf(Math3D_Vec3fMagnitudeSq(&overcoat_leftAxis));
-    f32 downLength = sqrtf(Math3D_Vec3fMagnitudeSq(&overcoat_downAxis));
-
-    // Flag variable that indicates that the directional axes for the overcoat
-    overcoat_dirAxesReady = 0;
-
-    // Check if the lengths of the directional axes vectors are greater than zero.
-    if (forwardLength < GREATER_THAN_ZERO || leftLength < GREATER_THAN_ZERO || 
-        downLength < GREATER_THAN_ZERO) {
-        return;
-    }
-
-    // Normalize the directional axes of the overcoat.
-    Math_Vec3f_Scale(&overcoat_forwardAxis, 1.f / forwardLength);
-    Math_Vec3f_Scale(&overcoat_leftAxis, 1.f / leftLength);
-    Math_Vec3f_Scale(&overcoat_downAxis, 1.f / downLength);
-
-    // Mark flag variable that indicates that the directional axes for the overcoat has been set up now.
-    overcoat_dirAxesReady = 1;
-}
-
-
-/**
  * @brief Limit the given phys bone's upward direction (and inward direction if indicated).
  * 
  * This function limits the upward direction and inward direction (if indicated in 'limitInward'
@@ -1808,6 +2020,23 @@ void Overcoat_ApplyChainRotationLimits(PhysLimb* gPhysLimbs[], const int chainSt
 
 
 /**
+ * @brief Select collider settings before Jackie is drawn.
+ */
+RECOMP_HOOK("Player_Draw") void Overcoat_on_Player_Draw(Actor* thisx, PlayState* play) {
+    // Get player
+    Player* player = GET_PLAYER(play);
+
+    // If player is null, overcoat actor is null, or outfit is not set to "Cadet Jackie", then get out.
+    if (thisx != &player->actor || gPlayerOvercoat == NULL || !recomp_get_config_u32("change_outfit")) {
+        return;
+    }
+
+    // Select collider settings before Jackie is drawn.
+    PhysCol_ApplySphereColliderEntries(overcoat_colliderEntries, overcoat_colliderEntryCount, player);
+}
+
+
+/**
  * @brief Get Jackie's torso limb's world position and rotation and also set up collider center world 
  * positions.
  * 
@@ -1822,170 +2051,52 @@ void Overcoat_ApplyChainRotationLimits(PhysLimb* gPhysLimbs[], const int chainSt
  */
 RECOMP_HOOK("Player_PostLimbDrawGameplay") void Overcoat_on_Player_PostLimbDrawGameplay(
     PlayState* play, s32 limbIndex, Gfx** dList1, Gfx** dList2, Vec3s* rot, Actor* actor) {
-    
-    // For moving colliders while riding Epona...
+    // Get player
     Player* player = GET_PLAYER(play);
-    u8 fastRiding = Overcoat_IsFastRidingOrSpurring(player);
 
-    /********************************
-     Torso Limb Positions and Rotations
-    ********************************/
-    if (limbIndex == PLAYER_LIMB_TORSO) {
-        OPEN_DISPS(play->state.gfxCtx);
-        Matrix_Push();
-
-        // Get current matrix, which is currently positioned and rotated for Jackie's Torso limb
-        MtxF* mtx = Matrix_GetCurrent();
-
-        // Update torso-relative directions using the current torso matrix.
-        Overcoat_CaptureLimitAxes(mtx);
-
-        // Get torso's world position directly from the current matrix
-        overcoat_torso_globalPos.x = mtx->xw;
-        overcoat_torso_globalPos.y = mtx->yw;
-        overcoat_torso_globalPos.z = mtx->zw;
-
-        // Get torso rotation values (used for rotating the belt strap hook actor properly)
-        Matrix_MtxFToYXZRot(mtx, &overcoat_torso_rotate, 1);
-
-        // Position the torso collider directly at the torso limb.
-        Math_Vec3f_Copy(&overcoat_torsoCollider.center, &overcoat_torso_globalPos);
-
-        // Position the roll collider using its torso-local offset.
-        Vec3f rollColliderLocalOffset = {-600.f, 0.f, 0.f};
-        Matrix_MultVec3f(&rollColliderLocalOffset, &overcoat_rollCollider.center);
-
-        // Close matrix
-        Matrix_Pop();
-        CLOSE_DISPS(play->state.gfxCtx);
+    // If player is null, overcoat is null, or outfit is not set to "Cadet Jackie", then get out.
+    if (actor != &player->actor || gPlayerOvercoat == NULL || !recomp_get_config_u32("change_outfit")) {
+        return;
     }
 
-    /********************************
-     Left Thigh Limb Positions
-    ********************************/
-    if (limbIndex == PLAYER_LIMB_LEFT_THIGH) {
-        OPEN_DISPS(play->state.gfxCtx);
-        Matrix_Push();
+    // Get the current player limb's matrix and position.
+    MtxF* mtx = Matrix_GetCurrent();
+    Vec3f jointPos = {mtx->xw, mtx->yw, mtx->zw};
 
-        // Get current matrix, which is currently positioned and rotated for Jackie's left thigh limb
-        MtxF* mtx = Matrix_GetCurrent();
+    // Update every sphere collider attached to this limb.
+    PhysCol_UpdateSphereCentersForLimb(overcoat_colliderEntries, overcoat_colliderEntryCount, limbIndex);
 
-        // Get left thigh limb's world position directly from the current matrix
-        overcoat_thighJointPos[0].x = mtx->xw;
-        overcoat_thighJointPos[0].y = mtx->yw;
-        overcoat_thighJointPos[0].z = mtx->zw;
+    // Preserve the existing torso and joint information used by overcoat physics.
+    switch (limbIndex) {
+        case PLAYER_LIMB_TORSO:
+            // For torso, capture the forward/backward and left/right direction axes
+            overcoat_dirAxesReady = CustomMath_CaptureLimitAxes(mtx, &overcoat_forwardAxis, 
+                &overcoat_leftAxis, &overcoat_downAxis);
+            // Get world position of Jackie's torso limb
+            overcoat_torso_globalPos = jointPos;
+            // Get world rotation of Jackie's torso limb
+            Matrix_MtxFToYXZRot(mtx, &overcoat_torso_rotate, 1);
+            break;
 
-        // Choose the left back thigh collider's local offset.
-        Vec3f leftThighBackColliderLocalOffset = {0.f, 175.f, -40.f};
+        case PLAYER_LIMB_LEFT_THIGH:
+            // Keep left thigh position
+            overcoat_thighJointPos[0] = jointPos;
+            break;
 
-        // Apply different local offset for when Jackie is riding Epona at fast speed or spurring
-        if (fastRiding) {
-            Math_Vec3f_Copy(&leftThighBackColliderLocalOffset, &overcoat_fastRideLeftThighOffset);
-        }
+        case PLAYER_LIMB_RIGHT_THIGH:
+            // Keep right thigh position
+            overcoat_thighJointPos[1] = jointPos;
+            break;
 
-        // Convert the local offset into the collider's world position.
-        Matrix_MultVec3f(&leftThighBackColliderLocalOffset, &overcoat_leftThighBackCollider.center);
+        case PLAYER_LIMB_LEFT_SHIN:
+            // Keep left knee position
+            overcoat_kneeJointPos[0] = jointPos;
+            break;
 
-        // Position the front thigh collider.
-        Vec3f leftThighFrontColliderLocalOffset = {0.f, -100.f, -30.f};
-        Matrix_MultVec3f(&leftThighFrontColliderLocalOffset, &overcoat_leftThighFrontCollider.center);
-
-        Matrix_Pop();
-        CLOSE_DISPS(play->state.gfxCtx);
-    }
-
-    /********************************
-     Right Thigh Limb Positions
-    ********************************/
-    if (limbIndex == PLAYER_LIMB_RIGHT_THIGH) {
-        OPEN_DISPS(play->state.gfxCtx);
-        Matrix_Push();
-
-        // Get current matrix, which is currently positioned and rotated for Jackie's right thigh limb
-        MtxF* mtx = Matrix_GetCurrent();
-
-        // Get right thigh limb's world position directly from the current matrix
-        overcoat_thighJointPos[1].x = mtx->xw;
-        overcoat_thighJointPos[1].y = mtx->yw;
-        overcoat_thighJointPos[1].z = mtx->zw;
-
-        // Choose the right back thigh collider's local offset.
-        Vec3f rightThighBackColliderLocalOffset = {0.f, 175.f, 40.f};
-
-        // Apply different local offset for when Jackie is riding Epona at fast speed or spurring
-        if (fastRiding) {
-            Math_Vec3f_Copy(&rightThighBackColliderLocalOffset, &overcoat_fastRideRightThighOffset);
-        }
-
-        // Convert the local offset into the collider's world position.
-        Matrix_MultVec3f(&rightThighBackColliderLocalOffset, &overcoat_rightThighBackCollider.center);
-
-        // Position the front thigh collider.
-        Vec3f rightThighFrontColliderLocalOffset = {0.f, -100.f, 30.f};
-        Matrix_MultVec3f(&rightThighFrontColliderLocalOffset, &overcoat_rightThighFrontCollider.center);
-
-        Matrix_Pop();
-        CLOSE_DISPS(play->state.gfxCtx);
-    }
-
-    /********************************
-     Left Leg Limb Positions
-    ********************************/
-    if (limbIndex == PLAYER_LIMB_LEFT_SHIN) {
-        OPEN_DISPS(play->state.gfxCtx);
-        Matrix_Push();
-
-        // Get current matrix, which is currently positioned and rotated for Jackie's left shin limb
-        MtxF* mtx = Matrix_GetCurrent();
-
-        // Get left shin limb's world position directly from the current matrix
-        overcoat_kneeJointPos[0].x = mtx->xw;
-        overcoat_kneeJointPos[0].y = mtx->yw;
-        overcoat_kneeJointPos[0].z = mtx->zw;
-
-        // Choose the left shin/leg collider's local offset.
-        Vec3f leftLegColliderLocalOffset = {0.f, -70.f, 0.f};
-
-        // Apply different local offset for when Jackie is riding Epona at fast speed or spurring
-        if (fastRiding) {
-            Math_Vec3f_Copy( &leftLegColliderLocalOffset, &overcoat_fastRideLeftLegOffset);
-        }
-
-        // Convert the local offset into the collider's world position.
-        Matrix_MultVec3f(&leftLegColliderLocalOffset, &overcoat_leftLegCollider.center);
-
-        Matrix_Pop();
-        CLOSE_DISPS(play->state.gfxCtx);
-    }
-
-    /********************************
-     Right Leg Limb Positions
-    ********************************/
-    if (limbIndex == PLAYER_LIMB_RIGHT_SHIN) {
-        OPEN_DISPS(play->state.gfxCtx);
-        Matrix_Push();
-
-        // Get current matrix, which is currently positioned and rotated for Jackie's right shin limb
-        MtxF* mtx = Matrix_GetCurrent();
-
-        // Get right shin limb's world position directly from the current matrix
-        overcoat_kneeJointPos[1].x = mtx->xw;
-        overcoat_kneeJointPos[1].y = mtx->yw;
-        overcoat_kneeJointPos[1].z = mtx->zw;
-
-        // Choose the right shin/leg collider's local offset.
-        Vec3f rightLegColliderLocalOffset = {0.f, -70.f, 0.f};
-
-        // Apply different local offset for when Jackie is riding Epona at fast speed or spurring
-        if (fastRiding) {
-            Math_Vec3f_Copy(&rightLegColliderLocalOffset, &overcoat_fastRideRightLegOffset);
-        }
-
-        // Convert the local offset into the collider's world position.
-        Matrix_MultVec3f(&rightLegColliderLocalOffset, &overcoat_rightLegCollider.center);
-
-        Matrix_Pop();
-        CLOSE_DISPS(play->state.gfxCtx);
+        case PLAYER_LIMB_RIGHT_SHIN:
+            // Keep right knee position
+            overcoat_kneeJointPos[1] = jointPos;
+            break;
     }
 }
 
@@ -2034,481 +2145,6 @@ void Overcoat_LimitSidewaysDistance(PhysLimb* physLimbA, PhysLimb* physLimbB, f3
     // Apply the scaled directional vector to both phys limbs.
     Math_Vec3f_Sum(&physLimbA->curr_pos, &correctedDirVec, &physLimbA->curr_pos);
     Math_Vec3f_Diff(&physLimbB->curr_pos, &correctedDirVec, &physLimbB->curr_pos);
-}
-
-
-/**
- * @brief Normalize Vec3f direction used by overcoat during substep physics calculations
- * 
- * This function calculates the length of the target direction vector and scales it so that its final 
- * length becomes 1.
- * 
- * @param targetVec     Direction vector to normalize
- * 
- * @return true if the vector was successfully normalized
- * @return false if the vector was too small to safely normalize
- */
-bool Overcoat_NormalizeSubstepDirectionVec(Vec3f* targetVec) {
-    // Find length of target direction vector with dot product of itself (basically squaring the length 
-    // of the vector).
-    f32 lengthSq = Math3D_Vec3fMagnitudeSq(targetVec);
-
-    // Treat extremely small values that's very close to 0 as just 0.
-    // Return "false" if the length of the target vector is basically 0.
-    if (lengthSq < GREATER_THAN_ZERO2) {
-        return false;
-    }
-
-    // Otherwise, scale the vector by 1/length of vector so that its final length becomes 1.
-    Math_Vec3f_Scale(targetVec, 1.f / sqrtf(lengthSq));
-    return true;
-}
-
-
-/**
- * @brief Find the closest point along a given capsule collider to a target world position
- * 
- * The capsule is made of two sphere colliders. This function projects the target position onto the
- * line segment between the two sphere colliders' centers and clamps the result so the closest point
- * remains between the two sphere colliders.
- * 
- * The function also interpolates the capsule's radius at that closest point. This allows the capsule
- * with differently sized endpoint sphere colliders to be handled. 
- * 
- * @param targetPos         Target world position 
- * @param capsuleColStart   Sphere collider that's the starting endpoint of the capsule collider
- * @param capsuleColEnd     Sphere collider that's the ending endpoint of the capsule collider
- * @param colRadius         Output radius of the sphere collider at the closest point in capsule
- * 
- * @return  World position of the closest point to targetPos along the capsule collider's center line
- */
-Vec3f Overcoat_FindClosestPointOnCapsule(Vec3f targetPos, PhysSphereCollider* capsuleColStart, 
-    PhysSphereCollider* capsuleColEnd, f32* colRadius) {
-    // Create vector pointing from the starting sphere collider's center to the end sphere collider's
-    // center.
-    Vec3f capsuleAxis = {0.f, 0.f, 0.f};
-    Math_Vec3f_Diff(&capsuleColEnd->center, &capsuleColStart->center, &capsuleAxis);
-
-    // Calculate the squared length of capsule's center line
-    f32 lengthSq = Math3D_Vec3fMagnitudeSq(&capsuleAxis);
-    
-    // Set up variable (t) that indicates where the point closest to targetPos is between the two
-    // capsule endpoint sphere colliders
-    f32 t = 0.f;
-
-    // Only project onto the capsule's center line if the two sphere centers are actually apart 
-    // instead of just being a sphere collider
-    if (lengthSq >= GREATER_THAN_ZERO3) {
-        Vec3f startToTarget = {0.f, 0.f, 0.f};
-        Math_Vec3f_Diff(&targetPos, &capsuleColStart->center, &startToTarget);
-        t = CustomMath_Vec3f_Dot(&startToTarget, &capsuleAxis) / lengthSq;
-
-        // Keep closest point within the positions of the start and end colliders of capsule
-        if (t < 0.f) {
-            t = 0.f;
-        }
-
-        if (t > 1.f) {
-            t = 1.f;
-        }
-    }
-
-    // Interpolate the capsule radius at the closest point.
-    *colRadius = capsuleColStart->radius + (capsuleColEnd->radius - capsuleColStart->radius) * t;
-
-    // Calculate the world position of the closest point along the capsule's center line.
-    Vec3f scaledCapsuleAxis = {0.f, 0.f, 0.f};
-    Math_Vec3f_ScaleAndStore(&capsuleAxis, t, &scaledCapsuleAxis);
-    Vec3f closestPoint = {0.f, 0.f, 0.f};
-    Math_Vec3f_Sum(&capsuleColStart->center, &scaledCapsuleAxis, &closestPoint);
-
-    return closestPoint;
-}
-
-
-/**
- * @brief Calculate the deepest depth between a target position and any of the colliders.
- *
- * This function checks a target position against the torso sphere collider and every capsule
- * collider used by the overcoat.
- *
- * For each collider, the function finds a point along the collider that is closest to the target 
- * position and calculates the collider radius at that point. It then calculates how deep the target
- * position is inside the collider. This includes the target's own collision radius. 
- *
- * @param targetPos          Target world position being checked
- * @param pointRadius        Collision radius of target point/position
- * @param capsulePairs       Array of sphere collider pairs used as capsule colliders
- * @param capsuleColCount    Number of capsule colliders
- * @param contactColCenter   Output center position of the deepest collider contact.
- * @param contactColRadius   Output combined collider and target radius of the deepest contact.
- *
- * @return Deepest overlap depth found among all body colliders.
- */
-f32 Overcoat_GroupContact(Vec3f targetPos, f32 pointRadius, PhysSphereCollider* capsulePairs[][2], 
-    int capsuleColCount, Vec3f* contactColCenter, f32* contactColRadius) {
-    
-    // Set up variable indicating deepest depth value of targetPos in any collider in overcoat
-    f32 deepest = 0.f;
-
-	// Note: This is crudely coded because I did not handle list of colliders cleanly. The array
-	//		 for colliders is only consisted of capsule colliders.
-    for (int capsuleIdx = 0; capsuleIdx < capsuleColCount; capsuleIdx++) {
-        // Use the two sphere colliders that make up this capsule collider
-        PhysSphereCollider* capsuleColStart = capsulePairs[capsuleIdx][0];
-        PhysSphereCollider* capsuleColEnd = capsulePairs[capsuleIdx][1];
-
-        // Find what part of the current capsule collider is closest to target position
-        // Set up variable for radius of sphere collider that would be located in closest point in 
-        // capsule. This is important in case capsule has differently sized endpoint sphere colliders,
-        // in which case the radius would be interpolated based on its position in capsule.
-        f32 colRadius;
-        // Find center position of sphere collider at a point in capsule collider that would be located
-        // closest to the target position.
-        Vec3f colCenter = Overcoat_FindClosestPointOnCapsule(targetPos, capsuleColStart, 
-            capsuleColEnd, &colRadius);
-        // Find the depth, or just how deep the target position is located inside current collider
-        f32 currDepth = colRadius + pointRadius - Math_Vec3f_DistXYZ(&targetPos, &colCenter);
-        // If the calculated depth is deeper than the currently recorded deepest depth so far, then
-        // replace that variable's value with this newly calculated current depth. Also keep note of the
-        // collider's center position and radius.
-        if (currDepth > deepest) {
-            deepest = currDepth;
-            *contactColCenter = colCenter;
-            *contactColRadius = colRadius + pointRadius;
-        }
-    }
-
-    // Return the deepest depth recorded in any of collider.
-    return deepest;
-}
-
-
-/**
- * @brief Check whether target position is outside all of colliders
- *
- * This function checks if the target position is outside the torso sphere collider and other
- * capsule colliders used by the overcoat.
- *
- * @param targetPos			Target world position being checked
- * @param pointRadius		Collision radius of target point/position
- * @param capsulePairs		Array of sphere collider pairs used as capsule colliders
- * @param capsuleColCount	Number of capsule colliders
- * 
- * @return true if target position is outside of all colliders, otherwise false
- */
-bool Overcoat_GroupOutside(Vec3f targetPos, f32 pointRadius, PhysSphereCollider* capsulePairs[][2], 
-    int capsuleColCount) {
-    Vec3f center = {0.f, 0.f, 0.f};		// Made only as function argument.
-    f32 radius = 0.f;					// Made only as function argument.
-	
-	// Check if target position is inside colliders (torso and capsule) by calculating the
-	// deepest depth the position is in any collider.
-	f32 colliderDepth = Overcoat_GroupContact(targetPos, pointRadius, capsulePairs, 
-		capsuleColCount, &center, &radius);
-		
-	// If target position is inside any collider, then return false
-	bool posIsOutside = (colliderDepth <= 0.f);
-	
-    return posIsOutside;
-}
-
-
-/**
- * @brief Find safe exit position for phys limb from overcoat's colliders.
- * 
- * This function uses a given direction from a target phys limb's position to find a new position
- * that is outside the torso collider and all capsule colliders of the overcoat.
- *
- * The function first finds a distance that is guaranteed to extend past every collider in the
- * specified direction. It then checks if this position is actually outside all colliders.
- *
- * If the test exit position at mid point is outside all colliders, then that is the new farthest 
- * distance between position outside the colliders and the closest collider's boundary.
- *
- * This function was made for the overcoat because the overcoat uses many colliders that are 
- * overlapping one another around Jackie's lower body. Simply pushing out the phys limb from one 
- * collider can put the phys limb in another collider, creating unwanted clipping behavior of the
- * overcoat. In a way, this method is trying to treat the overlapping colliders as one big collider
- * entity.
- *
- * @param targetPhysLimbPos		Target phys limb's world position
- * @param physLimbDir			Direction along which a safe exit position for phys limb is searched
- * @param pointRadius			Collisionr radius of target phys limb
- * @param capsulePairs			Array of pairs of sphere colliders used for capsule colliders
- * @param capsuleColCount		Count of capsule colliders 
- * @param padding				Small extra distance added so exit doesn't sit on collider boundary
- * @param exitPosition			Output position containing safe exit position for phys limb
- */
-bool Overcoat_GroupRayExit(Vec3f targetPhysLimbPos, Vec3f physLimbDir, f32 pointRadius,
-    PhysSphereCollider* capsulePairs[][2], int capsuleColCount, f32 padding, Vec3f* exitPosition) {
-    // Find a distance from phys limb, along the indicated search direction (physLimbDir), that is 
-	// far enough that it should be past every collider
-    f32 farDistance = 0.f;
-	
-	// Go through each collider in the array of capsule colliders and see how far the target phys limb 
-    // should go to be outside all colliders (indicated by farDistance)
-    for (int capsuleIdx = 0; capsuleIdx < capsuleColCount; capsuleIdx++) {
-        // Use the two sphere colliders that make up this capsule collider
-        PhysSphereCollider* capsuleColStart = capsulePairs[capsuleIdx][0];	// Capsule collider endpoint 1
-		PhysSphereCollider* capsuleColEnd = capsulePairs[capsuleIdx][1];    // Capsule collider endpoint 2
-        
-		// Get the larger radius of the two endpoints of the capsule collider 
-		f32 colRadius;
-		if (capsuleColStart->radius > capsuleColEnd->radius) {
-			colRadius = capsuleColStart->radius;
-		}
-		else {
-			colRadius = capsuleColEnd->radius;
-		}
-		
-		// Check the two sphere collider endpoints of the current capsule collider.
-		// The focus is going to be on the current capsule collider's sphere collider with the larger 
-        // radius for finding a distance that is more certain to be big enough to push the phys limb out 
-        // of the colliders.
-        for (int capsuleEndIdx = 0; capsuleEndIdx < 2; capsuleEndIdx++) {
-			Vec3f colliderCenter;
-			if (capsuleEndIdx == 0) {
-				colliderCenter = capsuleColStart->center;
-			}
-			else {
-				colliderCenter = capsuleColEnd->center;
-			}
-			
-			// Calculate a safe distance along the input direction that would move phys limb beyond capsule's 
-            // sphere collider endpoint
-            Vec3f physLimbToCollider = {0.f, 0.f, 0.f};
-            Math_Vec3f_Diff(&colliderCenter, &targetPhysLimbPos, &physLimbToCollider);
-            f32 projectedDistance = CustomMath_Vec3f_Dot(&physLimbToCollider, &physLimbDir);
-            f32 currDistance = projectedDistance + colRadius + pointRadius;
-				
-			// If the calculated distance is greater than the current farthest distance from 
-			// collider boundary to phys limb, then keep track of that new farthest distance
-            if (currDistance > farDistance) {
-				farDistance = currDistance;
-			}
-        }
-    }
-	
-	// Ensure that the farthest point is not precisely on the collider boundary by adding padding
-    farDistance += padding;
-    f32 nearDistance = 0.f;	// Distance from the target PhysLimb's current position
-	
-	// Use the calculated farthest distance from any collider (farDistance) to find the point along the 
-    // input phys limb direction where it would be outside all colliders. Update the exitPosition 
-    // argument with this new position value
-    Vec3f travelVec = {0.f, 0.f, 0.f};
-    Math_Vec3f_ScaleAndStore(&physLimbDir, farDistance, &travelVec);
-    Math_Vec3f_Sum(&targetPhysLimbPos, &travelVec, exitPosition);
-
-	// If the newly calculated position is still inside any collider, return false and get out of function.
-    if (!Overcoat_GroupOutside(*exitPosition, pointRadius, capsulePairs, capsuleColCount)) { 
-		return false;
-	}
-
-	// Up to this point, a safe far distance was found that places the PhysLimb outside all colliders. 
-	// However, this distance may be farther than necessary.
-	//
-	// Use binary search to find a closer safe exit position along input direction (physLimbDir).
-	// nearDistance represents the inside side of the search, while farDistance represents  the known safe 
-    // outside side. Each iteration cuts the gap between them in half.
-	//
-	// More iterations make exitPosition closer to the point where the PhysLimb first  becomes outside
-	// all colliders along this direction.
-    for (int iter = 0; iter < OVERCOAT_EXIT_SEARCH_STEPS; iter++) {
-		// Find midpoint between nearDistance and farDistance
-        f32 midpointDist = (nearDistance + farDistance) * 0.5f;
-		
-		// Check where the phys limb would end up by moving it along the input direction to the
-		// midpoint distance
-        Vec3f midpointTravelVec = {0.f, 0.f, 0.f};
-        Math_Vec3f_ScaleAndStore(&physLimbDir, midpointDist, &midpointTravelVec);
-        Vec3f testExitPos = {0.f, 0.f, 0.f};
-        Math_Vec3f_Sum(&targetPhysLimbPos, &midpointTravelVec, &testExitPos);
-		// If the test exit position at mid point is outside all colliders, then that is the new 
-		// farthest distance between position outside the colliders and the closest collider's
-		// boundary.
-        bool testExitIsOutside = Overcoat_GroupOutside(testExitPos, pointRadius, capsulePairs, 
-			capsuleColCount);
-        if (testExitIsOutside) {
-            farDistance = midpointDist;
-            *exitPosition = testExitPos;
-        } 
-		// If the text exit position at mid point is inside a collider still, then it closest
-		// position inside the collider is assigned that midpoint distance
-		else {
-            nearDistance = midpointDist;
-        }
-		
-		// Continue to run this to get closer to boundary of collider
-    }
-    return true;
-}
-
-
-/**
- * @brief Push the given overcoat phys limb out of Jackie's set colliders for overcoat.
- * 
- * This function checks whether a given phys limb is inside the currently set colliders for the
- * overcoat. All the colliders are capsule colliders.
- *
- * If the phys limb is inside a collider, the function calculates an outward direction from the collider 
- * and tries to move the phys limbs in that direction out of the collider.
- * 
- * If the initial calculated new world position for the phys limb being pushed out of the collider still
- * overlaps the collider group, search from the phys limb's original world current position in the 
- * outward and opposite directions. Use the closer successful exit, preferring outward direction when
- * distances are equal.
- * 
- * If neither exits succeed, then leave the position unchanged.
- *
- * @param physLimb			Phys limb that is being checked and corrected
- * @param collider_pairs	Array of pairs of sphere colliders used to form capsule colliders
- * @param capsuleColCount	Number of capsule collider pairs
- */
-void Overcoat_SolveColliderGroup(PhysLimb* physLimb, PhysSphereCollider* collider_pairs[][2], 
-    int capsuleColCount) {
-	// Find the collider where the phys limb is deepest in within the group of colliders.
-    // First find the closest point along this capsule collider's centerline to the phys limb.
-    Vec3f center = {0.f, 0.f, 0.f};     // Center of sphere collider in capsule collider
-    f32 radius = 0.f;                   // Radius of sphere collider in capsule collider
-	
-	// If the phys limb is not inside any collider, no correction is needed.
-    if (Overcoat_GroupContact(physLimb->curr_pos, physLimb->collision_radius,
-		collider_pairs, capsuleColCount, &center, &radius) <= 0.f) {
-		return;
-	}
-
-	// Find direction pointing from the collider center toward the phys limb's current position
-    Vec3f direction = {0.f, 0.f, 0.f};
-    Math_Vec3f_Diff(&physLimb->curr_pos, &center, &direction);
-		
-	// Try to normalize the direction from the target collider center toward the phys limb.
-    // If it is too short to normalize, try the previous position of phys limb instead.
-    if (!Overcoat_NormalizeSubstepDirectionVec(&direction)) {
-        // Use phys limb's previous position instead to create another possible outward direction
-        Math_Vec3f_Diff(&physLimb->prev_pos, &center, &direction);
-		// Try to normalize direction from collider center to phys limb's previous position If
-		// this fails, then even the previous position of the phys limb is too close to the
-		// collider's center.
-        if (!Overcoat_NormalizeSubstepDirectionVec(&direction)) {
-			// Use Jackie's forward direction as an alternative
-            direction = overcoat_forwardAxis;
-			
-			// Try to normalize Jackie's forward direction. If even this fails, then just use
-			// straight upward direction as final fallback direction.
-            if (!Overcoat_NormalizeSubstepDirectionVec(&direction)) { 
-				direction = (Vec3f){0.f, 1.f, 0.f};
-			}
-        }
-    }
-    
-	// Create very small padding gap between collider and phys limb so that phys limb won't end
-	// up exactly on the collider's boundary. This is because if the phys limb ends up exactly
-	// on the collider's boundary, then the phys limb would still be considered colliding against
-	// the collider.
-	f32 padding = radius * GREATER_THAN_ZERO3;
-	// Fail safe for when padding somehow ends up being 0 or less
-    if (padding < GREATER_THAN_ZERO3) {
-		padding = GREATER_THAN_ZERO3;
-	}
-	// Calculate the offset from the collider center to just outside its boundary.
-    Vec3f outwardOffset = {0.f, 0.f, 0.f};
-    Math_Vec3f_ScaleAndStore(&direction, radius + padding, &outwardOffset);
-
-    // Calculate the candidate world position.
-    Vec3f candidate = {0.f, 0.f, 0.f};
-    Math_Vec3f_Sum(&center, &outwardOffset, &candidate);
-
-    // Check whether phys limb would be outside all colliders if it were moved to this candidate
-	// position. If the position is safe, then move the phys limb there and finish
-    if (Overcoat_GroupOutside(candidate, physLimb->collision_radius, collider_pairs, capsuleColCount)) {
-        physLimb->curr_pos = candidate;
-        return;
-    }
-
-	// Store possible safe exit positions in the normal outward direction (collider center to phys limb)
-	// and in the opposite direction.
-    Vec3f outwardExit = {0.f, 0.f, 0.f};	// exit position that goes from collider center to phys limb
-    Vec3f oppositeExit = {0.f, 0.f, 0.f};	// opposite exit position that points to collider center and
-                                            // beyond to the other side of the sphere collider.
-	
-	// Create direction that points exactly opposite from the normal outward direction.
-    Vec3f opposite = {0.f, 0.f, 0.f};
-    Math_Vec3f_ScaleAndStore(&direction, -1.f, &opposite);
-	
-	// Search outward from phys limb for a position that is outside all colliders
-	// outwardOK is a flag that indicates whether valid exit was found in normal direction.
-	// outwardExit stores the position of that exit.
-    bool outwardOK = Overcoat_GroupRayExit(physLimb->curr_pos, direction, physLimb->collision_radius, 
-		collider_pairs, capsuleColCount, padding, &outwardExit);
-	// Search in opposite direction for another valid exit that is outside all colliders
-	// oppositeOK is a flag that indicates whether valid exit was found in opposite direction
-	// oppositeExit stores the position of that exit.
-    bool oppositeOK = Overcoat_GroupRayExit(physLimb->curr_pos, opposite, physLimb->collision_radius, 
-		collider_pairs, capsuleColCount, padding, &oppositeExit);
-
-    // If exit was found in normal outward direction, use it when either:
-	//  1. no safe exit was found in the opposite direction OR
-	//  2. outward exit is closer to the phys limb than the opposite exit
-	// Otherwise, use the safe opposite exit
-    bool outwardIsCloser = (Math_Vec3f_DistXYZ(&physLimb->curr_pos, &outwardExit) <=
-        Math_Vec3f_DistXYZ(&physLimb->curr_pos, &oppositeExit));
-    bool useOutwardExit = (outwardOK && (!oppositeOK || outwardIsCloser));
-
-    if (useOutwardExit) {
-        physLimb->curr_pos = outwardExit;
-    } else if (oppositeOK) {
-        physLimb->curr_pos = oppositeExit;
-    }
-}
-
-
-/**
- * @brief Prevent the midpoint between two neighboring phys limbs from clipping through collider
- *
- * This function creates a temporary phys limb at the midpoint between two neighboring unpinnied phys
- * limbs. The midpoint is checked against the torso and capsule colliders just like phys limbs.
- *
- * If the midpoint is pushed out of a collider, the correction is applied to both neighboring phys
- * limbs. This helps keep the cloth surface between the two phys limbs from passing through Jackie's
- * body even when the phys limbs themselves are outside of the colliders.
- * 
- * @param physLimb_a		First phys limb
- * @param physLimb_b 		Second phys limb
- * @param collider_pairs	Array of pairs of colliders that are used for establishing capsule colliders
- * @param capsuleColCount	Number of capsule colliders
- */
-void Overcoat_SolveMidpointGroup(PhysLimb* physLimb_a, PhysLimb* physLimb_b, 
-	PhysSphereCollider* collider_pairs[][2], int capsuleColCount) {
-	// Create temporary phys limb that represents midpoint between two neighboring phys limbs.
-    PhysLimb midpoint = {0};
-	
-	// Calculate midpoint's current position by averaging out two phys limb's positions
-	// Average current position
-    Math_Vec3f_Sum(&physLimb_a->curr_pos, &physLimb_b->curr_pos, &midpoint.curr_pos);
-    Math_Vec3f_Scale(&midpoint.curr_pos, 0.5f);
-
-    // Average previous position
-    Math_Vec3f_Sum(&physLimb_a->prev_pos, &physLimb_b->prev_pos, &midpoint.prev_pos);
-    Math_Vec3f_Scale(&midpoint.prev_pos, 0.5f);
-		
-	// Calculate midpoint phys limb's averaged collision radius
-    midpoint.collision_radius = (physLimb_a->collision_radius + physLimb_b->collision_radius) * 0.5f;
-	
-	// Save midpoint's position before collision correction constraint
-    Vec3f midpointBeforeCollision = midpoint.curr_pos;
-	
-	// Apply collider correction on midpoint temp phys limb
-	// This is basically the same way phys limbs get their collider correction applied
-    Overcoat_SolveColliderGroup(&midpoint, collider_pairs, capsuleColCount);
-	// Calculate how far midpoint was moved by the collision correction.
-    Vec3f correction = {0.f, 0.f, 0.f};
-    Math_Vec3f_Diff(&midpoint.curr_pos, &midpointBeforeCollision, &correction);
-
-	// Apply the midpoint's collision correction to both neighboring phys limbs
-	Math_Vec3f_Sum(&physLimb_a->curr_pos, &correction, &physLimb_a->curr_pos);
-    Math_Vec3f_Sum(&physLimb_b->curr_pos, &correction, &physLimb_b->curr_pos);
 }
 
 
@@ -2718,175 +2354,6 @@ void Overcoat_SetResetShape(Overcoat* this, PhysLimb* gPhysLimbs[], const Overco
 
 
 /**
- * @brief Rotate a given target point about the pivot point by a given angle along the y-axis.
- *
- * Typically, the target point is the current position of a phys limb, and the pivot point is the
- * overcoat root's world position.
- *
- * The 'targetPoint' param will get overwritten with a new, rotated position of old 'targetPoint'
- *
- * @param targetPoint		Point in the world position to rotate
- * @param pivotPoint		Point where the targetPoint should rotate around by the y-axis
- * @param rotAngle			Rotate targetPoint around pivotPoint by this value			
- */
-void Overcoat_RotatePointAroundY(Vec3f* targetPoint, Vec3f* pivotPoint, s16 rotAngle) {
-	// Find the line between targetPoint and pivotPoint
-    Vec3f offset = {0.f, 0.f, 0.f};
-    Math_Vec3f_Diff(targetPoint, pivotPoint, &offset);
-	
-	// Rotate that line by the input angle
-    CustomMath_Vec3f_RotateByY(&offset, rotAngle, &offset);
-	
-	// Add that rotated line on to pivotPoint to get new targetPoint (saved over old targetPoint)
-    Math_Vec3f_Sum(pivotPoint, &offset, targetPoint);
-}
-
-
-/**
- * @brief Calculate target phys collider/limb's new position in current substep based on yaw
- *
- * This function uses the previous frame and the current frame to calculate the target collider/phys 
- * limb's current positions in the current substep (indicated by t) without applying verlet integration. 
- * This function was designed to consider Jackie's torso limb's yaw rotation AND other animation-based
- * change in position when calculating the colliders' positions in the current substep.
- *
- * Note that this function is specifically for rotating colliders and phys limbs that are to skip verlet 
- * integration (i.e. pinned phys limbs). This function is not meant to be used for unpinned phys limbs.
- * 
- * @param prevFramePos			Target phys object's world position in previous frame
- * @param currFrameTargetPos	Target phys object's target world position in current frame
- * @param prevFramePivotPoint	Point where target phys object should rotate around in previous frame
- * @param currFramePivotPoint	Point where target phys object is expected to rotate around in current
- *								frame
- * @param yawRotation			How much the rotation by y-axis that needs to be applied to calculating
- *								position in current substep
- * @param t						Current substep described as fraction (current substep / # of substeps)
- * @param currSubstepNewPos		Output position of target phys object
- */
-void Overcoat_InterpolatePosWithRot(Vec3f* prevFramePos, Vec3f* currFrameTargetPos,
-	Vec3f* prevFramePivotPoint, Vec3f* currFramePivotPoint, s16 yawRotation, f32 t, 
-	Vec3f* currSubstepNewPos) {
-	/********************************
-     Calculate Target Phys Object's Position at Current Substep Due to Yaw
-    ********************************/
-	// Find the current substep's pivot point.
-    Vec3f substepPivotPoint = {0.f, 0.f, 0.f};
-    CustomMath_Vec3f_Lerp(prevFramePivotPoint, currFramePivotPoint, t, &substepPivotPoint);
-
-	// In previous frame, find the line segment between target phys object's world position and the
-	// pivot point.
-    Vec3f prevFrameOffset = {0.f, 0.f, 0.f};
-    Math_Vec3f_Diff(prevFramePos, prevFramePivotPoint, &prevFrameOffset);
-
-	// Rotate that line segment by the given yaw rotation scaled down to current substep (t)
-    Vec3f prevFrameOffsetRotated = prevFrameOffset;
-    CustomMath_Vec3f_RotateByY(&prevFrameOffset, (s16)(yawRotation * t), &prevFrameOffsetRotated);
-	
-	/********************************
-     Calculate Target Phys Object's Position at Current Substep Due to Other Movements
-    ********************************/
-	// Movements outside of yaw like crouching may impact position of target phys object at substep.
-	
-	// Calculate the full target rotation at the end of substeps between prev and current frame (t = 1)
-    Vec3f currFrameTargetOffsetRotated = prevFrameOffset;
-    CustomMath_Vec3f_RotateByY(&prevFrameOffset, yawRotation * 1, &currFrameTargetOffsetRotated);
-	
-	// Using the target rotation by end of substeps, calculate where the target phys object is supposed 
-	// to end up at current frame (t = 1).
-    Vec3f predictedEndPosFromYaw = {0.f, 0.f, 0.f};
-    Math_Vec3f_Sum(currFramePivotPoint, &currFrameTargetOffsetRotated, &predictedEndPosFromYaw);
-
-	// Take into account of other animation (bending, crouching, etc.) in current frame.
-	// Calculate the difference from current frame's target position impacted by current animation
-	// and where the current frame's target position would have been just from Jackie's yaw rotation.
-    Vec3f residual = {0.f, 0.f, 0.f};
-    Math_Vec3f_Diff(currFrameTargetPos, &predictedEndPosFromYaw, &residual);
-	
-	// Scale that difference by the current substep's value.
-    Math_Vec3f_Scale(&residual, t);
-	
-	/********************************
-     Combine the Change in Position in Current Substep based on the two
-    ********************************/
-	// From the current substep's pivot point world position, find the point where the phys object is
-	// currently ending up in based on the yaw alone.
-    Math_Vec3f_Sum(&substepPivotPoint, &prevFrameOffsetRotated, currSubstepNewPos);
-	
-	// From that position resulted just from the yaw, find the world position where the phys object is
-	// in the current substep that is caused by the other animations.
-    Math_Vec3f_Sum(currSubstepNewPos, &residual, currSubstepNewPos);
-}
-
-
-/**
- * @brief Calculate overcoat's world directional axes for current physics substep
- * 
- * This function interpolates the overcoat's previous frame's forward and down directions of the overcoat 
- * towards the current frame's target directions based on the current substep interpolation value.
- * 
- * After interpolation, the down direction is normalized. After that, the forward direction is corrected 
- * so that it is perpendicular to the down direction. Then, the forward direction is normalized also.
- * 
- * If either interpolated direction is unable to be normalized, then the functionf alls back to the 
- * current frame's target directions.
- * 
- * The overcoat's left direction is calculated using the cross product of the overcoat's forward and down 
- * directions. From this, we get the overcoat's forward, down, and left directions in world space for this 
- * current substep.
- * 
- * @param targetForward Current frame's target world-space forward direction of overcoat
- * @param targetDown    Current frame's target world-space down direction of overcoat.
- * @param t             Interpolation fraction value between previous and current frame
- */
-void Overcoat_SetSubstepDirAxes(Vec3f targetForward, Vec3f targetDown, f32 t) {
-	// Interpolate overcoat's down direction from previous frame toward current frame's target down
-	// direction based on current substep.
-    Vec3f downDirection = {0.f, 0.f, 0.f};
-    CustomMath_Vec3f_Lerp(&overcoat_previousFrameDown, &targetDown, t, &downDirection);
-
-    // Interpolate overcoat's forward direction from previous frame toward current frame's target forward 
-    // direction based on the current substep.
-    Vec3f forwardDirection = {0.f, 0.f, 0.f};
-    CustomMath_Vec3f_Lerp(&overcoat_previousFrameForward, &targetForward, t, &forwardDirection);
-
-    // Normalize the overcoat's interpolated down direction
-    // If the down direction is too small to normalize, then use the final target down direction instead.
-    if (!Overcoat_NormalizeSubstepDirectionVec(&downDirection)) {
-        downDirection = targetDown;
-    }
-
-    // Using dot product, find projection to know how much of overcoat's forward direction points  in the 
-    // same direction as overcoat's down direction.
-    f32 projection = CustomMath_Vec3f_Dot(&forwardDirection, &downDirection);
-
-    // Calculate the part of the forward direction that lies along the down direction.
-    Vec3f forwardDownComponent = {0.f, 0.f, 0.f};
-    Math_Vec3f_ScaleAndStore(&downDirection, projection, &forwardDownComponent);
-
-    // Remove that component so forward becomes perpendicular to down.
-    Math_Vec3f_Diff(&forwardDirection, &forwardDownComponent, &forwardDirection);
-
-    // Normalize the overcoat's correct forward direction.
-    // If the corrected forward direction is too small to normalize, then use the final target forward and 
-    // down directions instead.
-    if (!Overcoat_NormalizeSubstepDirectionVec(&forwardDirection)) {
-        // Near-opposite poses have no unique linear interpolation.
-        Math_Vec3f_Copy(&overcoat_forwardAxis, &targetForward);
-        Math_Vec3f_Copy(&overcoat_downAxis, &targetDown);
-    } 
-    // Otherwise, store the interpolated and corrected substep directions of the overcoat
-    else {
-        Math_Vec3f_Copy(&overcoat_forwardAxis, &forwardDirection);
-        Math_Vec3f_Copy(&overcoat_downAxis, &downDirection);
-    }
-    
-    // Calculate the overcoat's left direction from the overcoat's forward and down directions.
-    // This overcoat model's directional coordinate axes are now made: forward, down, and left
-    Math3D_Vec3f_Cross(&overcoat_forwardAxis, &overcoat_downAxis, &overcoat_leftAxis);
-}
-
-
-/**
  * @brief Solve the overcoat's physics across multiple substeps within one rendered frame.
  * 
  * To better calculate frame-dependent values such as actor scale, collider states (world position and 
@@ -3077,19 +2544,19 @@ void Overcoat_SolvePhysAtSubsteps(Overcoat* this, Player* player, Vec3f apply_fo
         for (int i = 0; i < OVERCOAT_BODYPART_MAX; i++) {
             // Pinned phys limb rotation
             if (gPhysLimbs[i]->pinned) {
-                Overcoat_RotatePointAroundY(&limbsPrevPos[i], &limbsPivotPoint, yawToSkipVerlet);
+                CustomMath_RotatePointAroundY(&limbsPrevPos[i], &limbsPivotPoint, yawToSkipVerlet);
             }
             // Unpinned phys limb rotation (previous position also has to be rotated alongside to avoid
             // verlet integration caused by change in position, which is also essentially velocity)
             else {
-                Overcoat_RotatePointAroundY(&gPhysLimbs[i]->curr_pos, &limbsPivotPoint, yawToSkipVerlet);
-                Overcoat_RotatePointAroundY(&gPhysLimbs[i]->prev_pos, &limbsPivotPoint, yawToSkipVerlet);
+                CustomMath_RotatePointAroundY(&gPhysLimbs[i]->curr_pos, &limbsPivotPoint, yawToSkipVerlet);
+                CustomMath_RotatePointAroundY(&gPhysLimbs[i]->prev_pos, &limbsPivotPoint, yawToSkipVerlet);
             }
         }
 
         // Rotate the previous frame's colliders positions and axes also by the same amount
         for (int currSphereCol = 0; currSphereCol < OVERCOAT_SUBSTEP_COLLIDER_COUNT; currSphereCol++) {
-            Overcoat_RotatePointAroundY(&overcoat_prevFrameColliders[currSphereCol].center, 
+            CustomMath_RotatePointAroundY(&overcoat_prevFrameColliders[currSphereCol].center, 
 				&limbsPivotPoint, yawToSkipVerlet);
         }
 
@@ -3139,6 +2606,9 @@ void Overcoat_SolvePhysAtSubsteps(Overcoat* this, Player* player, Vec3f apply_fo
 	// 6. Move unpinned phys limbs using Verlet Integration in substep
 	// 7. Repeatedly solve bone, sideways, movement limit, and collision constraints in current substep.
 	// 8. Recalculate limb velocities from corrected positions in current substep vs previous substep.
+
+    // Prepare the capsule colliders' array.
+    PhysCapsuleCollider preparedCapsules[OVERCOAT_CAPSULE_CAPACITY];
 	
 	// Split the current frame into several smaller frames 
     // Final substep represents the current frame's target state.
@@ -3180,7 +2650,7 @@ void Overcoat_SolvePhysAtSubsteps(Overcoat* this, Player* player, Vec3f apply_fo
 		// remaining yaw (remainingYaw) from prior and animation-based limb position change are used.
         for (int currSphereCol = 0; currSphereCol < OVERCOAT_SUBSTEP_COLLIDER_COUNT; currSphereCol++) {
 			// Update colliders' world positions at current substep.
-            Overcoat_InterpolatePosWithRot(&overcoat_prevFrameColliders[currSphereCol].center, 
+            CustomMath_InterpolatePosWithRot(&overcoat_prevFrameColliders[currSphereCol].center, 
 				&overcoat_currFrameTargetColliders[currSphereCol].center, 
 				&limbsPrevPos[OVERCOAT_BODYPART_ROOT], &limbsCurrTargetPos[OVERCOAT_BODYPART_ROOT], 
 				remainingYaw, t, &colliderPointers[currSphereCol]->center);
@@ -3190,6 +2660,12 @@ void Overcoat_SolvePhysAtSubsteps(Overcoat* this, Player* player, Vec3f apply_fo
                 (overcoat_currFrameTargetColliders[currSphereCol].radius - 
 				overcoat_prevFrameColliders[currSphereCol].radius) * t;
         }
+
+        // Update each capsule using its endpoints' current substep state.
+        for (int capsuleIdx = 0; capsuleIdx < capsuleCount; capsuleIdx++) {
+            PhysCol_UpdateCapsule(&preparedCapsules[capsuleIdx], 
+                capsulePairs[capsuleIdx][0], capsulePairs[capsuleIdx][1]);
+        }
 		
 		/********************************
          3. Interpolate directional reference axes
@@ -3198,7 +2674,8 @@ void Overcoat_SolvePhysAtSubsteps(Overcoat* this, Player* player, Vec3f apply_fo
 		// during the current substep. These directions are interpolated between the previous frame's
 		// directional references and the current frame's target directional references of Jackie.
         if (overcoat_dirAxesReady) {
-            Overcoat_SetSubstepDirAxes(targetForward, targetDown, t);
+            CustomMath_SetSubstepDirAxes(overcoat_previousFrameForward, overcoat_previousFrameDown, 
+                targetForward, targetDown, t, &overcoat_forwardAxis, &overcoat_leftAxis, &overcoat_downAxis);
         }
 		
 		/********************************
@@ -3227,7 +2704,7 @@ void Overcoat_SolvePhysAtSubsteps(Overcoat* this, Player* player, Vec3f apply_fo
                         &currPhysLimb->curr_pos);
                 }
                 else {
-                    Overcoat_InterpolatePosWithRot(&limbsPrevPos[i], &limbsCurrTargetPos[i],
+                    CustomMath_InterpolatePosWithRot(&limbsPrevPos[i], &limbsCurrTargetPos[i],
                         &limbsPrevPos[OVERCOAT_BODYPART_ROOT], &limbsCurrTargetPos[OVERCOAT_BODYPART_ROOT],
                         remainingYaw, t, &currPhysLimb->curr_pos);
                 }
@@ -3325,7 +2802,8 @@ void Overcoat_SolvePhysAtSubsteps(Overcoat* this, Player* player, Vec3f apply_fo
 				
 				// Take all the colliders and correct the unpinned phys limb's position if they are inside
                 // said colliders.
-                Overcoat_SolveColliderGroup(gPhysLimbs[i], capsulePairs, capsuleCount);
+                PhysCol_SolveColliderGroup(gPhysLimbs[i], preparedCapsules, capsuleCount, 
+                    overcoat_forwardAxis, OVERCOAT_EXIT_SEARCH_STEPS);
             }
 
             // ======== Push midpoint of two horizontally neighboring phys limbs out of colliders ========
@@ -3339,9 +2817,9 @@ void Overcoat_SolvePhysAtSubsteps(Overcoat* this, Player* player, Vec3f apply_fo
                 for (int row = 1; row < 9; row++) {
 					// Take midpoint between current chain's phys limb and next chain's phys limb in current
 					// row and push it out of colliders.
-                    Overcoat_SolveMidpointGroup(
-                        gPhysLimbs[chains[chain] + row], gPhysLimbs[chains[chain + 1] + row], 
-                        capsulePairs, capsuleCount);
+                    PhysCol_SolveMidpointGroup(gPhysLimbs[chains[chain] + row],
+                        gPhysLimbs[chains[chain + 1] + row], preparedCapsules, capsuleCount,
+                        overcoat_forwardAxis, OVERCOAT_EXIT_SEARCH_STEPS);
                 }
             }
         }
@@ -3351,7 +2829,8 @@ void Overcoat_SolvePhysAtSubsteps(Overcoat* this, Player* player, Vec3f apply_fo
         ********************************/
         for (int currPhysLimbIdx = 0; currPhysLimbIdx < OVERCOAT_BODYPART_MAX; currPhysLimbIdx++) {
             if (!gPhysLimbs[currPhysLimbIdx]->pinned) {
-                Overcoat_SolveColliderGroup(gPhysLimbs[currPhysLimbIdx], capsulePairs, capsuleCount);
+                PhysCol_SolveColliderGroup(gPhysLimbs[currPhysLimbIdx], preparedCapsules, capsuleCount, 
+                    overcoat_forwardAxis, OVERCOAT_EXIT_SEARCH_STEPS);
             }
         }
 
@@ -3639,7 +3118,8 @@ void Overcoat_UpdateBodyPartsPos(Overcoat* this, Player* player, Vec3f apply_for
     /********************************
      Update body colliders' size
     ********************************/
-    Overcoat_UpdateColliderRadii(player);
+    PhysCol_UpdateSphereRadii(overcoat_colliderEntries, overcoat_colliderEntryCount, 
+        (player->actor.scale.x / 0.01f));
 
     /********************************
      Set up sideways cloth connections for horizontal distance limits
@@ -3660,72 +3140,13 @@ void Overcoat_UpdateBodyPartsPos(Overcoat* this, Player* player, Vec3f apply_for
     // Two sphere colliders are paired together to create a capsule collider
     // Capsule colliders essentially cover the hips and legs to prevent the overcoat from clipping
     // through Jackie's body between individual sphere colliders.
-    PhysSphereCollider* capsulePairs[][2] = {
-        // Permanent thigh and leg capsules.
-        {&overcoat_leftThighBackCollider, &overcoat_rightThighBackCollider},
-        {&overcoat_leftThighFrontCollider, &overcoat_rightThighFrontCollider},
-        {&overcoat_leftThighFrontCollider, &overcoat_leftLegCollider},
-        {&overcoat_leftThighBackCollider, &overcoat_leftLegCollider},
-        {&overcoat_rightThighFrontCollider, &overcoat_rightLegCollider},
-        {&overcoat_rightThighBackCollider, &overcoat_rightLegCollider},
-        {&overcoat_rightThighFrontCollider, &overcoat_leftLegCollider},
-        {&overcoat_leftThighFrontCollider, &overcoat_rightLegCollider},
+    PhysSphereCollider* capsulePairs[OVERCOAT_CAPSULE_CAPACITY][2];
 
-        // Space for up to two optional spheres.
-        {NULL, NULL},
-        {NULL, NULL}
-    };
+    s16 potentialPairCount = sizeof(overcoat_potentialCapsulePairs) / 
+        sizeof(overcoat_potentialCapsulePairs[0]);
 
-    // Calculate number of capsule colliders
-    // Start with only the permanent thigh and leg pairs.
-    // Exclude the two reserved slots until they are filled.
-    int capsuleCount = sizeof(capsulePairs) / sizeof(capsulePairs[0]) - OVERCOAT_RESERVED_COLLIDER_SLOTS;
-
-    // Always include the torso sphere.
-    // Its radius was selected above based on the animation.
-    capsulePairs[capsuleCount][0] = &overcoat_torsoCollider;
-    capsulePairs[capsuleCount][1] = &overcoat_torsoCollider;
-    capsuleCount++;
-
-    // Include the extra sphere collider during rolling or forward stabbing.
-    if (Overcoat_IsRolling(player) || Overcoat_IsForwardStabbing(player)) {
-        capsulePairs[capsuleCount][0] = &overcoat_rollCollider;
-        capsulePairs[capsuleCount][1] = &overcoat_rollCollider;
-        capsuleCount++;
-    }
-
-    // Exclude capsule colliders with the front thigh sphere collider during fast riding.
-    // Compact the active pairs so the collision loops encounter no empty slots.
-    if (Overcoat_IsFastRidingOrSpurring(player)) {
-        // Index that helps overwrite capsule colliders with front thigh collider in capsulePairs array
-        int keptCapsuleCount = 0;
-
-        // Look through each capsule and check if that capsule includes a front thigh sphere collider
-        for (int currCapsule = 0; currCapsule < capsuleCount; currCapsule++) {
-            // Check if either the start or the end sphere collider of the current capsule is a
-            // front thigh collider.
-            PhysSphereCollider* start = capsulePairs[currCapsule][0];
-            PhysSphereCollider* end = capsulePairs[currCapsule][1];
-
-            u8 usesFrontThigh =(start == &overcoat_leftThighFrontCollider ||
-                                start == &overcoat_rightThighFrontCollider ||
-                                end == &overcoat_leftThighFrontCollider ||
-                                end == &overcoat_rightThighFrontCollider);
-
-            // Skip if one of the end sphere collider 
-            if (usesFrontThigh) {
-                continue;
-            }
-
-            // Overwrite capsule collider with front thigh collider in capsulePairs array.
-            capsulePairs[keptCapsuleCount][0] = start;
-            capsulePairs[keptCapsuleCount][1] = end;
-            keptCapsuleCount++;
-        }
-
-        // Use the count only including capsule colliders without front thigh collider.
-        capsuleCount = keptCapsuleCount;
-    }
+    s16 capsuleCount = PhysCol_BuildActiveCapsulePairs(overcoat_potentialCapsulePairs, potentialPairCount, 
+        capsulePairs);
 
     // Create 2D array that will store maximum allowed sideways distance between neighboring cloth chains
     // 21 chains form 20 sideways connections.

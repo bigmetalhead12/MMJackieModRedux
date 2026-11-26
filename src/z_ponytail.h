@@ -139,33 +139,15 @@ void Ponytail_SetDefaultBodyPartsPos(Ponytail* this, Player* player, PhysLimb* g
 u8 Ponytail_IsInFirstPerson(PlayState* play, Player* player);
 void Ponytail_SetDefaultRotLimitsAndReset(Ponytail* this);
 void Ponytail_UpdateRotLimitsAndReset(Ponytail* this, Player* player);
-void Ponytail_CaptureLimitAxes(MtxF* mtx);
 void Ponytail_ApplyBoneRotationLimit(PhysLimb* parentPhysLimb, PhysLimb* childPhysLimb, 
     Vec3f* outwardDirVec, u8 limitInward, s16 maxUpwardRotLim);
 void Ponytail_ApplyChainRotationLimits(PhysLimb* gPhysLimbs[], const PonytailLimbChain chainStarts[],
     int chainCount, const PonytailRotationSettings* limits);
-bool Ponytail_NormalizeSubstepDirectionVec(Vec3f* targetVec);
-Vec3f Ponytail_FindClosestPointOnCapsule(Vec3f targetPos, PhysSphereCollider* capsuleColStart, 
-    PhysSphereCollider* capsuleColEnd, f32* colRadius);
-f32 Ponytail_GroupContact(Vec3f targetPos, f32 pointRadius, PhysSphereCollider* capsulePairs[][2], 
-    int capsuleColCount, Vec3f* contactColCenter, f32* contactColRadius);
-bool Ponytail_GroupOutside(Vec3f targetPos, f32 pointRadius, PhysSphereCollider* capsulePairs[][2], 
-    int capsuleColCount);
-bool Ponytail_GroupRayExit(Vec3f targetPhysLimbPos, Vec3f physLimbDir, f32 pointRadius,
-    PhysSphereCollider* capsulePairs[][2], int capsuleColCount, f32 padding, Vec3f* exitPosition);
-void Ponytail_SolveColliderGroup(PhysLimb* physLimb, PhysSphereCollider* collider_pairs[][2], 
-    int capsuleColCount);
 void Ponytail_ResetChain(Ponytail* this, PhysLimb* gPhysLimbs[], const PonytailLimbChain* chain);
 void Ponytail_SetResetShape(Ponytail* this, PhysLimb* gPhysLimbs[], const PonytailLimbChain chains[], 
     int chainCount);
-void Ponytail_RotatePointAroundY(Vec3f* targetPoint, Vec3f* pivotPoint, s16 rotAngle);
-void Ponytail_InterpolatePosWithRot(Vec3f* prevFramePos, Vec3f* currFrameTargetPos,
-	Vec3f* prevFramePivotPoint, Vec3f* currFramePivotPoint, s16 yawRotation, f32 t, 
-	Vec3f* currSubstepNewPos);
-void Ponytail_SetSubstepDirAxes(Vec3f targetForward, Vec3f targetDown, f32 t);
 void Ponytail_UpdatePinnedLimb(Ponytail* this, Player* player, PhysLimb* gPhysLimbs[], 
     int pinnedLimbIdx);
-void Ponytail_UpdateColliderRadii(Player* player);
 void Ponytail_SolvePhysAtSubsteps(Ponytail* this, Player* player, Vec3f apply_force, 
     PhysLimb* gPhysLimbs[], PhysBone* gPhysBones[], Vec3f limbsPrevPos[], 
     const PonytailLimbChain chains[], int chainCount, PhysSphereCollider* capsulePairs[][2], 
